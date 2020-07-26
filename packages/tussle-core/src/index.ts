@@ -1,3 +1,1 @@
-export default {
-  hey: 'fart',
-};
+export default {};

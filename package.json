@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "run-s clean && run-p build:lib",
     "build:lib": "tsc -b ./packages/tsconfig.json",
-    "bootstrap": "lerna bootstrap",
+    "watch": "yarn run build:lib --watch --preserveWatchOutput",
+    "bootstrap": "lerna exec yarn install",
     "clean": "lerna run --parallel clean",
     "release": "lerna publish"
   },
