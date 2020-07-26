@@ -4,21 +4,24 @@
   "description": "summon your own tus daemon",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "run-s clean && run-p build:lib",
+    "build:lib": "tsc -b ./packages/tsconfig.json",
+    "bootstrap": "lerna bootstrap",
+    "clean": "lerna run --parallel clean",
+    "release": "lerna publish"
   },
   "keywords": [],
   "author": "Mark Riedesel <mark@klowner.com>",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "lerna": "^3.22.1",
     "npm-run-all": "^4.1.5",
     "typescript": "^3.9.7"
   },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
-  },
   "private": true,
-  "dependencies": {}
+  "dependencies": {
+    "@klowner/tussle-core": "file:packages/tussle-core",
+    "@klowner/tussle-koa": "file:packages/tussle-koa"
+  }
 }

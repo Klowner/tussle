@@ -1,3 +1,3 @@
 export default {
-  hey: 'fart',
+  hey: 'toot toot',
 };
