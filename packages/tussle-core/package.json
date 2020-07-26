@@ -1,0 +1,16 @@
+{
+  "name": "@klowner/tussle-core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "run-s clean build:tsc",
+    "build:tsc": "tsc -b",
+    "clean": "rimraf lib coverage tsconfig.tsbuildinfo"
+  },
+  "author": "Mark Riedesel <mark@klowner.com>",
+  "license": "MIT"
+}
