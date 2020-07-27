@@ -1,11 +1,10 @@
 const Tussle = require('@klowner/tussle-koa-middleware');
 const Koa = require('koa');
 const Router = require('@koa/router');
+const send = require('koa-send');
 
-console.log(Tussle);
-function index(ctx) {
-  ctx.body = 'hello!';
-}
+const index = async (ctx) => await send(ctx, 'index.html');
+const bundle = async (ctx) => await send(ctx, 'bundle.js');
 
 function serve(port = process.env.PORT || '8080') {
   const app = new Koa();
@@ -14,8 +13,8 @@ function serve(port = process.env.PORT || '8080') {
     // tussle config
   });
   router.all('/files/:dirname', tussle.middleware());
+  router.get('/bundle.js', bundle);
   router.get('/', index);
-  app.use(router.middleware()),
   app.listen(port);
 }
 
