@@ -23,6 +23,6 @@
   "private": true,
   "dependencies": {
     "@klowner/tussle-core": "file:packages/tussle-core",
-    "@klowner/tussle-koa": "file:packages/tussle-koa"
+    "@klowner/tussle-koa-middleware": "file:packages/tussle-koa-middleware"
   }
 }

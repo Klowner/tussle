@@ -1,3 +1,3 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = {};
+var core_1 = require("./core");
+module.exports = core_1.Tussle;

@@ -1,1 +1,2 @@
-export default {};
+import { Tussle } from './core';
+export = Tussle;
