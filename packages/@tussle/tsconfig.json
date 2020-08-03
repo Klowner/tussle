@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.json",
+  "files": [],
+  "references": [
+    {"path": "./core"},
+    {"path": "./koa-middleware"},
+    {"path": "./b2-storage"}
+  ]
+}

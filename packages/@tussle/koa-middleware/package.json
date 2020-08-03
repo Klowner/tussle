@@ -15,7 +15,7 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
-    "@klowner/tussle-core": "link:../tussle-core",
+    "@tussle/core": "link:../core",
     "@types/koa": "^2.11.3"
   }
 }

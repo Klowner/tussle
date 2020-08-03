@@ -4,9 +4,10 @@
   "description": "summon your own tus daemon",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "run-s test:unit",
+    "test:unit": "npm run build:lib && jest",
     "build": "run-s clean && run-p build:lib",
-    "build:lib": "tsc -b ./packages/tsconfig.json",
+    "build:lib": "tsc -b ./packages/@tussle/tsconfig.json",
     "watch": "yarn run build:lib --watch --preserveWatchOutput",
     "bootstrap": "lerna exec yarn install",
     "clean": "lerna run --parallel clean",
@@ -22,7 +23,9 @@
   },
   "private": true,
   "dependencies": {
-    "@klowner/tussle-core": "file:packages/tussle-core",
-    "@klowner/tussle-koa-middleware": "file:packages/tussle-koa-middleware"
+    "@tussle/core": "file:packages/@tussle/core",
+    "@tussle/koa-middleware": "file:packages/@tussle/koa-middleware",
+    "@tussle/b2-storage": "file:packages/@tussle/b2-storage",
+    "jest": "^26.2.2"
   }
 }

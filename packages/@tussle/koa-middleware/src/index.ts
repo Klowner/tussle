@@ -1,5 +1,5 @@
 import type Koa from 'koa';
-import type { Tussle } from '@klowner/tussle-core/src/core';
+import type { Tussle } from '@tussle/core';
 
 const TUS_VERSION_SUPPORTED = '1.0.0';
 
@@ -33,26 +33,44 @@ interface TussleResponse<T> {
   request: TussleRequest<T>;
 }
 
+interface Options {
+  identifier: string;
+}
+
+const defaultOptions: Options = {
+  identifier: 'tussle-koa-middleware',
+}
+
+// middleware provides an interface
+// which exposes getters and setters
+// for the request context
 
 export = class TussleKoaMiddleware {
-  private readonly extensions?: string;
-  private readonly maxSize?: number;
+  private readonly options: Options; // user options merged with defaultOptions
+  private readonly extensions: string; // extensions supported by core as comma-separated string
 
-  constructor(private readonly core: Tussle) {
-    this.extensions = this.core.extensions.length > 0 ? this.core.extensions.join(',') : undefined;
+  constructor(private readonly core: Tussle, options: Partial<Options>) {
+    this.options = {
+      ...defaultOptions,
+      ...options,
+    };
+    this.extensions = this.core.extensions.join(',');
+    console.log(core, this.options);
   }
 
   public middleware<T extends Koa.ParameterizedContext>(): (ctx: T, next: Koa.Next) => void {
     return (ctx: T, _next: Koa.Next): void => {
 
+      ctx.req;
+      console.log('req');
       if (ctx.request.method === 'OPTIONS') {
         ctx.headers['Tus-Resumable'] = TUS_VERSION_SUPPORTED;
         ctx.headers['Tus-Version'] = TUS_VERSION_SUPPORTED;
         if (this.extensions) {
           ctx.headers['Tus-Extension'] = this.extensions;
         }
-        if (this.maxSize) {
-          ctx.headers['Tus-Max-Size'] = this.maxSize;
+        if (this.core.maxSize) {
+          ctx.headers['Tus-Max-Size'] = this.core.maxSize;
         }
         return;
       }
@@ -66,7 +84,7 @@ export = class TussleKoaMiddleware {
       ctx.header['Tus-Resumable'] = TUS_VERSION_SUPPORTED;
       ctx.body = '';
 
-      console.log(ctx.request.headers);
+      // console.log(ctx.request.headers);
 
       const request: TussleRequest<Koa.ParameterizedContext> = {
         url: ctx.request.url,

@@ -1,6 +1,6 @@
 {
   "packages": [
-    "packages/*",
+    "packages/@tussle/*",
     "examples/*"
   ],
   "version": "independent",
