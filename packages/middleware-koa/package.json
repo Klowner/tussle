@@ -1,0 +1,20 @@
+{
+  "name": "@tussle/middleware-koa",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "run-s clean build:tsc",
+    "build:tsc": "tsc -b",
+    "watch": "tsc -b -w --preserveWatchOutput",
+    "clean": "rimraf lib coverage tsconfig.tsbuildinfo"
+  },
+  "author": "Mark Riedesel <mark@klowner.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@types/koa": "^2.11.3"
+  }
+}

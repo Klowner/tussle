@@ -1,10 +1,11 @@
 {
   "packages": [
-    "packages/@tussle/*",
+    "packages/*",
     "examples/*"
   ],
-  "version": "independent",
-  "linsense": "MIT",
+  "version": "0.0.0",
+  "license": "MIT",
+  "useWorkspaces": true,
   "npmClient": "yarn",
   "command": {
     "publish": {

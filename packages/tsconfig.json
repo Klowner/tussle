@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.settings.json",
+  "files": [],
+  "references": [
+    {"path": "./core"},
+    {"path": "./middleware-koa"},
+    {"path": "./storage-b2"},
+    {"path": "./state-memory"}
+  ]
+}
