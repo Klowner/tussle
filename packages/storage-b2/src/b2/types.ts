@@ -21,3 +21,16 @@ export interface B2ActionConfig {
   url: string;
   authorization: string;
 }
+
+export type B2BucketType =
+  | 'allPrivate'
+  | 'allPublic'
+  | 'snapshot'
+;
+
+export type B2FileAction =
+  | 'start'
+  | 'upload'
+  | 'hide'
+  | 'folder'
+;

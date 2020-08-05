@@ -2,18 +2,22 @@ import type { B2InitOptions, B2Options, B2ActionConfig } from './types';
 import type { Observable } from "rxjs";
 import { RxHttpRequestResponse } from "@akanass/rx-http-request";
 import { Subject } from "rxjs";
-import { b2AuthorizeAccountRequest, B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';
-import { b2GetUploadURLRequest } from './actions/b2GetUploadURL';
-import { b2GetUploadPartURLRequest } from './actions/b2GetUploadPartURL';
 import { map, take, shareReplay, startWith, switchMap } from "rxjs/operators";
+import { B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';
+import * as actions from './actions';
 
 export const B2_API_URL = "https://api.backblazeb2.com/b2api/v2";
 
 const defaultOptions: B2Options = {
   apiUrl: B2_API_URL,
-  applicationKey: "MISSING",
-  applicationKeyId: "MISSING",
+  applicationKey: "",
+  applicationKeyId: "",
 };
+
+const requiredOptions: Readonly<(keyof B2Options)[]> = [
+  'applicationKey',
+  'applicationKeyId',
+];
 
 export class B2 {
   private readonly options: B2Options;
@@ -22,12 +26,12 @@ export class B2 {
     options: Partial<B2Options>,
     defaults: B2Options
   ): B2Options {
-    if (!options.applicationKey) {
-      throw new Error("b2: applicationKey missing");
-    }
-    if (!options.applicationKeyId) {
-      throw new Error("b2: applicationKeyId missing");
-    }
+    requiredOptions.forEach((prop) => {
+      if (!options[prop]) {
+        throw new Error(`b2: ${prop} missing!`);
+      }
+    });
+
     return {
       ...defaults,
       ...options,
@@ -45,7 +49,7 @@ export class B2 {
     this.authorizationResponse$ = this.reauthorize$.pipe(
       startWith(undefined), // Perform an initial request without reauthorize$.next()
       switchMap(() =>
-        b2AuthorizeAccountRequest(B2_API_URL, {
+        actions.b2AuthorizeAccountRequest(B2_API_URL, {
           applicationKey: this.options.applicationKey,
           applicationKeyId: this.options.applicationKeyId,
         })
@@ -63,8 +67,16 @@ export class B2 {
     this.reauthorize$.next(undefined);
   }
 
-  public readonly getUploadURL = bindAction(this, b2GetUploadURLRequest);
-  public readonly getUploadPartURL = bindAction(this, b2GetUploadPartURLRequest);
+  public readonly cancelLargeFile = bindAction(this, actions.b2CancelLargeFileRequest);
+  public readonly finishLargeFile = bindAction(this, actions.b2FinishLargeFileRequest);
+  public readonly getFileInfo  = bindAction(this, actions.b2GetFileInfoRequest);
+  public readonly getUploadPartURL = bindAction(this, actions.b2GetUploadPartURLRequest);
+  public readonly getUploadURL = bindAction(this, actions.b2GetUploadURLRequest);
+  public readonly listParts = bindAction(this, actions.b2ListPartsRequest);
+  public readonly listBuckets = bindAction(this, actions.b2ListBucketsRequest);
+  public readonly listFileNames = bindAction(this, actions.b2ListFileNamesRequest);
+  public readonly listUnfinishedLargeFiles = bindAction(this, actions.b2ListUnfinishedLargeFilesRequest);
+  public readonly startLargeFile = bindAction(this, actions.b2StartLargeFileRequest);
 }
 
 const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) => Observable<R>) => {
@@ -80,5 +92,3 @@ const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) 
       take(1),
     );
 }
-
-// const getUploadURL = bindAction(null, b2GetUploadUrlRequest);
