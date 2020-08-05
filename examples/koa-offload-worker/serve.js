@@ -17,12 +17,11 @@ const serveStatic = async (ctx) => {
   }
 }
 
-
 function serve(port = process.env.PORT || '8080') {
   const app = new Koa();
   const router = new Router();
   const tussle = new Tussle({
-    storage: new TussleStorageB2({}),
+    storage: new TussleStorageB2({name: 'b2'}),
   });
   router.all('/files', tussleMiddlewareKoa(tussle));
   app.use(router.middleware());

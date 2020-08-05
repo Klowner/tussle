@@ -16,14 +16,11 @@ export interface TussleRequestContext<T> {
 
 export class Tussle {
   constructor(private readonly cfg: TussleConfig) {
-    console.log('created tussle', this.cfg);
-    const requiredExtesions = cfg.storage.extensionsRequired;
-    console.log('storage requires', requiredExtesions);
+    const extensions = cfg.storage;
+    console.log('requires', this.cfg, extensions);
   }
 
   public handle<T>(ctx: TussleRequestContext<T>): Observable<TussleRequestContext<T>> {
-    switch (ctx.req.method) {
-    }
     return of(ctx);
   }
 }
