@@ -4,6 +4,7 @@ import type { B2ActionConfig, B2InitOptions, B2Options } from './types';
 import { AxiosRx } from './request';
 import { B2Auth } from './b2auth';
 import * as actions from './actions';
+import * as operations from './operations';
 
 export const B2_API_URL = "https://api.backblazeb2.com/b2api/v2";
 
@@ -55,10 +56,18 @@ export class B2 {
   public readonly listFileNames = bindAction(this, actions.b2ListFileNamesRequest);
   public readonly listUnfinishedLargeFiles = bindAction(this, actions.b2ListUnfinishedLargeFilesRequest);
   public readonly startLargeFile = bindAction(this, actions.b2StartLargeFileRequest);
+
+  public readonly operations = {
+    upload: bindOp(this, operations.upload),
+  }
 }
 
-const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) => Observable<R>) => {
-  return (options: O) =>
+const bindOp = <O, R>(b2: B2, func: (b2: B2, options: O) => Observable<R>) =>
+  (options: O) =>
+    func(b2, options);
+
+const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) => Observable<R>) =>
+  (options: O) =>
     b2.auth.state$.pipe(
       switchMap(({ authorizationToken, apiUrl }) => {
         const config = {
@@ -70,4 +79,3 @@ const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) 
       }),
       take(1),
     );
-};
