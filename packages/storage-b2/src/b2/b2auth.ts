@@ -25,7 +25,7 @@ export interface B2AuthOptionsValidated extends B2AuthOptions {
 
 export class B2Auth {
   private readonly reauth$ = new Subject<void>();
-  private readonly response$: B2ActionObservable<B2AuthorizeAccountResponse>;
+  public readonly response$: B2ActionObservable<B2AuthorizeAccountResponse>;
   public readonly state$: Observable<B2AuthorizeAccountResponse>;
 
   private validateOptions(
