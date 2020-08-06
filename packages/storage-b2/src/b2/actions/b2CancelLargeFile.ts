@@ -1,8 +1,9 @@
 import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
 import type { Observable } from 'rxjs';
-import type { B2ActionConfig } from '../types';
+import type { B2ActionConfig, B2Capability } from '../types';
 
 const fragment = '/b2_get_upload_url';
+export const requiresCapability: B2Capability = 'writeFiles';
 
 export interface B2CancelLargeFileParams {
   fileId: string;

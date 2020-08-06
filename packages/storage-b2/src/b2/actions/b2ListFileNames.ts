@@ -1,8 +1,9 @@
 import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
 import type { Observable } from 'rxjs';
-import type { B2ActionConfig, B2FileAction } from '../types';
+import type { B2ActionConfig, B2FileAction, B2Capability, B2FileInfo } from '../types';
 
 const fragment = '/b2_list_file_names';
+export const requiredCapability: B2Capability = 'listFiles';
 
 export interface B2ListFileNamesParams {
   bucketId: string;
@@ -13,19 +14,7 @@ export interface B2ListFileNamesParams {
 }
 
 export interface B2ListFileNamesResponse {
-  files: {
-    accountId: string;
-    action: B2FileAction;
-    bucketId: string;
-    contentLength: number;
-    contentSha1: string;
-    contentMd5?: string;
-    contentType: string;
-    fileId: string;
-    fileInfo: Record<string, unknown>;
-    fileName: string;
-    uploadTimestamp: number;
-  }[];
+  files: B2FileInfo[];
   nextFileName: string;
 }
 

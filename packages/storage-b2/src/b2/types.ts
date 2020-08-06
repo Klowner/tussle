@@ -4,7 +4,11 @@ export interface B2Options {
   applicationKeyId: string;
 }
 
-export type B2InitOptions = Pick<B2Options, "applicationKey" | "applicationKeyId"> &
+export type B2InitOptions =
+  Pick<B2Options,
+    | "applicationKey"
+    | "applicationKeyId"
+    > &
   Partial<B2Options>;
 
 export type B2Capability =
@@ -34,3 +38,29 @@ export type B2FileAction =
   | 'hide'
   | 'folder'
 ;
+
+export interface B2FileInfo {
+  accountId: string;
+  action: B2FileAction;
+  bucketId: string;
+  contentLength: number;
+  contentSha1: string;
+  contentMd5?: string;
+  contentType: string;
+  fieldId: string;
+  fileInfo: Record<string, unknown>;
+  fileName: string;
+  uploadTimestamp: number;
+}
+
+export interface B2BucketInfo {
+  accountId: string;
+  bucketId: string;
+  bucketName: string;
+  bucketType: B2BucketType;
+  bucketInfo: Record<string, unknown>;
+  corsRules: unknown; // TODO
+  lifecycleRules: unknown; // TODO
+  revision: number;
+  options?: string; // may be set to S3
+}

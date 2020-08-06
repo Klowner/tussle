@@ -1,8 +1,9 @@
 import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
 import type { Observable } from 'rxjs';
-import type { B2ActionConfig, B2BucketType } from '../types';
+import type { B2ActionConfig, B2BucketType, B2Capability } from '../types';
 
 const fragment = '/b2_list_buckets';
+export const requiredCapability: B2Capability = 'listBuckets';
 
 export interface B2ListBucketsParams {
   accountId: string;

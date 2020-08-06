@@ -40,5 +40,3 @@ export function b2AuthorizeAccountRequest(url: string, options: B2AuthorizeAccou
     },
   });
 }
-
-
