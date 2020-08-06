@@ -1,4 +1,4 @@
-import type { AxiosRxInstance, AxiosObservable } from './fetch';
+import type { AxiosRxInstance, AxiosObservable } from './request';
 export type { AxiosRequestConfig } from 'axios';
 
 export type B2ActionObservable<T> = AxiosObservable<T>;

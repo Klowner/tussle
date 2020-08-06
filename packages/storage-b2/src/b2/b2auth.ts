@@ -4,7 +4,7 @@ import { B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';
 import { Subject } from 'rxjs';
 import { b2AuthorizeAccountRequest } from './actions/b2AuthorizeAccount';
 import { map, startWith, switchMap, shareReplay, } from 'rxjs/operators';
-import { AxiosRxInstance, AxiosRx } from './fetch';
+import { AxiosRxInstance, AxiosRx } from './request';
 
 export const B2_API_URL = 'https://api.backblazeb2.com/b2api/v2';
 
