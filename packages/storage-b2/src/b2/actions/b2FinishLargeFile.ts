@@ -1,4 +1,5 @@
-import { RxHR } from "@akanass/rx-http-request";
+import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
+import type { Observable } from 'rxjs';
 import type { B2ActionConfig } from '../types';
 
 const fragment = '/b2_finish_large_file';
@@ -17,14 +18,16 @@ export interface B2FinishLargeFileResponse {
   contentMd5?: string;
   contentType: string;
   fileId: string;
-  fileInfo: {};
+  fileInfo: Record<string, unknown>
   fileName: string;
   uploadTimestamp: number;
 }
 
-export function b2FinishLargeFileRequest(cfg: B2ActionConfig, options: B2FinishLargeFileParams) {
+export function b2FinishLargeFileRequest(cfg: B2ActionConfig, options: B2FinishLargeFileParams):
+  Observable<RxHttpRequestResponse<B2FinishLargeFileResponse>>
+{
   const { authorization, url } = cfg;
-  return RxHR.post<B2FinishLargeFileResponse>(url + fragment, {
+  return RxHR.post(url + fragment, {
     json: true,
     headers: {
       authorization,

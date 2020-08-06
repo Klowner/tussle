@@ -1,7 +1,6 @@
 import nock from 'nock';
-import { B2, B2_API_URL } from './b2';
-import { tap, flatMap, delay, map, concatMap, take, switchMap, withLatestFrom } from 'rxjs/operators';
-import { from, range, combineLatest } from 'rxjs';
+import {take} from 'rxjs/operators';
+import {B2, B2_API_URL} from './b2';
 
 const DEFAULT_B2_OPTIONS = {
   applicationKey: 'MOCK-KEY',
@@ -19,7 +18,7 @@ describe('B2 API', () => {
           allowed: [],
           apiUrl: 'api-url',
         });
-    })
+    });
 
     it('should send authorization header', async (complete) => {
       const b2 = new B2(DEFAULT_B2_OPTIONS);

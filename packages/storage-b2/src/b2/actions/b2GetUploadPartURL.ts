@@ -1,4 +1,5 @@
-import { RxHR } from "@akanass/rx-http-request";
+import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
+import type { Observable } from 'rxjs';
 import type { B2ActionConfig } from '../types';
 
 const fragment = '/b2_get_upload_part_url';
@@ -13,9 +14,11 @@ export interface B2GetUploadPartURLResponse {
   authorizationToken: string;
 }
 
-export function b2GetUploadPartURLRequest(cfg: B2ActionConfig, options: B2GetUploadPartURLParams) {
+export function b2GetUploadPartURLRequest(cfg: B2ActionConfig, options: B2GetUploadPartURLParams):
+  Observable<RxHttpRequestResponse<B2GetUploadPartURLResponse>>
+{
   const { authorization, url } = cfg;
-  return RxHR.post<B2GetUploadPartURLResponse>(url + fragment, {
+  return RxHR.post(url + fragment, {
     json: true,
     headers: {
       authorization,

@@ -1,4 +1,5 @@
-import { RxHR } from "@akanass/rx-http-request";
+import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
+import type { Observable } from 'rxjs';
 import type { B2ActionConfig } from '../types';
 
 const fragment = '/b2_start_large_file';
@@ -7,8 +8,8 @@ export interface B2StartLargeFileParams {
   bucketId: string;
   fileName: string;
   contentType: string;
-  fileInfo?: {};
-};
+  fileInfo?: Record<string, unknown>;
+}
 
 export interface B2StartLargeFileResponse {
   accountId: string;
@@ -18,14 +19,16 @@ export interface B2StartLargeFileResponse {
   contentSha1: string;
   contentType: string;
   fileId: string;
-  fileInfo: {};
+  fileInfo: Record<string, unknown>;
   fileName: string;
   uploadTimestamp: number;
 }
 
-export function b2StartLargeFileRequest(cfg: B2ActionConfig, options: B2StartLargeFileParams) {
+export function b2StartLargeFileRequest(cfg: B2ActionConfig, options: B2StartLargeFileParams):
+  Observable<RxHttpRequestResponse<B2StartLargeFileResponse>>
+{
   const { authorization, url } = cfg;
-  return RxHR.post<B2StartLargeFileResponse>(url + fragment, {
+  return RxHR.post(url + fragment, {
     json: true,
     headers: {
       authorization,

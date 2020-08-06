@@ -12,7 +12,7 @@ function prepareRequest<T extends Context>(originalRequest: T)
     req: originalRequest.req,
     res: originalRequest.res,
     originalRequest,
-  }
+  };
 }
 
 function handleResponse<T extends Context>(context: TussleRequestContext<T>): void {
@@ -33,5 +33,5 @@ export = function TussleKoaMiddleware<T extends Context>(
           next();
         }
       });
-  }
+  };
 }
