@@ -31,6 +31,7 @@
   "private": true,
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^3.8.0",
-    "@typescript-eslint/parser": "^3.8.0"
+    "@typescript-eslint/parser": "^3.8.0",
+    "eslint-plugin-rxjs": "^0.0.2-beta.28"
   }
 }

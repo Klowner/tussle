@@ -24,7 +24,7 @@ export = function TussleKoaMiddleware<T extends Context>(
 ): TussleMiddlewareFunction<T> {
   console.log('tussle middleware created');
   return function middleware(ctx, next) {
-    core
+    return core
       .handle(prepareRequest(ctx))
       .subscribe((response) => {
         if (response) {

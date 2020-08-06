@@ -1,7 +1,7 @@
 import Base64 from 'base64-js';
-import type { B2Capability } from '../types';
+import type { B2Capability, B2Response } from '../types';
 import type { Observable } from 'rxjs';
-import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
+import { RxHR } from "@akanass/rx-http-request";
 
 const fragment = '/b2_authorize_account';
 
@@ -26,7 +26,7 @@ export interface B2AuthorizeAccountResponse {
 }
 
 export function b2AuthorizeAccountRequest(url: string, options: B2AuthorizeAccountParams):
-  Observable<RxHttpRequestResponse<B2AuthorizeAccountResponse>>
+  Observable<B2Response<B2AuthorizeAccountResponse>>
 {
   const authorization: string = 'Basic ' + Base64.fromByteArray(Buffer.from([
     options.applicationKeyId,

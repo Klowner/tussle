@@ -1,3 +1,7 @@
+export interface B2Response<T> {
+  body: T;
+}
+
 export interface B2Options {
   apiUrl: string;
   applicationKey: string;
@@ -11,6 +15,19 @@ export type B2InitOptions =
     > &
   Partial<B2Options>;
 
+export interface B2AuthOptions {
+  apiUrl: string;
+  applicationKey: string;
+  applicationKeyId: string;
+}
+
+export type B2AuthInitOptions =
+  Pick<B2AuthOptions,
+    | "applicationKeyId"
+    | "applicationKey"
+    > &
+  Partial<B2AuthOptions>;
+
 export type B2Capability =
   | 'deleteFiles'
   | 'listAllBucketNames'
@@ -20,6 +37,7 @@ export type B2Capability =
   | 'readFiles'
   | 'shareFiles'
   | 'writeFiles'
+  ;
 
 export interface B2ActionConfig {
   url: string;
@@ -30,14 +48,14 @@ export type B2BucketType =
   | 'allPrivate'
   | 'allPublic'
   | 'snapshot'
-;
+  ;
 
 export type B2FileAction =
   | 'start'
   | 'upload'
   | 'hide'
   | 'folder'
-;
+  ;
 
 export interface B2FileInfo {
   accountId: string;

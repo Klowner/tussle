@@ -1,6 +1,6 @@
 import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
 import type { Observable } from 'rxjs';
-import type { B2ActionConfig, B2FileAction, B2Capability, B2FileInfo } from '../types';
+import type { B2ActionConfig, B2Capability, B2FileInfo } from '../types';
 
 const fragment = '/b2_list_file_names';
 export const requiredCapability: B2Capability = 'listFiles';
