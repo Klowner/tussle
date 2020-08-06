@@ -1,8 +1,9 @@
+import type { B2ActionConfig, B2InitOptions, B2Options } from './types';
 import type { Observable } from "rxjs";
-import { switchMap, take } from "rxjs/operators";
 import * as actions from './actions';
 import { B2Auth } from './b2auth';
-import type { B2ActionConfig, B2InitOptions, B2Options } from './types';
+import { fromFetch } from './fetch';
+import { switchMap, take } from "rxjs/operators";
 
 export const B2_API_URL = "https://api.backblazeb2.com/b2api/v2";
 
@@ -20,6 +21,7 @@ const requiredOptions: Readonly<(keyof B2Options)[]> = [
 export class B2 {
   public readonly options: B2Options;
   public readonly auth: B2Auth;
+  private readonly fromFetch = fromFetch;
 
   private validateOptions(
     options: Partial<B2Options>,
@@ -36,6 +38,7 @@ export class B2 {
       ...options,
     };
   }
+
 
   constructor(options: B2InitOptions) {
     this.options = options = this.validateOptions(options, defaultOptions);
@@ -61,6 +64,7 @@ const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) 
         const config = {
           url: apiUrl + '/b2api/v2',
           authorization: authorizationToken,
+          fromFetch,
         };
         return actionFunc(config, options);
       }),

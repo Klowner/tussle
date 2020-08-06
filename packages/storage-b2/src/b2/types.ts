@@ -1,3 +1,5 @@
+import type { fromFetch } from 'rxjs/fetch';
+
 export interface B2Response<T> {
   body: T;
 }
@@ -42,6 +44,7 @@ export type B2Capability =
 export interface B2ActionConfig {
   url: string;
   authorization: string;
+  fromFetch: typeof fromFetch;
 }
 
 export type B2BucketType =
@@ -80,5 +83,5 @@ export interface B2BucketInfo {
   corsRules: unknown; // TODO
   lifecycleRules: unknown; // TODO
   revision: number;
-  options?: string; // may be set to S3
+  options?: string; // may be set to 's3'
 }

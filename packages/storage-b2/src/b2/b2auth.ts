@@ -4,6 +4,7 @@ import { B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';
 import { Subject } from 'rxjs';
 import { b2AuthorizeAccountRequest } from './actions/b2AuthorizeAccount';
 import { map, startWith, switchMap, shareReplay, } from 'rxjs/operators';
+import { fromFetch } from './fetch';
 
 export const B2_API_URL = 'https://api.backblazeb2.com/b2api/v2';
 
@@ -48,7 +49,10 @@ export class B2Auth {
 
     this.response$ = this.reauth$.pipe(
       startWith(undefined), // perform initial request without reauth$.next()
-      switchMap(() => b2AuthorizeAccountRequest(apiUrl, {
+      switchMap(() => b2AuthorizeAccountRequest({
+        url: apiUrl,
+        fromFetch,
+      }, {
         applicationKey,
         applicationKeyId,
       })),

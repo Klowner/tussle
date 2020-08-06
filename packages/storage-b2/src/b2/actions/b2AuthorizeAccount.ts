@@ -1,9 +1,11 @@
 import Base64 from 'base64-js';
-import type { B2Capability, B2Response } from '../types';
+import type { B2Capability, B2Response, B2ActionConfig } from '../types';
 import type { Observable } from 'rxjs';
-import { RxHR } from "@akanass/rx-http-request";
+// import { RxHR } from "@akanass/rx-http-request";
 
 const fragment = '/b2_authorize_account';
+
+export type B2AuthorizeAccountConfig = Omit<B2ActionConfig, 'authorization'>;
 
 export interface B2AuthorizeAccountParams {
   applicationKeyId: string;
@@ -25,7 +27,7 @@ export interface B2AuthorizeAccountResponse {
   recommendedPartSize: number;
 }
 
-export function b2AuthorizeAccountRequest(url: string, options: B2AuthorizeAccountParams):
+export function b2AuthorizeAccountRequest(cfg: B2AuthorizeAccountConfig, options: B2AuthorizeAccountParams):
   Observable<B2Response<B2AuthorizeAccountResponse>>
 {
   const authorization: string = 'Basic ' + Base64.fromByteArray(Buffer.from([
@@ -33,10 +35,19 @@ export function b2AuthorizeAccountRequest(url: string, options: B2AuthorizeAccou
     options.applicationKey,
   ].join(':')));
 
-  return RxHR.get(url + fragment, {
-    json: true,
+  return cfg.fromFetch(cfg.url + fragment, {
+    method: 'get',
     headers: {
-      authorization,
+      'Authorization': authorization,
+      accept: 'application/json',
     },
+    selector: (response) => response.json(),
   });
+
+  // return RxHR.get(cfg.url + fragment, {
+  //   json: true,
+  //   headers: {
+  //     authorization,
+  //   },
+  // });
 }
