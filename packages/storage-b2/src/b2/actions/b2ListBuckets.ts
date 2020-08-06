@@ -1,9 +1,8 @@
-import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
-import type { Observable } from 'rxjs';
-import type { B2ActionConfig, B2BucketType, B2Capability } from '../types';
+import type { B2BucketType, B2Capability } from "../types";
+import { createGenericAction } from "./util";
 
-const fragment = '/b2_list_buckets';
-export const requiredCapability: B2Capability = 'listBuckets';
+const fragment = "/b2_list_buckets";
+export const requiredCapability: B2Capability = "listBuckets";
 
 export interface B2ListBucketsParams {
   accountId: string;
@@ -20,15 +19,7 @@ export interface B2ListBucketsResponse {
   bucketType: B2BucketType;
 }
 
-export function b2ListBucketsRequest(cfg: B2ActionConfig, options: B2ListBucketsParams):
-  Observable<RxHttpRequestResponse<B2ListBucketsResponse>>
-{
-  const { authorization, url } = cfg;
-  return RxHR.post(url + fragment, {
-    json: true,
-    headers: {
-      authorization,
-    },
-    body: options,
-  });
-}
+export const b2ListBucketsRequest = createGenericAction<
+  B2ListBucketsParams,
+  B2ListBucketsResponse
+>("POST", fragment);

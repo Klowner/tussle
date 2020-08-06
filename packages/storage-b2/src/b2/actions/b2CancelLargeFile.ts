@@ -1,9 +1,8 @@
-import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
-import type { Observable } from 'rxjs';
-import type { B2ActionConfig, B2Capability } from '../types';
+import type { B2Capability } from "../types";
+import { createGenericAction } from "./util";
 
-const fragment = '/b2_get_upload_url';
-export const requiresCapability: B2Capability = 'writeFiles';
+const fragment = "/b2_get_upload_url";
+export const requiresCapability: B2Capability = "writeFiles";
 
 export interface B2CancelLargeFileParams {
   fileId: string;
@@ -16,15 +15,7 @@ export interface B2CancelLargeFileResponse {
   fileName: string;
 }
 
-export function b2CancelLargeFileRequest(cfg: B2ActionConfig, options: B2CancelLargeFileParams):
-  Observable<RxHttpRequestResponse<B2CancelLargeFileResponse>>
-{
-  const { authorization, url } = cfg;
-  return RxHR.post(url + fragment, {
-    json: true,
-    headers: {
-      authorization,
-    },
-    body: options,
-  });
-}
+export const b2CancelLargeFileRequest = createGenericAction<
+  B2CancelLargeFileParams,
+  B2CancelLargeFileResponse
+>("POST", fragment);

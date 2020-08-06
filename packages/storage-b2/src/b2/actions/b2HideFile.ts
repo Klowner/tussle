@@ -1,9 +1,8 @@
-import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
-import type { Observable } from 'rxjs';
-import type { B2ActionConfig, B2Capability, B2FileInfo } from '../types';
+import type { B2Capability, B2FileInfo } from "../types";
+import { createGenericAction } from "./util";
 
-const fragment = '/b2_hide_file';
-export const requiredCapability: B2Capability = 'readFiles';
+const fragment = "/b2_hide_file";
+export const requiredCapability: B2Capability = "readFiles";
 
 export interface B2HideFileParams {
   bucketId: string;
@@ -12,15 +11,7 @@ export interface B2HideFileParams {
 
 export type B2HideFileResponse = B2FileInfo;
 
-export function b2HideFileRequest(cfg: B2ActionConfig, options: B2HideFileParams):
-  Observable<RxHttpRequestResponse<B2HideFileResponse>>
-{
-  const { authorization, url } = cfg;
-  return RxHR.post(url + fragment, {
-    json: true,
-    headers: {
-      authorization,
-    },
-    body: options,
-  });
-}
+export const b2HideFileRequest = createGenericAction<
+  B2HideFileParams,
+  B2HideFileResponse
+>("POST", fragment);

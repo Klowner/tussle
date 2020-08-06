@@ -1,8 +1,7 @@
-import type { fromFetch } from 'rxjs/fetch';
+import type { AxiosRxInstance, AxiosObservable } from './fetch';
+export type { AxiosRequestConfig } from 'axios';
 
-export interface B2Response<T> {
-  body: T;
-}
+export type B2ActionObservable<T> = AxiosObservable<T>;
 
 export interface B2Options {
   apiUrl: string;
@@ -21,6 +20,7 @@ export interface B2AuthOptions {
   apiUrl: string;
   applicationKey: string;
   applicationKeyId: string;
+  axios?: AxiosRxInstance;
 }
 
 export type B2AuthInitOptions =
@@ -44,7 +44,7 @@ export type B2Capability =
 export interface B2ActionConfig {
   url: string;
   authorization: string;
-  fromFetch: typeof fromFetch;
+  axios: AxiosRxInstance;
 }
 
 export type B2BucketType =

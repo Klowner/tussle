@@ -1,9 +1,8 @@
-import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
-import type { Observable } from 'rxjs';
-import type { B2ActionConfig, B2Capability, B2FileInfo } from '../types';
+import type { B2Capability, B2FileInfo } from "../types";
+import { createGenericAction } from "./util";
 
-const fragment = '/b2_get_file_info';
-export const requiredCapability: B2Capability = 'readFiles';
+const fragment = "/b2_get_file_info";
+export const requiredCapability: B2Capability = "readFiles";
 
 export interface B2GetFileInfoParams {
   fileId: string;
@@ -11,15 +10,7 @@ export interface B2GetFileInfoParams {
 
 export type B2GetFileInfoResponse = B2FileInfo;
 
-export function b2GetFileInfoRequest(cfg: B2ActionConfig, options: B2GetFileInfoParams):
-  Observable<RxHttpRequestResponse<B2GetFileInfoResponse>>
-{
-  const { authorization, url } = cfg;
-  return RxHR.post(url + fragment, {
-    json: true,
-    headers: {
-      authorization,
-    },
-    body: options,
-  });
-}
+export const b2GetFileInfoRequest = createGenericAction<
+  B2GetFileInfoParams,
+  B2GetFileInfoResponse
+>("POST", fragment);

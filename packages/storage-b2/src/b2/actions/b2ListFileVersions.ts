@@ -1,9 +1,8 @@
-import { RxHR, RxHttpRequestResponse } from "@akanass/rx-http-request";
-import type { Observable } from 'rxjs';
-import type { B2ActionConfig, B2Capability, B2FileInfo } from '../types';
+import type { B2Capability, B2FileInfo } from "../types";
+import { createGenericAction } from "./util";
 
-const fragment = '/b2_list_file_versions';
-export const requiredCapability: B2Capability = 'listFiles';
+const fragment = "/b2_list_file_versions";
+export const requiredCapability: B2Capability = "listFiles";
 
 export interface B2ListFileVersionsParams {
   bucketId: string;
@@ -20,15 +19,7 @@ export interface B2ListFileVersionsResponse {
   nextFileId: string;
 }
 
-export function b2ListFileVersionsRequest(cfg: B2ActionConfig, options: B2ListFileVersionsParams):
-  Observable<RxHttpRequestResponse<B2ListFileVersionsResponse>>
-{
-  const { authorization, url } = cfg;
-  return RxHR.post(url + fragment, {
-    json: true,
-    headers: {
-      authorization,
-    },
-    body: options,
-  });
-}
+export const b2ListFileVersionsRequest = createGenericAction<
+  B2ListFileVersionsParams,
+  B2ListFileVersionsResponse
+>("POST", fragment);

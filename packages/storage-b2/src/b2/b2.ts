@@ -2,7 +2,7 @@ import type { B2ActionConfig, B2InitOptions, B2Options } from './types';
 import type { Observable } from "rxjs";
 import * as actions from './actions';
 import { B2Auth } from './b2auth';
-import { fromFetch } from './fetch';
+import { AxiosRx } from './fetch';
 import { switchMap, take } from "rxjs/operators";
 
 export const B2_API_URL = "https://api.backblazeb2.com/b2api/v2";
@@ -21,7 +21,7 @@ const requiredOptions: Readonly<(keyof B2Options)[]> = [
 export class B2 {
   public readonly options: B2Options;
   public readonly auth: B2Auth;
-  private readonly fromFetch = fromFetch;
+  public readonly axios: AxiosRx;
 
   private validateOptions(
     options: Partial<B2Options>,
@@ -39,10 +39,10 @@ export class B2 {
     };
   }
 
-
   constructor(options: B2InitOptions) {
     this.options = options = this.validateOptions(options, defaultOptions);
     this.auth = new B2Auth(this.options);
+    this.axios = AxiosRx.create({});
   }
 
   public readonly cancelLargeFile = bindAction(this, actions.b2CancelLargeFileRequest);
@@ -64,7 +64,7 @@ const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) 
         const config = {
           url: apiUrl + '/b2api/v2',
           authorization: authorizationToken,
-          fromFetch,
+          axios: b2.axios,
         };
         return actionFunc(config, options);
       }),
