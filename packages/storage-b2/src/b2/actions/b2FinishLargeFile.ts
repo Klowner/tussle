@@ -6,7 +6,7 @@ const fragment = '/b2_finish_large_file';
 export interface B2FinishLargeFileParams {
   fileId: string;
   partSha1Array: string[];
-};
+}
 
 export interface B2FinishLargeFileResponse {
   accountId: string;

@@ -5,7 +5,7 @@ const fragment = '/b2_get_upload_url';
 
 export interface B2CancelLargeFileParams {
   fileId: string;
-};
+}
 
 export interface B2CancelLargeFileResponse {
   accountId: string;

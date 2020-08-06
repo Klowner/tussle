@@ -5,7 +5,7 @@ const fragment = '/b2_get_file_info';
 
 export interface B2GetFileInfoParams {
   fileId: string;
-};
+}
 
 export interface B2GetFileInfoResponse {
   accountId: string;

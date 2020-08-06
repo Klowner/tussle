@@ -45,9 +45,9 @@ export class B2 {
   constructor(options: B2InitOptions) {
     this.options = options = this.validateOptions(options, defaultOptions);
 
-    // Authorization
+    // authorization
     this.authorizationResponse$ = this.reauthorize$.pipe(
-      startWith(undefined), // Perform an initial request without reauthorize$.next()
+      startWith(undefined), // perform an initial request without reauthorize$.next()
       switchMap(() =>
         actions.b2AuthorizeAccountRequest(B2_API_URL, {
           applicationKey: this.options.applicationKey,
@@ -58,12 +58,13 @@ export class B2 {
     );
 
     this.authorization$ = this.authorizationResponse$.pipe(
-      map((response) => response.body)
+      map((response) => response.body),
+      shareReplay({ refCount: true, bufferSize: 1 }),
     );
   }
 
-  // Signal that a re-auth is required
-  public reauthorize() {
+  // trigger a reauthorization
+  public reauthorize(): void {
     this.reauthorize$.next(undefined);
   }
 
@@ -91,4 +92,4 @@ const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) 
       }),
       take(1),
     );
-}
+};
