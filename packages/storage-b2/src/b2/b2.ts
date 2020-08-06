@@ -1,9 +1,9 @@
-import type { B2ActionConfig, B2InitOptions, B2Options } from './types';
 import type { Observable } from "rxjs";
-import * as actions from './actions';
-import { B2Auth } from './b2auth';
-import { AxiosRx } from './request';
 import { switchMap, take } from "rxjs/operators";
+import type { B2ActionConfig, B2InitOptions, B2Options } from './types';
+import { AxiosRx } from './request';
+import { B2Auth } from './b2auth';
+import * as actions from './actions';
 
 export const B2_API_URL = "https://api.backblazeb2.com/b2api/v2";
 

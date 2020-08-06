@@ -6,13 +6,14 @@ export function createGenericAction<P, R>(method: AxiosRequestConfig['method'], 
     options: P,
   ) : B2ActionObservable<R> {
     const { authorization } = cfg;
-    return cfg.axios.request<R>({
+    const request = {
       headers: {
         authorization,
       },
       method,
       data: options,
       url: cfg.url + fragment,
-    });
+    };
+    return cfg.axios.request<R>(request);
   };
 }
