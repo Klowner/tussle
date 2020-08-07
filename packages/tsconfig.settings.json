@@ -8,7 +8,7 @@
     "strict": true,
     "composite": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": false
   },
   "exclude": [
     "node_modules"
