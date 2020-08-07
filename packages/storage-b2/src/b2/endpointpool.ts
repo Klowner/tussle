@@ -1,8 +1,8 @@
 import type { B2 } from "./b2";
 import type { B2GetUploadPartURLParams, B2GetUploadPartURLResponse } from "./actions/b2GetUploadPartURL";
 import type { B2GetUploadURLParams, B2GetUploadURLResponse } from "./actions/b2GetUploadURL";
-import {map} from "rxjs/operators";
-import {Pool} from "./pool";
+import { map } from "rxjs/operators";
+import { Pool } from "./pool";
 
 export function createUploadURLPool(
   b2: B2,
