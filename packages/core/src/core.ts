@@ -33,10 +33,6 @@ function addResponseHeaders(ctx: TussleRequest<unknown>, headers: Record<string,
   }
 }
 
-function assertUnreachable(x: never): never {
-  throw new Error("Unreachable code reached");
-}
-
 const supportedVersions = [
   '1.0.0',
 ];
@@ -77,6 +73,7 @@ export class Tussle {
   }
 
   private readonly process = <T>() => mergeMap((ctx: TussleRequest<T>) => {
+    // Route the request to the appropriate handler
     switch (ctx.request.method) {
       case 'POST': return this.handleCreate(ctx);
       case 'PATCH': return this.handleDataTransmit(ctx);
@@ -85,7 +82,6 @@ export class Tussle {
       case 'DELETE': return this.handleDelete(ctx); // Termination extension
     }
   });
-
 
   private handleCreate<T>(ctx: TussleRequest<T>): Observable<TussleRequest<T>> {
     // make outgoing requests?
@@ -106,9 +102,6 @@ export class Tussle {
   }
 
   private readonly postProcess = <T>() => map((ctx: TussleRequest<T>) => {
-    // Route the request to the appropriate action handler
-
-
     // Add any remaining response headers
     const extraHeaders: Record<string, unknown> = {};
 
