@@ -1,37 +1,86 @@
 import type Koa from 'koa';
-import type { Tussle, TussleRequestContext } from '@tussle/core';
+import { Tussle } from '@tussle/core';
+import type { TussleConfig, TussleRequest }  from '@tussle/core';
 
-type Context = Koa.ParameterizedContext;
+type KoaContext = Koa.ParameterizedContext;
 
-type TussleMiddlewareFunction<T extends Context> =
-  (ctx: T, next: Koa.Next) => void;
+type KoaMiddlewareFunction<T extends KoaContext> =
+  (ctx: T, next: Koa.Next) => Promise<any>;
 
-function prepareRequest<T extends Context>(originalRequest: T)
-  : TussleRequestContext<T> {
-  return {
-    req: originalRequest.req,
-    res: originalRequest.res,
-    originalRequest,
-  };
+type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
+
+function allowedMethod(method: string, overrideMethod?: string): AllowedMethod | null {
+  method = overrideMethod || method;
+  switch(method) {
+    case 'POST':
+    case 'OPTIONS':
+    case 'HEAD':
+    case 'PATCH':
+      return method;
+  }
+  return null;
 }
 
-function handleResponse<T extends Context>(context: TussleRequestContext<T>): void {
-  console.log('response', context);
+const prepareRequest = <T extends KoaContext>(originalRequest: T): TussleRequest<T> | null => {
+  const ctx = originalRequest;
+  const overrideMethod = ctx.headers['x-http-method-override'];
+  const method = allowedMethod(ctx.method, overrideMethod);
+  if (method) {
+    return {
+      request: {
+        method,
+        headers: ctx.headers,
+        path: ctx.path,
+      },
+      response: null,
+      meta: {},
+      originalRequest,
+    };
+  }
+  return null; // ignore this request
 }
 
-export = function TussleKoaMiddleware<T extends Context>(
-  core: Tussle,
-): TussleMiddlewareFunction<T> {
-  console.log('tussle middleware created');
-  return function middleware(ctx, next) {
-    return core
-      .handle(prepareRequest(ctx))
-      .subscribe((response) => {
-        if (response) {
-          handleResponse(response);
-        } else {
-          next();
-        }
-      });
-  };
+const handleResponse = async <T extends KoaContext>(ctx: TussleRequest<T>): Promise<void> => {
+  console.log('tussle middleware-koa response handler', ctx.meta);
+  if (ctx.response && ctx.response.status) {
+    // Set response status code
+    ctx.originalRequest.status = ctx.response.status;
+    ctx.originalRequest.body = ctx.response.body || '';
+
+    // Merge all response headers
+    Object.entries(ctx.response.headers).forEach(
+      ([key, value]) => ctx.originalRequest.set(key, value)
+    );
+  } else {
+    console.log('tussle did not respond to request');
+  }
 }
+
+export default class TussleKoaMiddleware {
+  private readonly core: Tussle;
+
+  constructor (options: Tussle | TussleConfig) {
+    if (options instanceof Tussle) {
+      this.core = options;
+    } else {
+      this.core = new Tussle(options);
+    }
+  }
+
+  public readonly middleware = <T extends KoaContext>(): KoaMiddlewareFunction<T> =>
+    async (ctx, next) => {
+      const req = prepareRequest(ctx);
+      if (req) {
+        return this.core.handle(req)
+          .subscribe(async (response) => {
+            if (response) {
+              return await handleResponse(response);
+            } else {
+              return await next();
+            }
+          })
+      }
+      return await next();
+    }
+}
+

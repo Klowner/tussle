@@ -1,0 +1,15 @@
+{
+  "name": "koa-cloudflare-b2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "run-p start:*",
+    "start:server": "nodemon server.js",
+    "start:client": "rollup -c --watch --preserveWatchOutput"
+  },
+  "dependencies": {
+    "rxjs": "^6.6.2"
+  }
+}

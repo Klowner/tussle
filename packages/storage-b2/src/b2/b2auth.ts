@@ -74,6 +74,6 @@ export class B2Auth {
 
   // trigger a reauthorization
   public reauthorize(): void {
-    this.reauth$.next(undefined);
+    this.reauth$.next();
   }
 }
