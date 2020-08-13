@@ -1,12 +1,13 @@
-import type { AxiosRxInstance, AxiosObservable } from './request';
-export type { AxiosRequestConfig } from 'axios';
+import type { TussleRequestService, TussleOutgoingResponse } from '@tussle/core';
+import type { Observable } from 'rxjs';
 
-export type B2ActionObservable<T> = AxiosObservable<T>;
+export type B2ActionObservable<T> = Observable<TussleOutgoingResponse<T, unknown>>;
 
 export interface B2Options {
   apiUrl: string;
   applicationKey: string;
   applicationKeyId: string;
+  requestService?: TussleRequestService;
 }
 
 export type B2InitOptions =
@@ -20,7 +21,7 @@ export interface B2AuthOptions {
   apiUrl: string;
   applicationKey: string;
   applicationKeyId: string;
-  axios?: AxiosRxInstance;
+  requestService?: TussleRequestService;
 }
 
 export type B2AuthInitOptions =
@@ -44,7 +45,7 @@ export type B2Capability =
 export interface B2ActionConfig {
   url: string;
   authorization: string;
-  axios: AxiosRxInstance;
+  requestService: TussleRequestService;
 }
 
 export type B2BucketType =

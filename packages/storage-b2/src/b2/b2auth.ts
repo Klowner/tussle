@@ -3,8 +3,8 @@ import type { Observable } from 'rxjs';
 import { B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';
 import { Subject } from 'rxjs';
 import { b2AuthorizeAccountRequest } from './actions/b2AuthorizeAccount';
-import { map, startWith, switchMap, shareReplay, } from 'rxjs/operators';
-import { AxiosRxInstance, AxiosRx } from './request';
+import { pluck, startWith, switchMap, shareReplay, } from 'rxjs/operators';
+import type { TussleRequestService } from '@tussle/core';
 
 export const B2_API_URL = 'https://api.backblazeb2.com/b2api/v2';
 
@@ -17,10 +17,11 @@ const defaultOptions: B2AuthOptions = {
 const requiredOptions: Readonly<(keyof B2AuthOptions)[]> = [
   'applicationKey',
   'applicationKeyId',
-];
+  'requestService',
+] as const;
 
 export interface B2AuthOptionsValidated extends B2AuthOptions {
-  axios: AxiosRxInstance;
+  requestService: TussleRequestService;
 }
 
 export class B2Auth {
@@ -29,7 +30,7 @@ export class B2Auth {
   public readonly state$: Observable<B2AuthorizeAccountResponse>;
 
   private validateOptions(
-    options: Partial<B2AuthOptions>,
+    options: Partial<B2AuthOptions & {requestService: TussleRequestService}>,
     defaults: B2AuthOptions,
   ): Readonly<B2AuthOptionsValidated>
   {
@@ -38,10 +39,11 @@ export class B2Auth {
         throw new Error(`'B2Auth: option ${prop} missing!`);
       }
     });
-    // ensure there's an axios instance, likely provided by the B2 instance.
-    const axios = options.axios || AxiosRx.create({});
+    if (options.requestService === undefined) {
+      throw new Error('kabookm');
+    }
     return {
-      axios,
+      requestService: options.requestService,
       ...defaults,
       ...options,
     };
@@ -52,14 +54,14 @@ export class B2Auth {
       applicationKey,
       applicationKeyId,
       apiUrl,
-      axios,
+      requestService,
     } = this.validateOptions(options, defaultOptions);
 
     this.response$ = this.reauth$.pipe(
       startWith(undefined), // perform initial request without reauth$.next()
       switchMap(() => b2AuthorizeAccountRequest({
         url: apiUrl,
-        axios,
+        requestService,
       }, {
         applicationKey,
         applicationKeyId,
@@ -67,7 +69,7 @@ export class B2Auth {
     ); 
 
     this.state$ = this.response$.pipe(
-      map((response) => response.data),
+      pluck('data'),
       shareReplay({ refCount: true, bufferSize: 1 }),
     );
   }

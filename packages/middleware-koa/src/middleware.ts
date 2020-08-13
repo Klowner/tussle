@@ -1,11 +1,11 @@
 import type Koa from 'koa';
 import { Tussle } from '@tussle/core';
-import type { TussleConfig, TussleRequest }  from '@tussle/core';
+import type { TussleConfig, TussleIncomingRequest }  from '@tussle/core';
 
 type KoaContext = Koa.ParameterizedContext;
 
 type KoaMiddlewareFunction<T extends KoaContext> =
-  (ctx: T, next: Koa.Next) => Promise<any>;
+  (ctx: T, next: Koa.Next) => Promise<unknown>;
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
@@ -21,7 +21,7 @@ function allowedMethod(method: string, overrideMethod?: string): AllowedMethod |
   return null;
 }
 
-const prepareRequest = <T extends KoaContext>(originalRequest: T): TussleRequest<T> | null => {
+const prepareRequest = <T extends KoaContext>(originalRequest: T): TussleIncomingRequest<T> | null => {
   const ctx = originalRequest;
   const overrideMethod = ctx.headers['x-http-method-override'];
   const method = allowedMethod(ctx.method, overrideMethod);
@@ -38,9 +38,9 @@ const prepareRequest = <T extends KoaContext>(originalRequest: T): TussleRequest
     };
   }
   return null; // ignore this request
-}
+};
 
-const handleResponse = async <T extends KoaContext>(ctx: TussleRequest<T>): Promise<void> => {
+const handleResponse = async <T extends KoaContext>(ctx: TussleIncomingRequest<T>): Promise<void> => {
   console.log('tussle middleware-koa response handler', ctx.meta);
   if (ctx.response && ctx.response.status) {
     // Set response status code
@@ -54,7 +54,7 @@ const handleResponse = async <T extends KoaContext>(ctx: TussleRequest<T>): Prom
   } else {
     console.log('tussle did not respond to request');
   }
-}
+};
 
 export default class TussleKoaMiddleware {
   private readonly core: Tussle;
@@ -72,13 +72,13 @@ export default class TussleKoaMiddleware {
       const req = prepareRequest(ctx);
       if (req) {
         return this.core.handle(req)
-          .subscribe(async (response) => {
+          .subscribe((response) => {
             if (response) {
-              return await handleResponse(response);
+              return handleResponse(response);
             } else {
-              return await next();
+              return next();
             }
-          })
+          });
       }
       return await next();
     }

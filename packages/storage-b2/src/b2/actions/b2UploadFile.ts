@@ -3,7 +3,7 @@ import type { B2ActionConfig, B2Capability, B2ActionObservable } from '../types'
 const fragment = '/b2_upload_file';
 export const requiredCapability: B2Capability = 'writeFiles';
 
-export interface B2UploadFileParams {
+export type B2UploadFileParams = {
   bucketId: string;
 }
 
@@ -20,12 +20,12 @@ export function b2UploadFileRequest(
 {
   // TODO 
   const { authorization } = cfg;
-  return cfg.axios.request({
-    method: 'post',
+  return cfg.requestService.makeRequest<B2UploadFileResponse>({
+    method: 'POST',
     url: cfg.url + fragment,
-    data: options,
+    body: options,
     headers: {
-      authorization, 
-    }
+      authorization,
+    },
   });
 }

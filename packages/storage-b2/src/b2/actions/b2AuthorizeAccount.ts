@@ -32,12 +32,13 @@ export function b2AuthorizeAccountRequest(
   cfg: B2AuthorizeAccountConfig,
   options: B2AuthorizeAccountParams
 ): B2ActionObservable<B2AuthorizeAccountResponse> {
-  return cfg.axios.request({
-    method: "get",
+  const req = cfg.requestService.makeRequest<B2AuthorizeAccountResponse>({
+    method: 'GET',
     url: cfg.url + fragment,
     auth: {
       username: options.applicationKeyId,
       password: options.applicationKey,
     },
   });
+  return req;
 }

@@ -1,7 +1,7 @@
 import type { Observable } from "rxjs";
 import { switchMap, take } from "rxjs/operators";
 import type { B2ActionConfig, B2InitOptions, B2Options } from './types';
-import { AxiosRx } from './request';
+import type { TussleRequestService } from '@tussle/core';
 import { B2Auth } from './b2auth';
 import * as actions from './actions';
 import * as operations from './operations';
@@ -17,12 +17,13 @@ const defaultOptions: B2Options = {
 const requiredOptions: Readonly<(keyof B2Options)[]> = [
   'applicationKey',
   'applicationKeyId',
+  'requestService',
 ];
 
 export class B2 {
   public readonly options: B2Options;
   public readonly auth: B2Auth;
-  public readonly axios: AxiosRx;
+  public readonly requestService: TussleRequestService;
 
   private validateOptions(
     options: Partial<B2Options>,
@@ -43,7 +44,12 @@ export class B2 {
   constructor(options: B2InitOptions) {
     this.options = options = this.validateOptions(options, defaultOptions);
     this.auth = new B2Auth(this.options);
-    this.axios = AxiosRx.create({});
+    // this.axios = AxiosRx.create({});
+    if (options.requestService) {
+      this.requestService = options.requestService;
+    } else {
+      throw new Error('B2 is missing RequestService!');
+    }
   }
 
   public readonly cancelLargeFile = bindAction(this, actions.b2CancelLargeFileRequest);
@@ -73,7 +79,9 @@ const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) 
         const config = {
           url: apiUrl + '/b2api/v2',
           authorization: authorizationToken,
-          axios: b2.axios,
+          requestService: b2.requestService,
+          // service: b2.requestService,
+          //axios: b2.axios,
         };
         return actionFunc(config, options);
       }),

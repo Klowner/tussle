@@ -5,6 +5,7 @@
     {"path": "./core"},
     {"path": "./middleware-koa"},
     {"path": "./storage-b2"},
-    {"path": "./state-memory"}
+    {"path": "./state-memory"},
+    {"path": "./request-axios"}
   ]
 }

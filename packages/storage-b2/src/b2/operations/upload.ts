@@ -1,11 +1,10 @@
 import type { B2 } from '../b2';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AxiosRequestConfig } from 'axios';
 
 export interface UploadOperationParams {
   bucketId: string;
-  file: AxiosRequestConfig['data'];
+  file: Blob; // ?
   metadata: Record<string, unknown>;
   filename: string;
 }

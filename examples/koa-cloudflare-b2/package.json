@@ -8,8 +8,5 @@
     "start": "run-p start:*",
     "start:server": "nodemon server.js",
     "start:client": "rollup -c --watch --preserveWatchOutput"
-  },
-  "dependencies": {
-    "rxjs": "^6.6.2"
   }
 }

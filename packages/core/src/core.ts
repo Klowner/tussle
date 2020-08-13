@@ -1,36 +1,21 @@
 import type { Observable } from 'rxjs';
+import type { TussleOutgoingRequest , TussleIncomingRequest, TussleOutgoingResponse } from './request.interface';
 import { of } from 'rxjs';
 import { tap, map, mergeMap } from 'rxjs/operators';
 
 export interface TussleConfig {
   maxSize?: number;
+  createOutgoingRequest: <T>(req: TussleOutgoingRequest) => Observable<TussleOutgoingResponse<T, unknown>>;
 }
 
-export interface TussleRequest<T> {
-  request: {
-    method: 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH' | 'DELETE';
-    headers: Record<string, number | string>;
-    path: string;
-  };
-  response: null | {
-    status?: number;
-    headers: Record<string, string>;
-    body?: string;
-  };
-  meta: {
-    tusVersion?: string;
-  }
-  originalRequest: T;
-}
-
-function addResponseHeaders(ctx: TussleRequest<unknown>, headers: Record<string, unknown>): void {
+function addResponseHeaders(ctx: TussleIncomingRequest<unknown>, headers: Record<string, unknown>): void {
   ctx.response = {
     ...ctx.response,
     headers: {
       ...ctx.response?.headers,
       ...headers as Record<string, string>,
     }
-  }
+  };
 }
 
 const supportedVersions = [
@@ -40,7 +25,7 @@ const supportedVersions = [
 export class Tussle {
   constructor(private readonly cfg: TussleConfig) {}
 
-  public handle<T>(ctx: TussleRequest<T>): Observable<TussleRequest<T>> {
+  public handle<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
     return of(ctx).pipe(
       this.processRequestHeaders(),
       this.process(),
@@ -50,7 +35,7 @@ export class Tussle {
   }
 
   private readonly processRequestHeaders = <T>() =>
-    map((ctx: TussleRequest<T>) => {
+    map((ctx: TussleIncomingRequest<T>) => {
       // Ensure meta property exists on incoming request context
       // Verify that the requested Tus protocol version is supported.
       const version = this.chooseProtocolVersion(ctx);
@@ -64,7 +49,7 @@ export class Tussle {
       return ctx;
     });
 
-  private chooseProtocolVersion(ctx: TussleRequest<unknown>): string | null {
+  private chooseProtocolVersion(ctx: TussleIncomingRequest<unknown>): string | null {
     const clientVersion = ctx.request.headers['tus-resumable'] as string;
     if (supportedVersions.includes(clientVersion)) {
       return clientVersion;
@@ -72,36 +57,36 @@ export class Tussle {
     return null;
   }
 
-  private readonly process = <T>() => mergeMap((ctx: TussleRequest<T>) => {
+  private readonly process = <T>() => mergeMap((ctx: TussleIncomingRequest<T>) => {
     // Route the request to the appropriate handler
     switch (ctx.request.method) {
-      case 'POST': return this.handleCreate(ctx);
-      case 'PATCH': return this.handleDataTransmit(ctx);
-      case 'OPTIONS': return this.handleOptions(ctx);
-      case 'HEAD': return this.handleGetInfo(ctx);
+      case 'PATCH': return this.handleDataTransmit(ctx); // File transfer
+      case 'HEAD': return this.handleGetInfo(ctx); // File info
+      case 'POST': return this.handleCreate(ctx); // Create (and related) extension(s)
+      case 'OPTIONS': return this.handleOptions(ctx); // Server info
       case 'DELETE': return this.handleDelete(ctx); // Termination extension
     }
   });
 
-  private handleCreate<T>(ctx: TussleRequest<T>): Observable<TussleRequest<T>> {
+  private handleCreate<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
     // make outgoing requests?
     console.log('creating file', ctx.request.headers['upload-metadata']);
     return of(ctx);
   }
-  private handleDataTransmit<T>(ctx: TussleRequest<T>): Observable<TussleRequest<T>> {
+  private handleDataTransmit<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
     return of(ctx);
   }
-  private handleOptions<T>(ctx: TussleRequest<T>): Observable<TussleRequest<T>> {
+  private handleOptions<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
     return of(ctx);
   }
-  private handleGetInfo<T>(ctx: TussleRequest<T>): Observable<TussleRequest<T>> {
+  private handleGetInfo<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
     return of(ctx);
   }
-  private handleDelete<T>(ctx: TussleRequest<T>): Observable<TussleRequest<T>> {
+  private handleDelete<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
     return of(ctx);
   }
 
-  private readonly postProcess = <T>() => map((ctx: TussleRequest<T>) => {
+  private readonly postProcess = <T>() => map((ctx: TussleIncomingRequest<T>) => {
     // Add any remaining response headers
     const extraHeaders: Record<string, unknown> = {};
 
@@ -131,7 +116,7 @@ export class Tussle {
   });
 }
 
-function respondWithUnsupportedProtocolVersion<T>(ctx: TussleRequest<T>): TussleRequest<T> {
+function respondWithUnsupportedProtocolVersion<T>(ctx: TussleIncomingRequest<T>): TussleIncomingRequest<T> {
   ctx.response = {
     status: 412, // precondition failed
     headers: {

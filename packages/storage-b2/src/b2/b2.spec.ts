@@ -25,7 +25,7 @@ describe('B2 API', () => {
       return b2.auth.response$.pipe(
         take(1),
       ).subscribe({
-        next: (res) => expect(res.request.headers.authorization).toBe('Basic TU9DSy1LRVktSUQ6TU9DSy1LRVk='),
+        next: (res) => expect(res.request.headers?.authorization).toBe('Basic TU9DSy1LRVktSUQ6TU9DSy1LRVk='),
         complete,
       });
     });

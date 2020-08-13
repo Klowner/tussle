@@ -1,10 +1,15 @@
-import { Tussle, TussleConfig, TussleRequest } from './core';
-import type { TusProtocolExtension } from './tus-protocol';
-import type { TussleStorage } from './storage';
+import { Tussle, TussleConfig } from './core';
+import type { TusProtocolExtension } from './tus-protocol.interface';
+import type { TussleStorage } from './storage.interface';
+import type { TussleIncomingRequest, TussleOutgoingResponse, TussleOutgoingRequest, TussleRequestService } from './request.interface';
+
 export {
   Tussle,
   TusProtocolExtension,
   TussleConfig,
-  TussleRequest,
+  TussleIncomingRequest,
+  TussleOutgoingRequest,
+  TussleOutgoingResponse,
   TussleStorage,
+  TussleRequestService,
 };
