@@ -79,8 +79,6 @@ const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) 
           url: apiUrl + '/b2api/v2',
           authorization: authorizationToken,
           requestService: b2.requestService,
-          // service: b2.requestService,
-          //axios: b2.axios,
         };
         return actionFunc(config, options);
       }),

@@ -14,10 +14,21 @@ class TussleRequestAxios {
     constructor(cfg = {}) {
         this.axios = cfg.axios || axios_observable_1.Axios.create(cfg.axiosOptions || {});
     }
-    makeRequest(req) {
-        const axiosReq = Object.assign({}, req);
-        console.log(req);
-        return this.axios.request(axiosReq).pipe(operators_1.map((axiosResponse) => new TussleOutgoingAxiosResponse(req, axiosResponse)));
+    makeRequest(request) {
+        var _a;
+        const req = Object.assign({}, request);
+        if ((_a = req.options) === null || _a === void 0 ? void 0 : _a.proxySourceRequest) {
+            const { sourceRequest } = req.options;
+            if (sourceRequest) {
+                // clone and merge (overwrite) headers
+                req.headers = Object.assign(Object.assign({}, sourceRequest.request.headers), req.headers);
+                // clone the body
+                req.body = sourceRequest; //.body;
+            }
+            throw new Error('proxySourceRequest set but no sourceRequest attached to outgoing request');
+        }
+        // return this.axios.request<T>(axiosReq).pipe(
+        return this.axios.request(req).pipe(operators_1.map((axiosResponse) => new TussleOutgoingAxiosResponse(req, axiosResponse)));
     }
 }
 exports.TussleRequestAxios = TussleRequestAxios;

@@ -10,6 +10,6 @@ declare type TussleRequestAxiosOptions = {
 export declare class TussleRequestAxios implements TussleRequestService<AxiosResponse> {
     private readonly axios;
     constructor(cfg?: TussleRequestAxiosOptions);
-    makeRequest<T>(req: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, AxiosResponse>>;
+    makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, AxiosResponse>>;
 }
 export {};

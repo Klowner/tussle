@@ -40,10 +40,10 @@ const prepareRequest = <T extends KoaContext>(originalRequest: T): TussleIncomin
   return null; // ignore this request
 };
 
-const handleResponse = async <T extends KoaContext>(ctx: TussleIncomingRequest<T>): Promise<void> => {
-  console.log('tussle middleware-koa response handler', ctx.meta);
+const handleResponse = async <T extends KoaContext>(ctx: TussleIncomingRequest<T>): Promise<T> => {
   if (ctx.response && ctx.response.status) {
     // Set response status code
+    console.log('RESPONDING',ctx.response);
     ctx.originalRequest.status = ctx.response.status;
     ctx.originalRequest.body = ctx.response.body || '';
 
@@ -54,6 +54,8 @@ const handleResponse = async <T extends KoaContext>(ctx: TussleIncomingRequest<T
   } else {
     console.log('tussle did not respond to request');
   }
+
+  return ctx.originalRequest;
 };
 
 export default class TussleKoaMiddleware {
@@ -69,18 +71,16 @@ export default class TussleKoaMiddleware {
 
   public readonly middleware = <T extends KoaContext>(): KoaMiddlewareFunction<T> =>
     async (ctx, next) => {
+      console.log(ctx.request.method, ctx.path);
       const req = prepareRequest(ctx);
       if (req) {
         return this.core.handle(req)
-          .subscribe((response) => {
-            if (response) {
-              return handleResponse(response);
-            } else {
-              return next();
-            }
+          .toPromise()
+          .then((response) => {
+            return response ? handleResponse(response) : next();
           });
       }
-      return await next();
+      await next();
     }
 }
 

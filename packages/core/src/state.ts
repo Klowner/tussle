@@ -1,6 +1,6 @@
 import type { TussleStateService } from './state.interface';
 
-export class TussleStateNamespace<T> implements TussleStateService<T> {
+class TussleStateNamespace<T> implements TussleStateService<T> {
   public constructor (
     public readonly state: TussleStateService<T>,
     public readonly namespace: string,
@@ -31,3 +31,6 @@ export class TussleStateNamespace<T> implements TussleStateService<T> {
   }
 }
 
+export {
+  TussleStateNamespace,
+}

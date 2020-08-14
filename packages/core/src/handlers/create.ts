@@ -1,29 +1,48 @@
 import type { Observable } from 'rxjs';
 import type { TussleIncomingRequest } from '../request.interface';
+import type { TussleStorageCreateFileResponse } from '../storage.interface';
 import type { Tussle } from '../core';
-import { of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { retry, switchMap, map, tap } from 'rxjs/operators';
 import { decode } from 'js-base64';
 
-export default function handleCreate<T>(core: Tussle, ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
+export default function handleCreate<T>(
+  core: Tussle,
+  ctx: TussleIncomingRequest<T>
+): Observable<TussleIncomingRequest<T>>
+{
   const store = core.getStorage('default');
   const params = extractCreationHeaders(ctx);
+  const params$ = core.hook('before-create', ctx, params);
 
-  const createdFile$ = store.createFile(params);
-
-  return createdFile$.pipe(
-    map((createdFile) => {
-      console.log('FILE CREATED', createdFile);
-      return ctx;
-    }),
+  return params$.pipe(
+    switchMap((params) => store.createFile(params).pipe(
+      retry(5),
+      map((createdFile) => toResponse(ctx, createdFile)),
+    )),
   );
-
-  // store.createFile(params);
-  
-  // good spot for pre-create hook?
-  // console.log(params);
-  // return of(ctx);
 }
+
+const toResponse = <T>(
+  ctx: TussleIncomingRequest<T>,
+  createdFile: TussleStorageCreateFileResponse
+): TussleIncomingRequest<T> => {
+  if (createdFile.location) {
+    ctx.response = {
+      status: 201, // created
+      headers: {
+        'Location': 'http://localhost:8080/files/upload-fefkoekfok',
+        'Tussle-Storage-Location': createdFile.location,
+        'Tussle-Storage': 'b2',
+      },
+    };
+  } else {
+    ctx.response = {
+      status: 400, // TODO - check this
+      headers: {},
+    };
+  }
+  return ctx;
+};
 
 const extractCreationHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
   const header = (key: string) => ctx.request.headers[key];
@@ -31,6 +50,7 @@ const extractCreationHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
   const uploadLength = parseInt(header('upload-length') as string || '', 10);
   const uploadMetadata = (header('upload-metadata') as string || '')
     .split(',')
+    .filter((v) => v.length > 0)
     .map((value) => value.split(' '))
     .map(([key, value]) => [key, decode(value)])
     .reduce((acc, [key, value]) => {

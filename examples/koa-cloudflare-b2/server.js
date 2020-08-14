@@ -6,7 +6,6 @@ const send = require('koa-send');
 const { TussleStorageB2 } = require('@tussle/storage-b2');
 const { TussleRequestAxios } = require('@tussle/request-axios');
 const { TussleStateMemory } = require('@tussle/state-memory');
-console.log(require('@tussle/state-memory'));
 
 const TussleKoa = require('@tussle/middleware-koa');
 
@@ -27,6 +26,21 @@ function serve(port = process.env.PORT || '8080') {
   const router = new Router();
 
   const tussle = new TussleKoa({
+    hooks: {
+      'before-create': async (_tussle, _ctx, params) => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            params.meta = {
+              ...params.meta,
+              ...{
+                honk: 'toot toot! FIXME',
+              },
+            };
+            resolve(params);
+          }, 100);
+        });
+      }
+    },
     storage: new TussleStorageB2({
       applicationKeyId: process.env.TUSSLE_B2_KEY_ID,
       applicationKey: process.env.TUSSLE_B2_KEY,
@@ -36,7 +50,7 @@ function serve(port = process.env.PORT || '8080') {
     }),
   });
 
-  router.all('/files', tussle.middleware());
+  router.all(/files.*/, tussle.middleware());
   app.use(router.middleware());
   app.use(serveStatic);
   app.listen(port);

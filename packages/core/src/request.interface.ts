@@ -10,6 +10,10 @@ export type TussleOutgoingRequest = {
     username: string;
     password: string;
   };
+  options?: {
+    sourceRequest?: TussleIncomingRequest<unknown>;
+    proxySourceRequest?: boolean;
+  }
 }
 
 export type TussleOutgoingResponse<T, R> = {
@@ -21,7 +25,7 @@ export type TussleOutgoingResponse<T, R> = {
 export type TussleIncomingRequest<T> = {
   request: {
     method: 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH' | 'DELETE';
-    headers: Record<string, number | string>;
+    headers: Record<string, string>;
     path: string;
   };
   response: null | {

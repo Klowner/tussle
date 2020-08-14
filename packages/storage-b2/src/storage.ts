@@ -1,10 +1,20 @@
-import type { Observable } from 'rxjs';
-import type { TusProtocolExtension, TussleStorage, TussleRequestService } from '@tussle/core';
-import type { TussleStateService } from '@tussle/core/src/state.interface';
-import type { TussleStorageCreateFileParams, TussleStorageDeleteFileParams, TussleStoragePatchFileParams } from '@tussle/core/src/storage.interface';
-import { B2 } from './b2';
-import { TussleStateNamespace } from '@tussle/core/src/state';
-import { of } from 'rxjs';
+import { TussleStateNamespace } from "@tussle/core";
+import type {
+  TusProtocolExtension,
+  TussleRequestService,
+  TussleStorage,
+} from "@tussle/core";
+import type { TussleStateService } from "@tussle/core/src/state.interface";
+import type {
+  TussleStorageCreateFileParams,
+  TussleStorageCreateFileResponse,
+  TussleStorageDeleteFileParams,
+  TussleStoragePatchFileParams,
+  TussleStoragePatchFileResponse,
+} from "@tussle/core/src/storage.interface";
+import { of } from "rxjs";
+import type { Observable } from "rxjs";
+import { B2 } from "./b2";
 
 export interface TussleStorageB2Options {
   applicationKeyId: string;
@@ -18,39 +28,51 @@ export class TussleStorageB2 implements TussleStorage {
   private readonly b2: B2;
   private readonly state: TussleStateService;
 
-  constructor (readonly options: TussleStorageB2Options) {
+  constructor(readonly options: TussleStorageB2Options) {
     this.b2 = new B2({
       applicationKey: options.applicationKey,
       applicationKeyId: options.applicationKeyId,
       requestService: options.requestService,
     });
 
-    this.state = new TussleStateNamespace(options.stateService, 'b2storage');
+    this.state = new TussleStateNamespace(options.stateService, "b2storage");
   }
 
-  createFile(params: TussleStorageCreateFileParams): Observable<unknown> {
+  createFile(
+    params: TussleStorageCreateFileParams
+  ): Observable<TussleStorageCreateFileResponse> {
     // TODO -- add file location manipulation hook here?
-    console.log('b2.createFile', params);
-    return of(params);
+    console.log("b2.createFile", params);
+
+    // TODO -- begin a b2 upload
+    // TODO -- store the required state retrievable by subsequent client requests
+    // TODO -- return the appropriate location response for subsequent client requests
+
+    return of({
+      location: "boop",
+      success: true,
+      params,
+    });
   }
 
-  patchFile(params: TussleStoragePatchFileParams): Observable<unknown> {
-    console.log('b2.patchFile', params);
+  patchFile(
+    params: TussleStoragePatchFileParams
+  ): Observable<TussleStoragePatchFileResponse> {
+    console.log("b2.patchFile", params);
     return of();
   }
 
   // Termination extension
   deleteFile(params: TussleStorageDeleteFileParams): Observable<unknown> {
-    console.log('b2.deleteFile', params);
+    console.log("b2.deleteFile", params);
     return of();
   }
 
   public readonly extensionsRequired: TusProtocolExtension[] = [
-    'checksum',
-    'concatenation',
-    'termination',
+    "checksum",
+    "concatenation",
+    "termination",
   ];
 }
-
 
 export { B2 };
