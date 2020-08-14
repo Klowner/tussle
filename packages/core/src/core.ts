@@ -1,11 +1,15 @@
+import handleCreate from './handlers/create';
 import type { Observable } from 'rxjs';
+import type { TusProtocolExtension } from './tus-protocol.interface';
 import type { TussleOutgoingRequest , TussleIncomingRequest, TussleOutgoingResponse } from './request.interface';
+import type { TussleStorage } from './storage.interface';
 import { of } from 'rxjs';
 import { tap, map, mergeMap } from 'rxjs/operators';
 
 export interface TussleConfig {
   maxSize?: number;
   createOutgoingRequest: <T>(req: TussleOutgoingRequest) => Observable<TussleOutgoingResponse<T, unknown>>;
+  storage: TussleStorage | Record<'default' | string, TussleStorage>;
 }
 
 function addResponseHeaders(ctx: TussleIncomingRequest<unknown>, headers: Record<string, unknown>): void {
@@ -18,19 +22,29 @@ function addResponseHeaders(ctx: TussleIncomingRequest<unknown>, headers: Record
   };
 }
 
+type IncomingRequestMethod = TussleIncomingRequest<unknown>['request']['method'];
+type IncomingRequestHandler = <T>(core: Tussle, ctx: TussleIncomingRequest<T>) => Observable<TussleIncomingRequest<T>>;
+
 const supportedVersions = [
   '1.0.0',
 ];
 
 export class Tussle {
-  constructor(private readonly cfg: TussleConfig) {}
+  public readonly handlers: Partial<Record<IncomingRequestMethod, IncomingRequestHandler>> = {};
+  public readonly extensions: Partial<Record<TusProtocolExtension, boolean>> = {};
+  public readonly storage: Partial<Record<'default' | string, TussleStorage>>;
+
+  constructor(private readonly cfg: TussleConfig) {
+    this.setHandler('POST', handleCreate);
+    this.storage = isStorageService(cfg.storage) ? { default: cfg.storage } : cfg.storage || {};
+  }
 
   public handle<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
     return of(ctx).pipe(
       this.processRequestHeaders(),
       this.process(),
       this.postProcess(),
-      tap((x) => console.log("\n\n---------", x.request.path, '\n', x.response)),
+      tap((x) => console.log("<-- ", x.request.path, '\n', x.response)),
     );
   }
 
@@ -58,33 +72,13 @@ export class Tussle {
   }
 
   private readonly process = <T>() => mergeMap((ctx: TussleIncomingRequest<T>) => {
-    // Route the request to the appropriate handler
-    switch (ctx.request.method) {
-      case 'PATCH': return this.handleDataTransmit(ctx); // File transfer
-      case 'HEAD': return this.handleGetInfo(ctx); // File info
-      case 'POST': return this.handleCreate(ctx); // Create (and related) extension(s)
-      case 'OPTIONS': return this.handleOptions(ctx); // Server info
-      case 'DELETE': return this.handleDelete(ctx); // Termination extension
+    const handler = this.handlers[ctx.request.method];
+    if (handler) {
+      return handler(this, ctx);
+    } else {
+      return of(ctx); // ignore request
     }
   });
-
-  private handleCreate<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
-    // make outgoing requests?
-    console.log('creating file', ctx.request.headers['upload-metadata']);
-    return of(ctx);
-  }
-  private handleDataTransmit<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
-    return of(ctx);
-  }
-  private handleOptions<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
-    return of(ctx);
-  }
-  private handleGetInfo<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
-    return of(ctx);
-  }
-  private handleDelete<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> {
-    return of(ctx);
-  }
 
   private readonly postProcess = <T>() => map((ctx: TussleIncomingRequest<T>) => {
     // Add any remaining response headers
@@ -114,6 +108,18 @@ export class Tussle {
 
     return ctx;
   });
+
+  public setHandler(method: IncomingRequestMethod, handler: IncomingRequestHandler): void {
+    this.handlers[method] = handler.bind(this);
+  }
+
+  public getStorage(name = 'default'): TussleStorage {
+    const storage = this.storage[name];
+    if (!storage) {
+      throw new Error('Unable to find storage: ' + name);
+    }
+    return storage;
+  }
 }
 
 function respondWithUnsupportedProtocolVersion<T>(ctx: TussleIncomingRequest<T>): TussleIncomingRequest<T> {
@@ -125,3 +131,6 @@ function respondWithUnsupportedProtocolVersion<T>(ctx: TussleIncomingRequest<T>)
   };
   return ctx;
 }
+
+const isStorageService = (storage: any): storage is TussleStorage =>
+  storage && (storage as TussleStorage).createFile !== undefined;

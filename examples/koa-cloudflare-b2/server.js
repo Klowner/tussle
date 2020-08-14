@@ -1,6 +1,12 @@
+require('dotenv').config();
 const Koa = require('koa');
 const Router = require('@koa/router');
 const send = require('koa-send');
+
+const { TussleStorageB2 } = require('@tussle/storage-b2');
+const { TussleRequestAxios } = require('@tussle/request-axios');
+const { TussleStateMemory } = require('@tussle/state-memory');
+console.log(require('@tussle/state-memory'));
 
 const TussleKoa = require('@tussle/middleware-koa');
 
@@ -19,7 +25,16 @@ const serveStatic = async (ctx) => {
 function serve(port = process.env.PORT || '8080') {
   const app = new Koa();
   const router = new Router();
-  const tussle = new TussleKoa({});
+
+  const tussle = new TussleKoa({
+    storage: new TussleStorageB2({
+      applicationKeyId: process.env.TUSSLE_B2_KEY_ID,
+      applicationKey: process.env.TUSSLE_B2_KEY,
+      bucketName: process.env.TUSSLE_B2_BUCKET,
+      stateService: new TussleStateMemory(),
+      requestService: new TussleRequestAxios(),
+    }),
+  });
 
   router.all('/files', tussle.middleware());
   app.use(router.middleware());

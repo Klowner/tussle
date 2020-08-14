@@ -44,7 +44,6 @@ export class B2 {
   constructor(options: B2InitOptions) {
     this.options = options = this.validateOptions(options, defaultOptions);
     this.auth = new B2Auth(this.options);
-    // this.axios = AxiosRx.create({});
     if (options.requestService) {
       this.requestService = options.requestService;
     } else {
