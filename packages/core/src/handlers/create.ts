@@ -16,7 +16,6 @@ export default function handleCreate<T>(
 
   return params$.pipe(
     switchMap((params) => store.createFile(params).pipe(
-      retry(5),
       map((createdFile) => toResponse(ctx, createdFile)),
     )),
   );
