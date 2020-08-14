@@ -3,8 +3,7 @@ import type { AxiosResponse } from 'axios';
 import type { Observable } from 'rxjs';
 import type { TussleOutgoingRequest, TussleOutgoingResponse, TussleRequestService } from '@tussle/core';
 import { Axios as AxiosRx } from 'axios-observable';
-import { tap, map } from 'rxjs/operators';
-
+import { map } from 'rxjs/operators';
 
 type TussleRequestAxiosOptions = {
   axios?: AxiosRx;
@@ -36,7 +35,6 @@ export class TussleRequestAxios implements TussleRequestService<AxiosResponse> {
 
     return this.axios.request<T>(axiosReq).pipe(
       map((axiosResponse) => new TussleOutgoingAxiosResponse(req, axiosResponse)),
-      // tap((r) => console.log('RESPONSE DATA', r.data())),
     );
   }
 }
