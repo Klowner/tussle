@@ -6,6 +6,7 @@
     {"path": "./middleware-koa"},
     {"path": "./storage-b2"},
     {"path": "./state-memory"},
-    {"path": "./request-axios"}
+    {"path": "./request-axios"},
+    {"path": "./request-cloudflare-fetch"}
   ]
 }

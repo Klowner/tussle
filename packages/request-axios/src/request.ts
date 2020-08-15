@@ -31,6 +31,7 @@ export class TussleRequestAxios implements TussleRequestService<AxiosResponse> {
   public makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, AxiosResponse>> {
     const req = { ...request };
 
+    // Attempt to proxy the modified original request
     if (req.options?.proxySourceRequest) {
       const { sourceRequest } = req.options;
       if (sourceRequest) {
@@ -45,7 +46,6 @@ export class TussleRequestAxios implements TussleRequestService<AxiosResponse> {
       throw new Error('proxySourceRequest set but no sourceRequest attached to outgoing request');
     }
 
-    // return this.axios.request<T>(axiosReq).pipe(
     return this.axios.request<T>(req).pipe(
       map((axiosResponse) => new TussleOutgoingAxiosResponse(req, axiosResponse)),
     );

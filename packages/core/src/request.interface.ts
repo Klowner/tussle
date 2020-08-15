@@ -1,10 +1,21 @@
 import type { Observable } from 'rxjs';
 
+type RequestBody =
+  | Blob
+  | ArrayBuffer
+  | ArrayBufferView
+  | FormData
+  | BufferSource
+  | Record<string, unknown>
+  | null
+  | string
+;
+
 export type TussleOutgoingRequest = {
   url: string;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
   headers?: Record<string, string>;
-  body?: Blob | BufferSource | FormData | ReadableStream | Record<string, unknown>;
+  body?: RequestBody;
   mode?: 'cors' | 'no-cors' | 'same-origin';
   auth?: {
     username: string;

@@ -5,7 +5,7 @@ function uploadFile(file) {
     endpoint: 'http://localhost:8080/files/b2-storage',
     retryDelays: [0, 1000, 3000, 5000],
     chunkSize: 1000 * 1000 * 200,
-    parallelUploads: 8,
+    parallelUploads: 1,
     metadata: {
       filename: file.name,
       filetype: file.type,

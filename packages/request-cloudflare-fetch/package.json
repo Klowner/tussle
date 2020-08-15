@@ -1,0 +1,21 @@
+{
+  "name": "@tussle/request-cloudflare-fetch",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "run-s clean build:tsc",
+    "build:tsc": "tsc -b",
+    "watch": "tsc -b -w --preserveWatchOutput",
+    "clean": "rimraf lib coverage tsconfig.tsbuildinfo"
+  },
+  "author": "Mark Riedesel <mark@klowner.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^2.0.0",
+    "rxjs": "^6.0.0"
+  }
+}
