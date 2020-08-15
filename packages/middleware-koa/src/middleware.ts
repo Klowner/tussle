@@ -21,7 +21,11 @@ function allowedMethod(method: string, overrideMethod?: string): AllowedMethod |
   return null;
 }
 
-const prepareRequest = <T extends KoaContext>(originalRequest: T): TussleIncomingRequest<T> | null => {
+const prepareRequest = async <T extends KoaContext>(
+  core: Tussle,
+  originalRequest: T
+): Promise<TussleIncomingRequest<T> | null> =>
+{
   const ctx = originalRequest;
   const overrideMethod = ctx.headers['x-http-method-override'];
   const method = allowedMethod(ctx.method, overrideMethod);
@@ -33,7 +37,8 @@ const prepareRequest = <T extends KoaContext>(originalRequest: T): TussleIncomin
         path: ctx.path,
       },
       response: null,
-      meta: {},
+      meta: {
+      },
       originalRequest,
     };
   }
@@ -42,15 +47,19 @@ const prepareRequest = <T extends KoaContext>(originalRequest: T): TussleIncomin
 
 const handleResponse = async <T extends KoaContext>(ctx: TussleIncomingRequest<T>): Promise<T> => {
   if (ctx.response && ctx.response.status) {
+    console.log('<--', ctx.response);
     // Set response status code
-    console.log('RESPONDING',ctx.response);
     ctx.originalRequest.status = ctx.response.status;
+
+    // Relay the body back out
     ctx.originalRequest.body = ctx.response.body || '';
 
     // Merge all response headers
-    Object.entries(ctx.response.headers).forEach(
-      ([key, value]) => ctx.originalRequest.set(key, value)
-    );
+    if (ctx.response.headers) {
+      Object.entries(ctx.response.headers).forEach(
+        ([key, value]) => ctx.originalRequest.set(key, value)
+      );
+    }
   } else {
     console.log('tussle did not respond to request');
   }
@@ -71,8 +80,8 @@ export default class TussleKoaMiddleware {
 
   public readonly middleware = <T extends KoaContext>(): KoaMiddlewareFunction<T> =>
     async (ctx, next) => {
-      console.log(ctx.request.method, ctx.path);
-      const req = prepareRequest(ctx);
+      console.log('-->', ctx.request.method, ctx.path);
+      const req = await prepareRequest(this.core, ctx);
       if (req) {
         return this.core.handle(req)
           .toPromise()

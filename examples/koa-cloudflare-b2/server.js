@@ -28,17 +28,10 @@ function serve(port = process.env.PORT || '8080') {
   const tussle = new TussleKoa({
     hooks: {
       'before-create': async (_tussle, _ctx, params) => {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            params.meta = {
-              ...params.meta,
-              ...{
-                honk: 'toot toot! FIXME',
-              },
-            };
-            resolve(params);
-          }, 100);
-        });
+        return params;
+      },
+      'before-patch': async (_tussle, _ctx, params) => {
+        return params;
       }
     },
     storage: new TussleStorageB2({
@@ -50,7 +43,7 @@ function serve(port = process.env.PORT || '8080') {
     }),
   });
 
-  router.all(/files.*/, tussle.middleware());
+  router.all(/\/files\/b2-storage\/?.*/, tussle.middleware());
   app.use(router.middleware());
   app.use(serveStatic);
   app.listen(port);

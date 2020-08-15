@@ -7,11 +7,15 @@ import { tap, map, mergeMap } from 'rxjs/operators';
 import handleCreate from './handlers/create';
 import handlePatch from './handlers/patch';
 
+// url: https://api.googlefart.pandle/files/marko/potatoman
+// toKey => marko/potatoman
+
 export interface TussleConfig {
   maxSize?: number;
   createOutgoingRequest: <T>(req: TussleOutgoingRequest) => Observable<TussleOutgoingResponse<T, unknown>>;
   storage: TussleStorage | Record<'default' | string, TussleStorage>;
   hooks?: Partial<Record<TussleEventHook, TussleHookFunc>>;
+  match: RegExp;
 }
 
 function addResponseHeaders(ctx: TussleIncomingRequest<unknown>, headers: Record<string, unknown>): void {
@@ -29,6 +33,7 @@ type IncomingRequestHandler = <T>(core: Tussle, ctx: TussleIncomingRequest<T>) =
 
 export type TussleEventHook =
   | 'before-create'
+  | 'before-patch'
 ;
 
 export type TussleHookFunc = <T>(
@@ -59,7 +64,6 @@ export class Tussle {
       this.processRequestHeaders(),
       this.process(),
       this.postProcess(),
-      // tap((x) => console.log("<-- ", x.request.path, '\n', x.response)),
     );
   }
 
@@ -75,6 +79,7 @@ export class Tussle {
       // Set the negotiated protocol version in the context metadata
       ctx.meta.tusVersion = version;
 
+      // TODO -- check max-size of transmit in POST requests, somewhere
       return ctx;
     });
 
@@ -88,7 +93,6 @@ export class Tussle {
 
   private readonly process = <T>() => mergeMap((ctx: TussleIncomingRequest<T>) => {
     const handler = this.handlers[ctx.request.method];
-    console.log('handler', handler, ctx.request.method);
     if (handler) {
       return handler(this, ctx);
     } else {
@@ -111,7 +115,7 @@ export class Tussle {
     }
 
     // Include required Tus-Extension
-    const supportedExtensions = 'creation,termination';
+    const supportedExtensions = 'creation,termination,concatenation';
     if (supportedExtensions) {
       extraHeaders['Tus-Extension'] = supportedExtensions;
     }

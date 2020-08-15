@@ -24,6 +24,9 @@ export interface TussleStorageB2Options {
   stateService: TussleStateService;
 }
 
+// middleware provides 'storage key'
+// core asks storage how to handle request with 'storage key'
+
 export class TussleStorageB2 implements TussleStorage {
   private readonly b2: B2;
   private readonly state: TussleStateService;
@@ -41,15 +44,23 @@ export class TussleStorageB2 implements TussleStorage {
   createFile(
     params: TussleStorageCreateFileParams
   ): Observable<TussleStorageCreateFileResponse> {
-    // TODO -- add file location manipulation hook here?
+    // TODO -- add file location manipulation hook here? (storage id to friendly id?)
+    // { file, part? } -> url -> { file, part? }
     console.log("b2.createFile", params);
 
     // TODO -- begin a b2 upload
     // TODO -- store the required state retrievable by subsequent client requests
     // TODO -- return the appropriate location response for subsequent client requests
 
+
+    // if multi-part
+    //   b2.startLargeFile
+    //   link return largeuploadUrl
+    // else
+    //   b2.
+
     return of({
-      location: "boop",
+      id: Math.floor(Math.random() * 1e20).toString(16),
       success: true,
       params,
     });
@@ -59,7 +70,12 @@ export class TussleStorageB2 implements TussleStorage {
     params: TussleStoragePatchFileParams
   ): Observable<TussleStoragePatchFileResponse> {
     console.log("b2.patchFile", params);
-    return of();
+    const currentOffset = params.offset;
+    return of({
+      id: params.id,
+      offset: currentOffset + params.length,
+      success: true,
+    });
   }
 
   // Termination extension

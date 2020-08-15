@@ -2637,8 +2637,10 @@ const { Upload: Upload$1 } = browser;
 
 function uploadFile(file) {
   const upload = new Upload$1(file, {
-    endpoint: 'http://localhost:8080/files',
+    endpoint: 'http://localhost:8080/files/b2-storage',
     retryDelays: [0, 1000, 3000, 5000],
+    chunkSize: 1000 * 1000 * 200,
+    parallelUploads: 8,
     metadata: {
       filename: file.name,
       filetype: file.type,

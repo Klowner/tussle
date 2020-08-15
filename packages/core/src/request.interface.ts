@@ -30,11 +30,12 @@ export type TussleIncomingRequest<T> = {
   };
   response: null | {
     status?: number;
-    headers: Record<string, string>;
+    headers?: Record<string, string>;
     body?: string;
   };
   meta: {
     tusVersion?: string;
+    storageKey?: string;
   }
   originalRequest: T;
 };

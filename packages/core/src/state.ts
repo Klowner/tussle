@@ -33,4 +33,4 @@ class TussleStateNamespace<T> implements TussleStateService<T> {
 
 export {
   TussleStateNamespace,
-}
+};
