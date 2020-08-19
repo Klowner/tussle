@@ -23,6 +23,7 @@ export default function handleCreate<T>(
 
 const extractCreationHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
   const id = ctx.request.path;
+  const path = ctx.request.path;
   const header = (key: string) => ctx.request.headers[key];
   const contentLength = parseInt(header('content-length') as string || '', 10);
   const uploadLength = parseInt(header('upload-length') as string || '', 10);
@@ -41,6 +42,7 @@ const extractCreationHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
 
   return {
     id,
+    path,
     contentLength,
     uploadLength,
     uploadMetadata,
@@ -52,12 +54,11 @@ const toResponse = <T>(
   ctx: TussleIncomingRequest<T>,
   createdFile: TussleStorageCreateFileResponse
 ): TussleIncomingRequest<T> => {
-  if (createdFile.id) {
+  if (createdFile.location) {
     ctx.response = {
       status: 201, // created
       headers: {
-        'Location': ctx.request.path + '/' + createdFile.id,
-        'Tussle-Storage-File-ID': createdFile.id,
+        'Location': createdFile.location,
         'Tussle-Storage': 'b2',
       },
     };

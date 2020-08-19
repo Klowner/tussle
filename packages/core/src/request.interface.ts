@@ -1,3 +1,4 @@
+import type { Readable } from 'stream';
 import type { Observable } from 'rxjs';
 
 type RequestBody =
@@ -38,6 +39,7 @@ export type TussleIncomingRequest<T> = {
     method: 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH' | 'DELETE';
     headers: Record<string, string>;
     path: string;
+    getReadable: () => Readable;
   };
   response: null | {
     status?: number;

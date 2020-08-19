@@ -41,7 +41,7 @@ export class TussleRequestAxios implements TussleRequestService<AxiosResponse> {
           ...req.headers,
         };
         // clone the body
-        req.body = sourceRequest; //.body;
+        req.body = sourceRequest;
       }
       throw new Error('proxySourceRequest set but no sourceRequest attached to outgoing request');
     }

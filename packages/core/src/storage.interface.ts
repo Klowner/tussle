@@ -1,27 +1,32 @@
+import type { Readable } from 'stream';
 import type { TusProtocolExtension } from './tus-protocol.interface';
+// import type { TussleIncomingRequest } from './request.interface';
 import type { Observable } from 'rxjs';
 
 export type TussleStorageCreateFileParams = {
-  id: string;
+  // id: string;
+  path: string;
   uploadLength: number;
   uploadMetadata: Record<string, string | number>;
 };
 
 export type TussleStorageCreateFileResponse = {
-  id: string;
+  // id: string;
+  location: string;
   success: boolean;
 };
 
 export type TussleStoragePatchFileParams = {
-  id: string;
+  location: string;
   length: number;
   offset: number;
+  getReadable: () => Readable;
 };
 
 export type TussleStoragePatchFileResponse = {
-  id: string;
-  offset: number;
+  location: string;
   success: boolean;
+  offset?: number; // only if success
 };
 
 export type TussleStorageDeleteFileParams = {

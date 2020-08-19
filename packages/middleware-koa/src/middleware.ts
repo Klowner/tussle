@@ -30,11 +30,14 @@ const prepareRequest = async <T extends KoaContext>(
   const overrideMethod = ctx.headers['x-http-method-override'];
   const method = allowedMethod(ctx.method, overrideMethod);
   if (method) {
+    // const x = ctx.request.files; //pipe();
+
     return {
       request: {
         method,
         headers: ctx.headers,
         path: ctx.path,
+        getReadable: () => ctx.req,
       },
       response: null,
       meta: {

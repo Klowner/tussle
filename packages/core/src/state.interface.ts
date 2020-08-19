@@ -1,4 +1,4 @@
-export type TussleStateService<T = unknown>= {
+export type TussleStateService<T>= {
   getItem: (key: string) => Promise<T | undefined>;
   setItem: (key: string, value: T) => Promise<void>;
   removeItem: (key: string) => Promise<T>;

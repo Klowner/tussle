@@ -37,7 +37,7 @@ function serve(port = process.env.PORT || '8080') {
     storage: new TussleStorageB2({
       applicationKeyId: process.env.TUSSLE_B2_KEY_ID,
       applicationKey: process.env.TUSSLE_B2_KEY,
-      bucketName: process.env.TUSSLE_B2_BUCKET,
+      bucketId: process.env.TUSSLE_B2_BUCKET_ID,
       stateService: new TussleStateMemory(),
       requestService: new TussleRequestAxios(),
     }),
@@ -49,4 +49,5 @@ function serve(port = process.env.PORT || '8080') {
   app.listen(port);
 }
 
+console.clear();
 serve();

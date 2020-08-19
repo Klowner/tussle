@@ -115,9 +115,10 @@ export class Tussle {
     }
 
     // Include required Tus-Extension
-    const supportedExtensions = 'creation,termination,concatenation';
+    const supportedExtensions = 'creation,termination,checksum'; // TODO -- generate this
     if (supportedExtensions) {
       extraHeaders['Tus-Extension'] = supportedExtensions;
+      extraHeaders['Tus-Checksum-Algorithm'] = 'sha1';
     }
 
     // Include required Tus-Version
@@ -152,6 +153,10 @@ export class Tussle {
       return isPromise(result) ? from(result) : result;
     }
     return of(params);
+  }
+
+  public hasHook(name: TussleEventHook): boolean {
+    return this.hooks[name] !== undefined;
   }
 }
 
