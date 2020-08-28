@@ -48,6 +48,8 @@ export interface B2ActionConfig {
   requestService: TussleRequestService;
 }
 
+export type B2UnconfiguredAction<T> = Exclude<T, B2ActionConfig>;
+
 export type B2BucketType =
   | 'allPrivate'
   | 'allPublic'

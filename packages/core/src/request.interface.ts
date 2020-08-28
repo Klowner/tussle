@@ -2,17 +2,18 @@ import type { Readable } from 'stream';
 import type { Observable } from 'rxjs';
 
 type RequestBody =
-  | Blob
-  | ArrayBuffer
-  | ArrayBufferView
-  | FormData
-  | BufferSource
+  // | Blob
+  // | ArrayBuffer
+  // | ArrayBufferView
+  // | FormData
+  // | BufferSource
+  | Readable
   | Record<string, unknown>
   | null
   | string
 ;
 
-export type TussleOutgoingRequest = {
+export type TussleOutgoingRequest<T = unknown> = {
   url: string;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
   headers?: Record<string, string>;
@@ -23,7 +24,7 @@ export type TussleOutgoingRequest = {
     password: string;
   };
   options?: {
-    sourceRequest?: TussleIncomingRequest<unknown>;
+    sourceRequest?: TussleIncomingRequest<T>;
     proxySourceRequest?: boolean;
   }
 }

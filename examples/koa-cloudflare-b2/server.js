@@ -28,9 +28,11 @@ function serve(port = process.env.PORT || '8080') {
   const tussle = new TussleKoa({
     hooks: {
       'before-create': async (_tussle, _ctx, params) => {
+        console.log('before create called');
         return params;
       },
       'before-patch': async (_tussle, _ctx, params) => {
+        console.log('before patch called');
         return params;
       }
     },

@@ -10,3 +10,4 @@ export { b2ListPartsRequest  } from './b2ListParts';
 export { b2ListBucketsRequest  } from './b2ListBuckets';
 export { b2ListUnfinishedLargeFilesRequest } from './b2ListUnfinishedLargeFiles';
 export { b2StartLargeFileRequest } from './b2StartLargeFile';
+export { b2UploadFileRequest } from './b2UploadFile';

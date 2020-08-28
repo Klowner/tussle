@@ -32,12 +32,13 @@ const prepareRequest = async <T extends KoaContext>(
   if (method) {
     // const x = ctx.request.files; //pipe();
 
+    ctx.req.pause();
     return {
       request: {
         method,
         headers: ctx.headers,
         path: ctx.path,
-        getReadable: () => ctx.req,
+        getReadable: () => ctx.req, //.resume(),
       },
       response: null,
       meta: {

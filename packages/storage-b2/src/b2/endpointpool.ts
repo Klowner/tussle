@@ -4,10 +4,13 @@ import type { B2GetUploadURLParams, B2GetUploadURLResponse } from "./actions/b2G
 import { pluck } from "rxjs/operators";
 import { Pool } from "./pool";
 
+export type B2UploadURLPool = Pool<B2GetUploadURLResponse>;
+export type B2UploadPartURLPool = Pool<B2GetUploadPartURLResponse>;
+
 export function createUploadURLPool(
   b2: B2,
   options: B2GetUploadURLParams
-): Pool<B2GetUploadURLResponse> {
+): B2UploadURLPool {
   const create = () => b2
     .getUploadURL(options)
     .pipe(pluck('data'))
@@ -18,7 +21,7 @@ export function createUploadURLPool(
 export function createUploadPartURLPool(
   b2: B2,
   options: B2GetUploadPartURLParams
-): Pool<B2GetUploadPartURLResponse> {
+): B2UploadPartURLPool {
   const create = () => b2
     .getUploadPartURL(options)
     .pipe(pluck('data'))

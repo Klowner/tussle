@@ -42,11 +42,12 @@ const extractPatchHeaders = (ctx: TussleIncomingRequest<unknown>) => {
   const getReadable = () => ctx.request.getReadable();
 
   return {
-    location,
     contentType,
-    offset,
-    length,
     getReadable,
+    length,
+    location,
+    offset,
+    request: ctx,
   };
 };
 

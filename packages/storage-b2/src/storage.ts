@@ -15,8 +15,10 @@ import type {
 } from "@tussle/core/src/storage.interface";
 import type { Observable } from "rxjs";
 import { B2 } from "./b2";
-import { map, flatMap, filter, shareReplay } from 'rxjs/operators';
-import { of, from, defer } from "rxjs";
+import { map, tap, flatMap, filter, shareReplay, switchMap, catchError } from 'rxjs/operators';
+import { of, from, defer, pipe } from "rxjs";
+import type { PoolType, Releasable } from './b2/pool';
+import { createUploadURLPool, createUploadPartURLPool } from './b2/endpointpool';
 
 export interface TussleStorageB2Options {
   applicationKeyId: string;
@@ -32,6 +34,8 @@ type B2UploadState = {
   currentOffset: number;
   largeFileId?: string;
   createParams: TussleStorageCreateFileParams;
+  metadata: Record<string, unknown>;
+  uploadLength: number;
 };
 
 enum PatchAction {
@@ -42,20 +46,13 @@ enum PatchAction {
   Invalid,
 }
 
-// type PatchAction =
-//   | 'error'
-//   | 'small-file'
-//   | 'large-file-start'
-//   | 'large-file-patch'
-//   | 'large-file-finish'
-// ;
-
 // middleware provides 'storage key'
 // core asks storage how to handle request with 'storage key'
 
 export class TussleStorageB2 implements TussleStorage {
   private readonly b2: B2;
   private readonly state: TussleStateService<B2UploadState>;
+  private readonly uploadURLPool: ReturnType<typeof createUploadURLPool>;
 
   constructor(readonly options: TussleStorageB2Options) {
     this.b2 = new B2({
@@ -64,7 +61,17 @@ export class TussleStorageB2 implements TussleStorage {
       requestService: options.requestService,
     });
 
-    this.state = new TussleStateNamespace<B2UploadState>(options.stateService as TussleStateService<B2UploadState>, "b2storage");
+    this.uploadURLPool = createUploadURLPool(this.b2, {
+      bucketId: this.options.bucketId,
+    });
+
+    this.state = new TussleStateNamespace<B2UploadState>(
+      options.stateService as TussleStateService<B2UploadState>,
+      "b2storage");
+  }
+
+  public getUploadURL(): Observable<Releasable<PoolType<ReturnType<typeof createUploadURLPool>>>> {
+    return defer(() => this.uploadURLPool.acquireReleasable());
   }
 
   createFile(
@@ -73,10 +80,16 @@ export class TussleStorageB2 implements TussleStorage {
     console.log("b2.createFile", params);
     // Here we don't actually start anything, just determine where we want the
     // user to start sending stuff.
-    const location = params.path + '/' + Math.floor(Math.random() * 1e16).toString(16) + '/' + params.uploadMetadata.filename;
+    const location = [
+      params.path,
+      '/',
+      Math.floor(Math.random() * 1e16).toString(16),
+      '/',
+      params.uploadMetadata.filename,
+    ].join('');
 
     if (!params.uploadLength) {
-      console.error('upload-length is required (breaks spec)');
+      console.error('upload-length is required (breaks spec)'); // SPEC CAVEAT
     }
 
     const response$ = of({
@@ -84,6 +97,8 @@ export class TussleStorageB2 implements TussleStorage {
       location,
       createParams: params,
       success: true,
+      metadata: params.uploadMetadata,
+      uploadLength: params.uploadLength, // total size in bytes of file to be sent
     });
 
     return response$.pipe(
@@ -118,43 +133,59 @@ export class TussleStorageB2 implements TussleStorage {
     state: B2UploadState,
     params: TussleStoragePatchFileParams
   ): Observable<TussleStoragePatchFileResponse> {
-    console.log('PATCHE SMALL FILE', params.getReadable());
+    const upload$ = this.getUploadURL().pipe(
+      switchMap(
+        (endpoint) => this.b2.uploadFile({
+          authorizationToken: endpoint.authorizationToken,
+          uploadUrl: endpoint.uploadUrl,
+          filename: state.location,
+          sourceRequest: params.request,
+          contentLength: params.length,
+          contentSha1: 'do_not_verify',
+          contentType: 'b2/x-auto',
+        }).pipe(
+          tap(() => endpoint.release(true)),
+          catchError((err, caught) => {
+            console.error(err);
+            return caught;
+          }),
+        ),
+      )
+    );
 
+    const response$ = upload$.pipe(
+      map((response) => {
+        console.log('RESPONSE', response);
+        return {
+          location: params.location,
+          success: true,
+          offset: state.currentOffset + params.length,
+        };
+      }),
+    );
 
-    return of({
-      location: params.location,
-      success: true,
-      offset: state.currentOffset + params.length,
-    });
+    return response$;
   }
 
 
   patchFile(
     params: TussleStoragePatchFileParams
   ): Observable<TussleStoragePatchFileResponse> {
-    // const currentOffset = params.offset + params.length;
-
+    // State must exist for the current request location
     return this.getState(params.location).pipe(
       flatMap((state) => {
         if (state) {
           switch (this.determinePatchIntent(state, params)) {
             case PatchAction.SmallFile:
               return this.patchSmallFile(state, params);
-
           }
         }
-
         return of({
           success: false,
           location: params.location,
         });
       })
     );
-    // return of({
-    //   location: params.location,
-    //   offset: currentOffset + params.length,
-    //   success: true,
-    // });
   }
 
   // Termination extension

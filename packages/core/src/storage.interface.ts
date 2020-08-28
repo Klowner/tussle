@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
 import type { TusProtocolExtension } from './tus-protocol.interface';
-// import type { TussleIncomingRequest } from './request.interface';
+import type { TussleIncomingRequest } from './request.interface';
 import type { Observable } from 'rxjs';
 
 export type TussleStorageCreateFileParams = {
@@ -17,10 +17,11 @@ export type TussleStorageCreateFileResponse = {
 };
 
 export type TussleStoragePatchFileParams = {
-  location: string;
-  length: number;
-  offset: number;
   getReadable: () => Readable;
+  length: number;
+  location: string;
+  offset: number;
+  request: TussleIncomingRequest<unknown>;
 };
 
 export type TussleStoragePatchFileResponse = {
