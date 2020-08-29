@@ -155,7 +155,7 @@ export class TussleStorageB2 implements TussleStorage {
 
     const response$ = upload$.pipe(
       map((response) => {
-        console.log('RESPONSE', response);
+        console.log('RESPONSE', response.data);
         return {
           location: params.location,
           success: true,

@@ -4,9 +4,10 @@
   "references": [
     {"path": "./core"},
     {"path": "./middleware-koa"},
+    {"path": "./middleware-cloudflareworker"},
     {"path": "./storage-b2"},
     {"path": "./state-memory"},
     {"path": "./request-axios"},
-    {"path": "./request-cloudflare-fetch"}
+    {"path": "./request-cloudflareworker"}
   ]
 }

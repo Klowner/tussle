@@ -1,5 +1,5 @@
 {
-  "name": "@tussle/request-cloudflare-fetch",
+  "name": "@tussle/request-cloudflareworker",
   "version": "0.0.1",
   "description": "",
   "main": "lib/index.js",

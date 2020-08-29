@@ -2,7 +2,7 @@ const { Upload } = require('tus-js-client');
 
 function uploadFile(file) {
   const upload = new Upload(file, {
-    endpoint: 'http://localhost:8080/files/b2-storage',
+    endpoint: '/files/', // the cloudflare worker should be running at this URL
     retryDelays: [0, 1000, 3000, 5000],
     chunkSize: 1000 * 1000 * 100,
     parallelUploads: 1,

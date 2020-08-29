@@ -1,0 +1,23 @@
+{
+  "name": "cloudflare-worker-b2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "run-p start:*",
+    "start:server": "nodemon server.js",
+    "start:client": "rollup -c --watch --preserveWatchOutput",
+    "build": "rollup -c",
+    "publish": "cd worker && wrangler publish"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "@cloudflare/wrangler": "^1.11.0",
+    "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
+    "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
+    "@tussle/storage-b2": "link:../../packages/storage-b2"
+  }
+}

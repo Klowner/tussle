@@ -45,7 +45,7 @@ function serve(port = process.env.PORT || '8080') {
     }),
   });
 
-  router.all(/\/files\/b2-storage\/?.*/, tussle.middleware());
+  router.all(/\/files\/?.*/, tussle.middleware());
   app.use(router.middleware());
   app.use(serveStatic);
   app.listen(port);
