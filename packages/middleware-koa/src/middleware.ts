@@ -30,15 +30,13 @@ const prepareRequest = async <T extends KoaContext>(
   const overrideMethod = ctx.headers['x-http-method-override'];
   const method = allowedMethod(ctx.method, overrideMethod);
   if (method) {
-    // const x = ctx.request.files; //pipe();
-
-    ctx.req.pause();
+    ctx.req.pause(); // TODO -- is this necessary?
     return {
       request: {
+        getHeader: (key: string) => ctx.headers[key],
+        getReadable: () => ctx.req,
         method,
-        headers: ctx.headers,
         path: ctx.path,
-        getReadable: () => ctx.req, //.resume(),
       },
       response: null,
       meta: {

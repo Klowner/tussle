@@ -84,7 +84,7 @@ export class Tussle {
     });
 
   private chooseProtocolVersion(ctx: TussleIncomingRequest<unknown>): string | null {
-    const clientVersion = ctx.request.headers['tus-resumable'] as string;
+    const clientVersion = ctx.request.getHeader('tus-resumable') as string;
     if (supportedVersions.includes(clientVersion)) {
       return clientVersion;
     }

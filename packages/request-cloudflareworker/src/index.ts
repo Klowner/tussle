@@ -1,2 +1,2 @@
-import { TussleRequestCloudflareFetch } from './request';
-export { TussleRequestCloudflareFetch };
+import { TussleRequestCloudflareWorker } from './request';
+export { TussleRequestCloudflareWorker };

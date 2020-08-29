@@ -9,7 +9,7 @@
     "start:server": "nodemon server.js",
     "start:client": "rollup -c --watch --preserveWatchOutput",
     "build": "rollup -c",
-    "publish": "cd worker && wrangler publish"
+    "deploy": "cd worker && wrangler publish"
   },
   "dependencies": {
     "dotenv": "^8.2.0"
@@ -18,6 +18,7 @@
     "@cloudflare/wrangler": "^1.11.0",
     "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
     "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
-    "@tussle/storage-b2": "link:../../packages/storage-b2"
+    "@tussle/storage-b2": "link:../../packages/storage-b2",
+    "rollup-plugin-string": "^3.0.0"
   }
 }

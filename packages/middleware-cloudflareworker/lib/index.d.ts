@@ -1,2 +1,2 @@
-import { TussleCloudflareMiddleware } from './middleware';
-export = TussleCloudflareMiddleware;
+import { TussleCloudflareWorker } from './middleware';
+export { TussleCloudflareWorker };

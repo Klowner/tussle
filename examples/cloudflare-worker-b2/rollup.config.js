@@ -1,5 +1,6 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import { string } from 'rollup-plugin-string';
 
 const client = {
     input: './client.js',
@@ -23,6 +24,9 @@ const worker = {
         sourcemap: true,
     },
     plugins: [
+        string({
+            include: ["**/*.html", "client-bundle.js"],
+        }),
         resolve({
             mainFields: ['module', 'main', 'browser'],
         }),

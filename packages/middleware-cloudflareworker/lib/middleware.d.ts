@@ -1,8 +1,6 @@
 import { Tussle, TussleConfig } from '@tussle/core';
-declare type AsyncRequestHandler = (request: Request) => Promise<Response | undefined>;
-export declare class TussleCloudflareMiddleware {
+export declare class TussleCloudflareWorker {
     private readonly core;
     constructor(options: Tussle | TussleConfig);
-    readonly middleware: () => AsyncRequestHandler;
+    handleRequest(request: Request): Promise<Response | null>;
 }
-export {};

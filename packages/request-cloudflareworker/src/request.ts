@@ -19,7 +19,7 @@ class TussleOutgoingCloudflareFetchResponse<T > implements TussleOutgoingRespons
 const observableFetch = (req: Request | string, init?: RequestInit): Observable<Response> =>
   defer(() => from(fetch(req, init)));
 
-export class TussleRequestCloudflareFetch implements TussleRequestService<CloudflareFetchResponse> {
+export class TussleRequestCloudflareWorker implements TussleRequestService<CloudflareFetchResponse> {
   public makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, CloudflareFetchResponse>> {
     let request$;
     const proxyRequest = request.options?.proxySourceRequest && request.options.sourceRequest;

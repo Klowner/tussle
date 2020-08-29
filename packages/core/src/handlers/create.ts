@@ -24,7 +24,7 @@ export default function handleCreate<T>(
 const extractCreationHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
   const id = ctx.request.path;
   const path = ctx.request.path;
-  const header = (key: string) => ctx.request.headers[key];
+  const header = ctx.request.getHeader;
   const contentLength = parseInt(header('content-length') as string || '', 10);
   const uploadLength = parseInt(header('upload-length') as string || '', 10);
   const uploadMetadata = (header('upload-metadata') as string || '')

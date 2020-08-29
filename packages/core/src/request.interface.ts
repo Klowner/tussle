@@ -38,9 +38,10 @@ export type TussleOutgoingResponse<T, R> = {
 export type TussleIncomingRequest<T> = {
   request: {
     method: 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH' | 'DELETE';
-    headers: Record<string, string>;
+    // headers: (key: string) => string | null;
     path: string;
     getReadable: () => Readable;
+    getHeader: (header: string) => string | null;
   };
   response: null | {
     status?: number;
