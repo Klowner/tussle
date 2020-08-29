@@ -2,7 +2,7 @@ const { Upload } = require('tus-js-client');
 
 function uploadFile(file) {
   const upload = new Upload(file, {
-    endpoint: '/files/',
+    endpoint: '/files',
     retryDelays: [0, 1000, 3000, 5000],
     chunkSize: 1000 * 1000 * 100,
     parallelUploads: 1,

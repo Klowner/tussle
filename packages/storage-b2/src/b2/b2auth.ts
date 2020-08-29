@@ -66,12 +66,12 @@ export class B2Auth {
         applicationKey,
         applicationKeyId,
       })),
-      tap((auth) => console.log(auth)),
+      tap((auth) => console.log('AUTH RESPONSE', auth)),
     ); 
 
     this.state$ = this.response$.pipe(
       flatMap((response) => from(response.getData())),
-      shareReplay({ refCount: true, bufferSize: 1 }),
+      shareReplay({ refCount: false, bufferSize: 1 }),
     );
   }
 

@@ -23,7 +23,6 @@ class TussleOutgoingCloudflareFetchResponse<T > implements TussleOutgoingRespons
 const observableFetch = (req: Request | string, init?: RequestInit): Observable<Response> =>
   defer(() => from(fetch(req, init)));
 
-
 export class TussleRequestCloudflareWorker implements TussleRequestService<CloudflareFetchResponse> {
   public makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, CloudflareFetchResponse>> {
     let request$;
@@ -39,21 +38,34 @@ export class TussleRequestCloudflareWorker implements TussleRequestService<Cloud
       const newRequestInit = {
         method: request.method,
         headers: request.headers,
-        body: <string><unknown>undefined,
+        body: <string | undefined> undefined,
       };
+
+      newRequestInit.headers = {
+          ...request.headers,
+          'Accept': 'application/json, text,plain, */*',
+          'User-Agent': 'tussle/cloudflare-worker 0.0.1',
+      };
+
       if (request.auth) {
-        newRequestInit.headers = newRequestInit.headers || {};
-        newRequestInit.headers['Authorization'] = 'Basic ' + Base64.encode([
+        const authorization = 'Basic ' + Base64.encode([
           request.auth.username,
           request.auth.password,
         ].join(':'));
+
+        newRequestInit.headers = {
+          ...newRequestInit.headers,
+          authorization,
+        };
       }
       if (request.body) {
         newRequestInit.body = JSON.stringify(request.body);
-        newRequestInit.headers = newRequestInit.headers || {};
-        // 
+        newRequestInit.headers = {
+          ...newRequestInit.headers,
+          'content-type': 'application/x-www-form-urlencoded',
+        };
       }
-      console.log('NEW REQUEST INIT', newRequestInit);
+      console.log('NEW REQUEST INIT', request.url, request.body, newRequestInit.body); //newRequestInit);
       request$ = observableFetch(request.url, newRequestInit);
     }
     return request$.pipe(
