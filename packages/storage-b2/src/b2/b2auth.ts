@@ -1,9 +1,9 @@
 import type { B2AuthOptions, B2AuthInitOptions, B2ActionObservable } from './types';
 import type { Observable } from 'rxjs';
 import { B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';
-import { Subject } from 'rxjs';
+import { Subject, from} from 'rxjs';
 import { b2AuthorizeAccountRequest } from './actions/b2AuthorizeAccount';
-import { pluck, startWith, switchMap, shareReplay, } from 'rxjs/operators';
+import { pluck, startWith, flatMap, switchMap, shareReplay, tap, } from 'rxjs/operators';
 import type { TussleRequestService } from '@tussle/core';
 
 export const B2_API_URL = 'https://api.backblazeb2.com/b2api/v2';
@@ -40,7 +40,7 @@ export class B2Auth {
       }
     });
     if (options.requestService === undefined) {
-      throw new Error('kabookm');
+      throw new Error('No requestService provided!');
     }
     return {
       requestService: options.requestService,
@@ -66,10 +66,11 @@ export class B2Auth {
         applicationKey,
         applicationKeyId,
       })),
+      tap((auth) => console.log(auth)),
     ); 
 
     this.state$ = this.response$.pipe(
-      pluck('data'),
+      flatMap((response) => from(response.getData())),
       shareReplay({ refCount: true, bufferSize: 1 }),
     );
   }

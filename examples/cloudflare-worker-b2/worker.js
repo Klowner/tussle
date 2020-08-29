@@ -4,7 +4,8 @@ const { TussleRequestCloudflareWorker } = require('@tussle/request-cloudflarewor
 const { TussleCloudflareWorker } = require('@tussle/middleware-cloudflareworker');
 
 const tussleCloudflare = new TussleCloudflareWorker({
-  hooks: {},
+  hooks: {
+  },
   storage: new TussleStorageB2({
       applicationKeyId: TUSSLE_B2_KEY_ID,    // <-- set via worker environment
       applicationKey: TUSSLE_B2_KEY,         // <-- set via worker environment

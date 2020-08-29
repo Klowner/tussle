@@ -34,6 +34,7 @@ export class TussleCloudflareWorker {
 
   public async handleRequest(request: Request): Promise<Response | null> {
     const req = await createTussleRequest(this.core, request);
+    console.log('req', req);
     if (req) {
       return this.core.handle(req)
         .toPromise()
@@ -72,7 +73,7 @@ const createTussleRequest = async <T extends Request>(
     };
   }
   return null; // ignore this request
-}
+};
 
 // If the request context has a `response` attached then respond to the client
 // request as described by the `response`.  If no `response`, then return null
@@ -80,6 +81,7 @@ const createTussleRequest = async <T extends Request>(
 const handleTussleResponse = async <T extends Request>(ctx: TussleIncomingRequest<T>):
   Promise<Response | null> =>
 {
+  console.log('res', ctx.response);
   if (ctx.response && ctx.response.status) {
     return new Response(ctx.response.body, {
       headers: ctx.response.headers,
@@ -88,4 +90,4 @@ const handleTussleResponse = async <T extends Request>(ctx: TussleIncomingReques
     console.log('tussle did not respond to request');
   }
   return null;
-}
+};

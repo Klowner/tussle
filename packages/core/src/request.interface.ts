@@ -31,7 +31,7 @@ export type TussleOutgoingRequest<T = unknown> = {
 
 export type TussleOutgoingResponse<T, R> = {
   request: TussleOutgoingRequest;
-  data: T;
+  getData: () => Promise<T>;
   originalResponse: R;
 };
 

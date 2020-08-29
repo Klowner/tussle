@@ -11,13 +11,13 @@ type TussleRequestAxiosOptions = {
 };
 
 class TussleOutgoingAxiosResponse<T> implements TussleOutgoingResponse<T, AxiosResponse> {
-  public data: T;
+  public getData: () => Promise<T>;
 
   constructor(
     public readonly request: TussleOutgoingRequest,
     public readonly originalResponse: AxiosResponse
   ) {
-    this.data = originalResponse.data;
+    this.getData = () => Promise.resolve(originalResponse.data);
   }
 }
 

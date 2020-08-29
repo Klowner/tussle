@@ -3,21 +3,26 @@ import type { TussleOutgoingRequest, TussleOutgoingResponse, TussleRequestServic
 import type { TussleIncomingRequest } from '@tussle/core/src/request.interface';
 import { map } from 'rxjs/operators';
 import { from, defer } from 'rxjs';
+import { Base64 } from 'js-base64';
 
 type CloudflareFetchResponse = Response;
 
 class TussleOutgoingCloudflareFetchResponse<T > implements TussleOutgoingResponse<T, CloudflareFetchResponse> {
-  public data: T;
+  public getData: () => Promise<T>;
   constructor(
     public readonly request: TussleOutgoingRequest,
     public readonly originalResponse: CloudflareFetchResponse
   ) {
-    this.data = {} as T;
+    this.getData = async (): Promise<T> => {
+      const response: T = await originalResponse.json();
+      return response;
+    };
   }
 }
 
 const observableFetch = (req: Request | string, init?: RequestInit): Observable<Response> =>
   defer(() => from(fetch(req, init)));
+
 
 export class TussleRequestCloudflareWorker implements TussleRequestService<CloudflareFetchResponse> {
   public makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, CloudflareFetchResponse>> {
@@ -34,8 +39,21 @@ export class TussleRequestCloudflareWorker implements TussleRequestService<Cloud
       const newRequestInit = {
         method: request.method,
         headers: request.headers,
-        // body: request.body,
+        body: <string><unknown>undefined,
       };
+      if (request.auth) {
+        newRequestInit.headers = newRequestInit.headers || {};
+        newRequestInit.headers['Authorization'] = 'Basic ' + Base64.encode([
+          request.auth.username,
+          request.auth.password,
+        ].join(':'));
+      }
+      if (request.body) {
+        newRequestInit.body = JSON.stringify(request.body);
+        newRequestInit.headers = newRequestInit.headers || {};
+        // 
+      }
+      console.log('NEW REQUEST INIT', newRequestInit);
       request$ = observableFetch(request.url, newRequestInit);
     }
     return request$.pipe(
