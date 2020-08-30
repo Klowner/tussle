@@ -26,13 +26,13 @@ const observableFetch = (req: Request | string, init?: RequestInit): Observable<
 export class TussleRequestCloudflareWorker implements TussleRequestService<CloudflareFetchResponse> {
   public makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, CloudflareFetchResponse>> {
     let request$;
-    const proxyRequest = request.options?.proxySourceRequest && request.options.sourceRequest;
-    if (proxyRequest) {
+    const sourceRequest = request.options?.sourceRequest;
+    if (sourceRequest) {
       const newRequestInit = {
         method: request.method, 
         headers: request.headers,
       };
-      const originalRequest = (proxyRequest as TussleIncomingRequest<Request>).originalRequest;
+      const originalRequest = (sourceRequest as TussleIncomingRequest<Request>).originalRequest;
       request$ = observableFetch(request.url, new Request(originalRequest, newRequestInit));
     } else {
       const newRequestInit = {
@@ -43,7 +43,7 @@ export class TussleRequestCloudflareWorker implements TussleRequestService<Cloud
 
       newRequestInit.headers = {
           ...request.headers,
-          'Accept': 'application/json, text,plain, */*',
+          'Accept': 'application/json, text/plain, */*',
           'User-Agent': 'tussle/cloudflare-worker 0.0.1',
       };
 
