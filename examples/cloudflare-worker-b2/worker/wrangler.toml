@@ -1,5 +1,0 @@
-name = "cloudflare-worker-b2"
-type = "javascript"
-account_id = "e0ecf4244fa3d5bde46d4c297d9555d1"
-workers_dev = true
-vars = { TUSSLE_B2_KEY_ID = "001eb6407e78f8b0000000005", TUSSLE_B2_KEY = "K001Ap3DehwWyGbcX9ZeHzwk0BHZsds", TUSSLE_B2_BUCKET_ID = "2ecb76f460177e17782f081b" }

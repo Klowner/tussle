@@ -1,5 +1,5 @@
 name = "cloudflare-worker-b2"
 type = "javascript"
-account_id = "e0ecf4244fa3d5bde46d4c297d9555d1"
+account_id = "<cloudflareAccountId>"
 workers_dev = true
 vars = { TUSSLE_B2_KEY_ID = "<b2KeyId>", TUSSLE_B2_KEY = "<b2Key>", TUSSLE_B2_BUCKET_ID = "<b2BucketId>" }
