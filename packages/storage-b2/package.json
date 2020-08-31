@@ -16,7 +16,6 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
-    "raw-body": "^2.4.1",
     "rxjs": "^6.0.0"
   },
   "devDependencies": {

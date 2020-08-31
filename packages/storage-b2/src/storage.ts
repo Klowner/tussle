@@ -1,4 +1,3 @@
-import raw from 'raw-body';
 import { TussleStateNamespace } from "@tussle/core";
 import type {
   TusProtocolExtension,

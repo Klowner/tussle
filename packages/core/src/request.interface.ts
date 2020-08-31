@@ -2,11 +2,6 @@ import type { Readable } from 'stream';
 import type { Observable } from 'rxjs';
 
 type RequestBody =
-  // | Blob
-  // | ArrayBuffer
-  // | ArrayBufferView
-  // | FormData
-  // | BufferSource
   | Readable
   | Record<string, unknown>
   | null
@@ -38,7 +33,6 @@ export type TussleOutgoingResponse<T, R> = {
 export type TussleIncomingRequest<T> = {
   request: {
     method: 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH' | 'DELETE';
-    // headers: (key: string) => string | null;
     path: string;
     getReadable: () => Readable;
     getHeader: (header: string) => string | null;
