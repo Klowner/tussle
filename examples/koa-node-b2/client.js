@@ -3,9 +3,9 @@ const { Upload } = require('tus-js-client');
 function uploadFile(file) {
   const upload = new Upload(file, {
     endpoint: '/files',
-    retryDelays: [0, 1000, 3000, 5000],
-    chunkSize: 1000 * 1000 * 100,
-    parallelUploads: 1,
+    retryDelays: [0, 5000],
+    chunkSize: 1000 * 1000 * 10, // 10MB
+    parallelUploads: false,
     metadata: {
       filename: file.name,
       filetype: file.type,
@@ -13,7 +13,7 @@ function uploadFile(file) {
     },
     onError: (err) => {
       console.error(err);
-      setTimeout(() => uploadFile(file), 2000); // retry in 5 seconds
+      setTimeout(() => uploadFile(file), 10000); // retry in 10 seconds
     },
     onProgress: (uploaded, total) => {
       const pct = Math.floor(uploaded / total * 100);
