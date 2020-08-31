@@ -32,21 +32,9 @@ export class TussleRequestAxios implements TussleRequestService<AxiosResponse> {
     const req: AxiosRequestConfig = {
       ...request,
     };
-
-    // Attempt to proxy the modified original request
-    // if (request.options?.proxySourceRequest) {
-    //   const { sourceRequest } = request.options;
-    //   if (sourceRequest) {
-    //     // clone and merge (overwrite) headers
-    //     req.headers = {
-    //       ...sourceRequest.request.headers,
-    //       ...request.headers,
-    //     };
-    //     // clone the body
-    //     req.body = sourceRequest;
-    //   }
-    //   throw new Error('proxySourceRequest set but no sourceRequest attached to outgoing request');
-    // }
+    if (request.body) {
+      req.data = request.body;
+    }
 
     // do whatever we need to do to essentially 'relay'
     // the source request data to the outgoing request.
@@ -54,8 +42,8 @@ export class TussleRequestAxios implements TussleRequestService<AxiosResponse> {
       req.data = request.options.sourceRequest.request.getReadable();
     }
 
+
     return this.axios.request<T>(req).pipe(
-      tap((response) => console.log('axios', req, response)),
       map((axiosResponse) => new TussleOutgoingAxiosResponse(request, axiosResponse)),
     );
   }

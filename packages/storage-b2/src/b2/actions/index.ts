@@ -11,3 +11,4 @@ export { b2ListBucketsRequest  } from './b2ListBuckets';
 export { b2ListUnfinishedLargeFilesRequest } from './b2ListUnfinishedLargeFiles';
 export { b2StartLargeFileRequest } from './b2StartLargeFile';
 export { b2UploadFileRequest } from './b2UploadFile';
+export { b2UploadPartRequest } from './b2UploadPart';

@@ -71,7 +71,7 @@ export interface B2FileInfo {
   contentSha1: string;
   contentMd5?: string;
   contentType: string;
-  fieldId: string;
+  fileId: string;
   fileInfo: Record<string, unknown>;
   fileName: string;
   uploadTimestamp: number;

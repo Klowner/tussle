@@ -62,6 +62,7 @@ export class B2 {
   public readonly listUnfinishedLargeFiles = bindAction(this, actions.b2ListUnfinishedLargeFilesRequest);
   public readonly startLargeFile = bindAction(this, actions.b2StartLargeFileRequest);
   public readonly uploadFile = bindAction(this, actions.b2UploadFileRequest);
+  public readonly uploadPart = bindAction(this, actions.b2UploadPartRequest);
 
   public readonly operations = {
     upload: bindOp(this, operations.upload),

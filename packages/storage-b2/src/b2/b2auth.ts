@@ -3,7 +3,7 @@ import type { Observable } from 'rxjs';
 import { B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';
 import { Subject, from} from 'rxjs';
 import { b2AuthorizeAccountRequest } from './actions/b2AuthorizeAccount';
-import { pluck, startWith, flatMap, switchMap, shareReplay, tap, } from 'rxjs/operators';
+import { startWith, flatMap, switchMap, shareReplay, tap, } from 'rxjs/operators';
 import type { TussleRequestService } from '@tussle/core';
 
 export const B2_API_URL = 'https://api.backblazeb2.com/b2api/v2';
@@ -66,7 +66,6 @@ export class B2Auth {
         applicationKey,
         applicationKeyId,
       })),
-      tap((auth) => console.log('AUTH RESPONSE', auth)),
     ); 
 
     this.state$ = this.response$.pipe(
