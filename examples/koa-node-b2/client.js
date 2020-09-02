@@ -4,7 +4,7 @@ function uploadFile(file) {
   const upload = new Upload(file, {
     endpoint: '/files',
     retryDelays: [0, 5000],
-    chunkSize: 1000 * 1000 * 10, // 10MB
+    chunkSize: 1000 * 1000 * 50, // 50MB
     parallelUploads: false,
     metadata: {
       filename: file.name,

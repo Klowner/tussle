@@ -1,27 +1,27 @@
-import { TussleStateNamespace } from "@tussle/core";
+import type { Observable } from "rxjs";
+import { catchError, filter, flatMap, map, share, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { combineLatest, defer, EMPTY, from, of, throwError } from "rxjs";
 import type {
   TusProtocolExtension,
   TussleRequestService,
-  TussleStorage,
+  TussleStorage
 } from "@tussle/core";
-import type { TussleStateService } from "@tussle/core/src/state.interface";
+import type {TussleOutgoingResponse} from "@tussle/core/src/request.interface";
+import type {TussleStateService} from "@tussle/core/src/state.interface";
 import type {
   TussleStorageCreateFileParams,
   TussleStorageCreateFileResponse,
   TussleStorageDeleteFileParams,
   TussleStoragePatchFileParams,
-  TussleStoragePatchFileResponse,
+  TussleStoragePatchFileResponse
 } from "@tussle/core/src/storage.interface";
-import type { Observable } from "rxjs";
-import { B2 } from "./b2";
-import { pluck, map, tap, share, flatMap, filter, shareReplay, switchMap, catchError } from 'rxjs/operators';
-import { of, from, merge, defer, pipe, throwError, combineLatest } from "rxjs";
-import type { PoolType, Releasable } from './b2/pool';
-import { createUploadURLPool, createUploadPartURLPool, B2UploadPartURLPool } from './b2/endpointpool';
-import { B2StartLargeFileResponse } from "./b2/actions/b2StartLargeFile";
-import { TTLCache } from '@tussle/core';
+import type {B2StartLargeFileResponse} from "./b2/actions/b2StartLargeFile";
+import type {B2UploadPartResponse} from './b2/actions/b2UploadPart';
+import type {PoolType, Releasable} from './b2/pool';
 
-const LARGE_FILE_EXT = '.largeFile';
+import { TTLCache, TussleStateNamespace} from "@tussle/core";
+import { B2UploadPartURLPool, createUploadPartURLPool, createUploadURLPool } from './b2/endpointpool';
+import { B2 } from "./b2";
 
 export interface TussleStorageB2Options {
   applicationKeyId: string;
@@ -31,22 +31,6 @@ export interface TussleStorageB2Options {
   stateService: TussleStateService<unknown>;
 }
 
-type B2UploadState = {
-  location: string;
-  isLargeFile?: boolean;
-  currentOffset: number;
-  largeFileId?: string;
-  createParams: TussleStorageCreateFileParams;
-  metadata: Record<string, unknown>;
-  uploadLength: number;
-};
-
-interface B2LargeFileState extends B2StartLargeFileResponse {
-  key: string;
-}
-
-type B2State = B2UploadState | B2LargeFileState;
-
 enum PatchAction {
   SmallFile,
   LargeFileFirstPart,
@@ -55,21 +39,39 @@ enum PatchAction {
   Invalid,
 }
 
-interface B2UploadPartState {
-  fileId: string;
-  nextPartNumber: number;
-  currentOffset: number;
+interface B2PersistentLocationState {
+  location: string;
+  createParams: TussleStorageCreateFileParams;
+  metadata: Record<string, unknown>
+  uploadLength: number;
+  largeFile?: B2StartLargeFileResponse;
 }
 
-// middleware provides 'storage key'
-// core asks storage how to handle request with 'storage key'
+type B2PersistentLocationLargeFileState = B2PersistentLocationState & Required<Pick<B2PersistentLocationState, 'largeFile'>>;
+
+interface B2TransientLocationState {
+  fileId: string | null;
+  nextPartNumber: number;
+  currentOffset: number;
+  partSha1Array: string[];
+}
+
+// TODO - these split states may be overkill, idk
+interface B2CombinedState {
+  state: B2PersistentLocationState;
+  transientState: B2TransientLocationState;
+}
+
+function hasLargeFile(state: B2PersistentLocationState): state is B2PersistentLocationLargeFileState {
+  return !!state.largeFile;
+}
 
 export class TussleStorageB2 implements TussleStorage {
   private readonly b2: B2;
-  private readonly state: TussleStateService<B2State>;
   private readonly uploadURLPool: ReturnType<typeof createUploadURLPool>;
   private readonly uploadPartURLPools: TTLCache<B2UploadPartURLPool>;
-  private readonly uploadPartState: TTLCache<B2UploadPartState>;
+  private readonly persistentState: TussleStateService<B2PersistentLocationState>;
+  private readonly transientState: TTLCache<B2TransientLocationState>;
 
   constructor(readonly options: TussleStorageB2Options) {
     this.b2 = new B2({
@@ -83,11 +85,9 @@ export class TussleStorageB2 implements TussleStorage {
     });
 
     this.uploadPartURLPools = new TTLCache(60 * 60 * 1000);
-    this.uploadPartState = new TTLCache(60 * 60 * 1000);
 
-    this.state = new TussleStateNamespace<B2State>(
-      options.stateService as TussleStateService<B2State>,
-      "b2storage");
+    this.persistentState = new TussleStateNamespace(options.stateService, "b2storage");
+    this.transientState = new TTLCache(60 * 60 * 1000);
   }
 
   public getUploadURL(): Observable<Releasable<PoolType<ReturnType<typeof createUploadURLPool>>>> {
@@ -108,11 +108,12 @@ export class TussleStorageB2 implements TussleStorage {
     );
   }
 
-  createFile(
+  public createFile(
     params: TussleStorageCreateFileParams
   ): Observable<TussleStorageCreateFileResponse> {
     // Here we don't actually start anything, just determine where we want the
-    // user to start sending stuff.
+    // user to start sending stuff. The location returned here determines the
+    // target location used by the first upload PATCH request.
     const location = [
       params.path,
       Math.floor(Math.random() * 1e16).toString(16),
@@ -123,46 +124,121 @@ export class TussleStorageB2 implements TussleStorage {
       console.error('upload-length is required (breaks spec)'); // SPEC CAVEAT
     }
 
-    const state = {
-      currentOffset: 0,
+    const state: B2PersistentLocationState = {
       location,
-      createParams: params,
-      success: true,
       metadata: params.uploadMetadata,
-      uploadLength: params.uploadLength, // total size in bytes of file to be sent
+      uploadLength: params.uploadLength,
+      createParams: params,
     };
 
-    // Use the file location as the key for storing the state. Then we can
-    // look it up for subsequent requests to the same location.
-    return defer(() => this.setState(state.location, state)).pipe(
-      map(() => state),
-    );
+    return defer(() => this.setState(state.location, state).pipe(
+      map((state) => ({
+        ...state,
+        success: true,
+      })),
+    ));
   }
 
-  private determinePatchIntent(state: B2UploadState, params: TussleStoragePatchFileParams): PatchAction {
-    const isFirstPart = state.currentOffset === 0;
-    const isLastPart = (state.currentOffset + params.length) === state.createParams.uploadLength;
-    const isLargeFile = !(isFirstPart && isLastPart);
-    // const isValidChunk = (!isLargeFile) || state.currentOffset === params.offset;
+  public patchFile(params: TussleStoragePatchFileParams)
+  : Observable<TussleStoragePatchFileResponse> {
 
-    // if (!isValidChunk) {
-    //   console.error('invalid chunk!', params);
-    //   return PatchAction.Invalid;
-    // }
-    if (isLargeFile) {
-      if (isFirstPart) {
-        return PatchAction.LargeFileFirstPart;
+    const state$ = this.getState(params.location);
+
+    const transientState$ = state$.pipe(
+      filter(isNonNull),
+      flatMap((state) => of(state).pipe(
+        this.getOrCreateTransientState(
+          params.location,
+          async function create() {
+            return {
+              currentOffset: 0,
+              nextPartNumber: 1,
+              fileId: state?.largeFile?.fileId || null,
+              partSha1Array: [],
+            };
+          }
+        ),
+      )),
+    );
+
+    const combinedState$: Observable<B2CombinedState> = combineLatest(
+      state$,
+      transientState$,
+      (state, transientState) => ({
+        state,
+        transientState,
+      })
+    ).pipe(
+      flatMap(({ state, transientState }) => {
+        if (state && transientState) {
+          return of({
+            state,
+            transientState,
+          });
+        }
+        return EMPTY;
+      })
+    );
+
+    const patchIntent$: Observable<PatchAction> = combinedState$.pipe(
+      map(({ state, transientState }) => {
+        if (state && transientState) {
+          return this.determinePatchIntent(state, transientState, params);
+        }
+        return PatchAction.Invalid;
+      }),
+    );
+
+    const response$ = combinedState$.pipe(
+      filter((combined) => !!combined.state),
+      withLatestFrom(patchIntent$),
+      flatMap(([combinedState, intent]) => {
+        switch (intent) {
+          case PatchAction.SmallFile:
+            return this.patchSmallFile(combinedState, params);
+          case PatchAction.LargeFileFirstPart:
+          case PatchAction.LargeFilePart:
+            return this.patchLargeFilePart(combinedState, params);
+          case PatchAction.LargeFileLastPart:
+            return this.patchLargeFileLastPart(combinedState, params);
+        }
+        return EMPTY; // todo error
+      }),
+    );
+    return response$;
+  }
+
+  private determinePatchIntent(
+    state: B2PersistentLocationState,
+    transientState: B2TransientLocationState,
+    params: TussleStoragePatchFileParams
+  ): PatchAction {
+    if (transientState) {
+      const isFirstPart = transientState.currentOffset === 0;
+      const isLastPart = (transientState.currentOffset + params.length) === state.createParams.uploadLength;
+      const isLargeFile = !(isFirstPart && isLastPart);
+      const isValidChunk = (!isLargeFile) || transientState.currentOffset === params.offset;
+
+      if (!isValidChunk) {
+        console.error('invalid chunk!', params);
+        return PatchAction.Invalid;
       }
-      if (isLastPart) {
-        return PatchAction.LargeFileLastPart;
+      if (isLargeFile) {
+        if (isFirstPart) {
+          return PatchAction.LargeFileFirstPart;
+        }
+        if (isLastPart) {
+          return PatchAction.LargeFileLastPart;
+        }
+        return PatchAction.LargeFilePart;
       }
-      return PatchAction.LargeFilePart;
+      return PatchAction.SmallFile;
     }
-    return PatchAction.SmallFile;
+    return PatchAction.Invalid;
   }
 
   private patchSmallFile(
-    state: B2UploadState,
+    state: B2CombinedState,
     params: TussleStoragePatchFileParams
   ): Observable<TussleStoragePatchFileResponse> {
     const upload$ = this.getUploadURL().pipe(
@@ -170,7 +246,7 @@ export class TussleStorageB2 implements TussleStorage {
         (endpoint) => this.b2.uploadFile({
           authorizationToken: endpoint.authorizationToken,
           uploadUrl: endpoint.uploadUrl,
-          filename: state.location,
+          filename: state.state.location,
           sourceRequest: params.request,
           contentLength: params.length,
           contentSha1: 'do_not_verify',
@@ -191,7 +267,7 @@ export class TussleStorageB2 implements TussleStorage {
         return {
           location: params.location,
           success: true,
-          offset: state.currentOffset + params.length,
+          offset: state.transientState.currentOffset + params.length,
         };
       }),
     );
@@ -201,189 +277,157 @@ export class TussleStorageB2 implements TussleStorage {
 
   public getOrCreateLargeFileState(
     location: string,
-    state: B2UploadState,
-  ): Observable<{
-    fileState: B2LargeFileState;
-    partState: B2UploadPartState;
-  }> {
-    const key = [location, LARGE_FILE_EXT].join('');
-    const initialState$: Observable<B2LargeFileState | undefined> = from(this.getState(key)).pipe(
-      map((state) => isLargeFileState(state) ? state : undefined),
-    );
-    const setState = (state: B2LargeFileState) => from(this.setState(key, state));
-
+    state: B2CombinedState,
+  ): Observable<B2CombinedState> {
+    const initialState$ = of(state);
     const persistedInitialState$ = initialState$.pipe(
       flatMap((initialState) => {
-        if (initialState) {
+        if (hasLargeFile(initialState.state)) {
           return of(initialState);
         } else {
-          return this.b2.startLargeFile({
+          const largeFile$ = this.b2.startLargeFile({
             bucketId: this.options.bucketId,
-            fileName: state.location,
-            contentType: (state.metadata?.contentType as string) || 'b2/x-auto',
-          }).pipe(
+            fileName: state.state.location,
+            contentType: (state.state.metadata?.contentType as string) || 'b2/x-auto',
+          });
+
+          const largeFileResponse$ = largeFile$.pipe(
             flatMap((response) => from(response.getData())),
-            flatMap((state) => setState({
-              key,
-              ...state,
+          );
+
+          const transformedState$ = largeFileResponse$.pipe(
+            flatMap((largeFile) => this.setState(
+              location,
+              {
+                ...initialState.state,
+                largeFile,
+              }
+            )),
+            map((state) => ({
+              state,
+              transientState: initialState.transientState,
             })),
           );
+          return transformedState$;
         }
       }),
     );
-
-    const uploadPartState$ = persistedInitialState$.pipe(
-      flatMap(({ fileId }) => from(this.uploadPartState.getOrCreate(
-        fileId,
-        // TODO -- this should be constructed via B2 incomplete large file API
-        async () => ({
-          fileId,
-          nextPartNumber: 1,
-          currentOffset: 0,
-        }),
-      ))),
-    );
-
-    return combineLatest(persistedInitialState$, uploadPartState$, (fileState, partState) => ({
-      fileState,
-      partState,
-    })).pipe(share());
+    return persistedInitialState$;
   }
 
-  private patchLargeFilePart(
-    state: B2UploadState,
-    params: TussleStoragePatchFileParams,
-  ): Observable<TussleStoragePatchFileResponse> {
-    /*
-    const largeFileState$ = this
-      .getOrCreateLargeFileState(state.location, state)
+  private uploadPart(
+    state: B2CombinedState,
+    params: TussleStoragePatchFileParams
+  ): Observable<{
+    response: TussleOutgoingResponse<B2UploadPartResponse, unknown>,
+    state: B2CombinedState,
+  }> {
+    // Ensure the state has a large file started for it.
+    const state$ = this
+      .getOrCreateLargeFileState(state.state.location, state)
       .pipe(share());
 
-    const endpoint$ = largeFileState$.pipe(
-      flatMap(({ fileId }) => this.getUploadPartURL(fileId)),
-    );
-
-    const partState$ = largeFileState$.pipe(
-      flatMap(({ fileId }) => from(this.uploadPartState.getOrCreate(
-        fileId,
-        async () => {
-          return {
-            fileId,
-            nextPartNumber: 1,
-            currentOffset: 0,
-          };
-        })
-      )),
-    );
-    */
-    const state$ = this
-      .getOrCreateLargeFileState(state.location, state);
-
+    // Find an upload URL and authorization for this part.
     const endpoint$ = state$.pipe(
-      flatMap(({ fileState }) => from(this.getUploadPartURL(fileState.fileId))),
+      flatMap(({ state }) => {
+        if (hasLargeFile(state)) {
+          return from(this.getUploadPartURL(state.largeFile.fileId));
+        }
+        return EMPTY;
+      }),
     );
 
-    // const partState$ = state$.pipe(pluck('partState'));
-    const isLastPart$ = state$.pipe(
-      map(({ partState, fileState }) => partState.currentOffset + params.length === fileState.contentLength),
-    );
-
-    const upload$ = combineLatest(endpoint$, state$).pipe(
-      // tap((endpoint) => console.log('endpoint', endpoint)),
-      switchMap(
-        ([endpoint, state]) => this.b2.uploadPart({
+    const uploaded$ = combineLatest(endpoint$, state$).pipe(
+      switchMap(([endpoint, state]) => {
+        const contentSha1 = 'do_not_verify';
+        const uploadPart$ = this.b2.uploadPart({
           authorizationToken: endpoint.authorizationToken,
           uploadUrl: endpoint.uploadUrl,
           sourceRequest: params.request,
           contentLength: params.length,
-          partNumber: state.partState.nextPartNumber,
-          contentSha1: 'do_not_verify',
-        }).pipe(
-          tap(() => {
-            endpoint.release(true);
-            state.partState.nextPartNumber++;
-            state.partState.currentOffset += params.length;
-          }),
-          catchError((err) => {
-            console.error(err);
-            return throwError(err);
-          }),
-          flatMap((b2UploadResponse) => of({
-            response: b2UploadResponse,
-            state,
-          })),
-        ),
-      ),
-    );
+          partNumber: state.transientState.nextPartNumber,
+          contentSha1,
+        })
 
-    const afterUpload$ = isLastPart$.pipe(
-      flatMap((isLastPart) => {
-        if (isLastPart) {
-          return upload$.pipe(
-            tap((_result) => console.log('LAST PART!!!!!!!!!!')),
-          );
-        }
-        return upload$;
+        const uploadPartResponse$ = uploadPart$.pipe(
+          flatMap((response) => from(response.getData()).pipe(
+            switchMap((data) => {
+              state.transientState.nextPartNumber++;
+              state.transientState.currentOffset += data.contentLength;
+              state.transientState.partSha1Array.push(
+                data.contentSha1.replace(/^[^:]+:/, '') // TODO - we're just trusting B2 here.
+              );
+              return of({
+                state,
+                response,
+              });
+            }),
+          )),
+        );
+        return uploadPartResponse$;
       }),
     );
 
-    const response$ = upload$.pipe(
-      map(({ state }) => {
-        return {
-          location: params.location,
-          offset: state.partState.currentOffset,
-          success: true,
-        };
-      }),
-    );
+    return uploaded$;
+  }
 
+  private patchLargeFilePart(
+    state: B2CombinedState,
+    params: TussleStoragePatchFileParams,
+  ): Observable<TussleStoragePatchFileResponse> {
+    const uploaded$ = this.uploadPart(state, params);
+    const response$ = uploaded$.pipe(
+      map(({ state }) => ({
+        location: state.state.location,
+        offset: state.transientState.currentOffset,
+        success: true,
+      })),
+    );
     return response$;
   }
 
-  // private patchLargeFileFinish(
-  //   stte: B2UploadState,
-  //   params: TussleStoragePatchFileParams
-  // ) : Observable<TussleStoragePatchFileResponse> {
-  //   const state$ = this
-  //     .getOrCreateLargeFileState(state.location, state);
-    
-  //   const up
-  // }
-
-  patchFile(
-    params: TussleStoragePatchFileParams
+  private patchLargeFileLastPart(
+    state: B2CombinedState,
+    params: TussleStoragePatchFileParams,
   ): Observable<TussleStoragePatchFileResponse> {
-    // State must exist for the current request location
-    return this.getState(params.location).pipe(
-      flatMap((state) => {
-        if (isUploadState(state)) {
-          const patchIntent = this.determinePatchIntent(state, params);
-          switch (patchIntent) {
-            case PatchAction.SmallFile:
-              return this.patchSmallFile(state, params);
-            case PatchAction.LargeFileFirstPart:
-            case PatchAction.LargeFilePart:
-            case PatchAction.LargeFileLastPart:
-              return this.patchLargeFilePart(
-                state,
-                params
-                // patchIntent === PatchAction.LargeFileLastPart
-              );
-          }
+    const uploaded$ = this.uploadPart(state, params);
+    const finished$ = uploaded$.pipe(
+      switchMap(({ state }) => {
+        if (hasLargeFile(state.state)) {
+          console.log(state);
+          return this.b2.finishLargeFile({
+            partSha1Array: state.transientState.partSha1Array || [],
+            fileId: state.state.largeFile.fileId,
+          }).pipe(
+            catchError((err) => {
+              console.error(err);
+              return throwError(err);
+            }),
+            map((response) => ({
+              response,
+              state,
+            })),
+          );
+        } else {
+          return throwError('attempted to finish invalid large file');
         }
-        return of({
-          success: false,
-          location: params.location,
-        });
-      })
+      }),
     );
+    const response$ = finished$.pipe(
+      map(({ state }) => ({
+        location: state.state.location,
+        offset: state.transientState.currentOffset,
+        success: true,
+      })),
+    );
+    return response$;
   }
 
   // Termination extension
   deleteFile(params: TussleStorageDeleteFileParams): Observable<unknown> {
     console.log("b2.deleteFile", params);
     return of();
-  };
+  }
 
   public readonly extensionsRequired: TusProtocolExtension[] = [
     "checksum",
@@ -391,33 +435,45 @@ export class TussleStorageB2 implements TussleStorage {
     "termination",
   ];
 
-  private getState(id: string): Observable<B2State | undefined> {
-    const state$ = defer(() => from(this.state.getItem(id)));
-    return state$;
+  private getState(location: string): Observable<B2PersistentLocationState | null> {
+    return defer(() => from(this.persistentState.getItem(location))).pipe(
+      map((state) => state ? state : null),
+    );
   }
 
-  private setState(id: string, value: B2UploadState): Observable<B2UploadState>;
-  private setState(id: string, value: B2LargeFileState): Observable<B2LargeFileState>;
-  private setState(id: string, value: B2State | null): Observable<B2State> {
-    return defer(() => {
-      if (value === null) {
-        return from(this.state.removeItem(id));
-      } else {
-        return from(this.state.setItem(id, value)).pipe(
-          map(() => value)
-        );
-      }
-    });
+  private setState(
+    location: string,
+    value: B2PersistentLocationState | null
+  ): Observable<B2PersistentLocationState>
+  {
+    if (value === null) {
+      return from(this.persistentState.removeItem(location));
+    } else {
+      return from(this.persistentState.setItem(location, value)).pipe(
+        map(() => value),
+      );
+    }
+  }
+
+  private getOrCreateTransientState(
+    location: string,
+    create: () => Promise<B2TransientLocationState>
+  ) {
+    return <T extends B2PersistentLocationState>(source: Observable<T>) =>
+      source.pipe(
+        flatMap((state) => {
+          if (state) {
+            return from(this.transientState.getOrCreate(location, create));
+          } else {
+            return EMPTY;
+          }
+        }),
+      );
   }
 }
 
-function isUploadState(state: B2State | undefined): state is B2UploadState {
-  return !!state && !(state as B2UploadState).location?.endsWith(LARGE_FILE_EXT);
+function isNonNull<T>(value: T): value is NonNullable<T> {
+  return value != null;
 }
 
-function isLargeFileState(state: B2State | undefined): state is B2LargeFileState {
-  const isLargeFileKey = (state: unknown) => (state as B2LargeFileState).key?.endsWith(LARGE_FILE_EXT);
-  return !!state && isLargeFileKey(state);
-}
-
-export { B2 };
+export {B2};

@@ -1,5 +1,5 @@
 // https://www.backblaze.com/b2/docs/b2_upload_part.html
-import type { B2ActionConfig, B2Capability, B2ActionObservable } from '../types';
+import type { B2ActionConfig, B2Capability, B2ActionObservable, B2PartInfo } from '../types';
 import type { TussleIncomingRequest } from '@tussle/core/src/request.interface';
 
 export const requiredCapability: B2Capability = 'writeFiles';
@@ -14,7 +14,7 @@ export type B2UploadPartParams = {
   contentSha1: string;
 }
 
-export type B2UploadPartResponse = void;
+export type B2UploadPartResponse = B2PartInfo;
 
 export function b2UploadPartRequest(
   cfg: B2ActionConfig,

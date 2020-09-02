@@ -77,6 +77,14 @@ export interface B2FileInfo {
   uploadTimestamp: number;
 }
 
+export interface B2PartInfo {
+  fileId: string;
+  partNumber: number;
+  contentLength: number;
+  contentSha1: string;
+  uploadTimestamp: number;
+}
+
 export interface B2BucketInfo {
   accountId: string;
   bucketId: string;

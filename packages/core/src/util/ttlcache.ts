@@ -32,6 +32,15 @@ export class TTLCache<T> {
     return hit.data;
   }
 
+  public getItem(key: string): T | null {
+    const hit = this.cache[key];
+    if (hit) {
+      hit.atime = this.now();
+      return hit.data;
+    }
+    return null;
+  }
+
   private garbageCollect(): void {
     const now = this.now();
     const { ttl, cache } = this;
