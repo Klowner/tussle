@@ -9,7 +9,8 @@
     "start:server": "nodemon server.js",
     "start:client": "rollup -c --watch --preserveWatchOutput",
     "build": "rollup -c",
-    "deploy": "cd worker && wrangler publish"
+    "deploy": "cd worker && wrangler publish",
+    "wrangler": "wrangler"
   },
   "dependencies": {
     "dotenv": "^8.2.0"
