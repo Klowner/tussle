@@ -3,12 +3,10 @@ import type { TusProtocolExtension } from './tus-protocol.interface';
 import type { TussleOutgoingRequest , TussleIncomingRequest, TussleOutgoingResponse } from './request.interface';
 import type { TussleStorage } from './storage.interface';
 import { of, from } from 'rxjs';
-import { tap, map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 import handleCreate from './handlers/create';
 import handlePatch from './handlers/patch';
-
-// url: https://api.googlefart.pandle/files/marko/potatoman
-// toKey => marko/potatoman
+import handleHead from './handlers/head';
 
 export interface TussleConfig {
   maxSize?: number;
@@ -34,6 +32,7 @@ type IncomingRequestHandler = <T>(core: Tussle, ctx: TussleIncomingRequest<T>) =
 export type TussleEventHook =
   | 'before-create'
   | 'before-patch'
+  | 'before-head'
 ;
 
 export type TussleHookFunc = <T>(
@@ -55,6 +54,7 @@ export class Tussle {
   constructor(private readonly cfg: TussleConfig) {
     this.setHandler('POST', handleCreate);
     this.setHandler('PATCH', handlePatch);
+    this.setHandler('HEAD', handleHead);
     this.storage = isStorageService(cfg.storage) ? { default: cfg.storage } : cfg.storage || {};
     this.hooks = cfg.hooks || {};
   }
@@ -92,12 +92,14 @@ export class Tussle {
   }
 
   private readonly process = <T>() => mergeMap((ctx: TussleIncomingRequest<T>) => {
-    const handler = this.handlers[ctx.request.method];
-    if (handler) {
-      return handler(this, ctx);
-    } else {
-      return of(ctx); // ignore request
+    // only if no response was already attached by preprocessing
+    if (!ctx.response) {
+      const handler = this.handlers[ctx.request.method];
+      if (handler) {
+        return handler(this, ctx);
+      }
     }
+    return of(ctx); // pass through
   });
 
   private readonly postProcess = <T>() => map((ctx: TussleIncomingRequest<T>) => {
@@ -105,8 +107,8 @@ export class Tussle {
     const extraHeaders: Record<string, unknown> = {};
 
     // Include required (excl. OPTIONS) Tus-Resumable header
-    if (ctx.request.method !== 'OPTIONS') {
-      extraHeaders['Tus-Resumable'] = ctx.meta.tusVersion || '<version>';
+    if (ctx.request.method !== 'OPTIONS' && ctx.meta.tusVersion) {
+      extraHeaders['Tus-Resumable'] = ctx.meta.tusVersion;
     }
 
     // Include optional Tux-Max-Size

@@ -65,7 +65,6 @@ export class TussleRequestCloudflareWorker implements TussleRequestService<Cloud
           'content-type': 'application/x-www-form-urlencoded',
         };
       }
-      console.log('NEW REQUEST INIT', request.url, request.body, newRequestInit.body); //newRequestInit);
       request$ = observableFetch(request.url, newRequestInit);
     }
     return request$.pipe(

@@ -1,10 +1,7 @@
 // https://www.backblaze.com/b2/docs/b2_upload_file.html
-import type { B2 } from '../b2';
-import type { B2ActionConfig, B2Capability, B2ActionObservable, B2UnconfiguredAction } from '../types';
-import type { TussleOutgoingRequest, TussleIncomingRequest } from '@tussle/core/src/request.interface';
-//import type { B2GetUploadURLResponse } from '../actions/b2GetUploadURL';
+import type { B2ActionConfig, B2Capability, B2ActionObservable, B2FileInfo } from '../types';
+import type { TussleIncomingRequest } from '@tussle/core/src/request.interface';
 
-// const fragment = '/b2_upload_file';
 export const requiredCapability: B2Capability = 'writeFiles';
 
 export type B2UploadFileParams = {
@@ -19,7 +16,7 @@ export type B2UploadFileParams = {
   // TODO -- there's lots more
 }
 
-export type B2UploadFileResponse = void;
+export type B2UploadFileResponse = B2FileInfo;
 
 export function b2UploadFileRequest(
   cfg: B2ActionConfig,

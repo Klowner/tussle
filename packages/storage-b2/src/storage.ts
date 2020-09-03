@@ -1,5 +1,5 @@
 import type { Observable } from "rxjs";
-import { catchError, filter, flatMap, map, share, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { catchError, filter, flatMap, map, share, switchMap, tap, withLatestFrom, take, endWith } from 'rxjs/operators';
 import { combineLatest, defer, EMPTY, from, of, throwError } from "rxjs";
 import type {
   TusProtocolExtension,
@@ -13,7 +13,9 @@ import type {
   TussleStorageCreateFileResponse,
   TussleStorageDeleteFileParams,
   TussleStoragePatchFileParams,
-  TussleStoragePatchFileResponse
+  TussleStoragePatchFileResponse,
+  TussleStorageFileInfoParams,
+  TussleStorageFileInfo,
 } from "@tussle/core/src/storage.interface";
 import type {B2StartLargeFileResponse} from "./b2/actions/b2StartLargeFile";
 import type {B2UploadPartResponse} from './b2/actions/b2UploadPart';
@@ -73,7 +75,9 @@ export class TussleStorageB2 implements TussleStorage {
   private readonly persistentState: TussleStateService<B2PersistentLocationState>;
   private readonly transientState: TTLCache<B2TransientLocationState>;
 
-  constructor(readonly options: TussleStorageB2Options) {
+  constructor(
+    readonly options: TussleStorageB2Options
+  ) {
     this.b2 = new B2({
       applicationKey: options.applicationKey,
       applicationKeyId: options.applicationKeyId,
@@ -90,7 +94,9 @@ export class TussleStorageB2 implements TussleStorage {
     this.transientState = new TTLCache(60 * 60 * 1000);
   }
 
-  public getUploadURL(): Observable<Releasable<PoolType<ReturnType<typeof createUploadURLPool>>>> {
+  public getUploadURL(
+  ): Observable<Releasable<PoolType<ReturnType<typeof createUploadURLPool>>>>
+  {
     return defer(() => this.uploadURLPool.acquireReleasable()).pipe(
       catchError((err) => {
         console.error('failed to get upload url', err);
@@ -99,7 +105,10 @@ export class TussleStorageB2 implements TussleStorage {
     );
   }
 
-  public getUploadPartURL(b2LargeFileId: string): Observable<Releasable<PoolType<ReturnType<typeof createUploadPartURLPool>>>> {
+  public getUploadPartURL(
+    b2LargeFileId: string
+  ): Observable<Releasable<PoolType<ReturnType<typeof createUploadPartURLPool>>>>
+  {
     const { b2 } = this;
     const create = async () => createUploadPartURLPool(b2, { fileId: b2LargeFileId, });
     const pool = this.uploadPartURLPools.getOrCreate(b2LargeFileId, create);
@@ -110,7 +119,8 @@ export class TussleStorageB2 implements TussleStorage {
 
   public createFile(
     params: TussleStorageCreateFileParams
-  ): Observable<TussleStorageCreateFileResponse> {
+  ): Observable<TussleStorageCreateFileResponse>
+  {
     // Here we don't actually start anything, just determine where we want the
     // user to start sending stuff. The location returned here determines the
     // target location used by the first upload PATCH request.
@@ -139,9 +149,49 @@ export class TussleStorageB2 implements TussleStorage {
     ));
   }
 
-  public patchFile(params: TussleStoragePatchFileParams)
-  : Observable<TussleStoragePatchFileResponse> {
+  public getFileInfo(
+    params: TussleStorageFileInfoParams
+  ): Observable<TussleStorageFileInfo>
+  {
+    const state$ = this.getState(params.location);
+    const combinedState$ = state$.pipe(
+      filter(isNonNull),
+      flatMap((state) => of(this.transientState.getItem(params.location)).pipe(
+        filter(isNonNull),
+        map((transientState) => ({
+          state,
+          transientState,
+        })),
+      )),
+      endWith(null),
+      take(1),
+    );
 
+    const fileInfo$ = combinedState$.pipe(
+      map((state) => {
+        if (state) {
+          const { currentOffset } = state.transientState;
+          return {
+            info: {
+              currentOffset,
+            }
+          };
+        } else {
+          return {};
+        }
+      }),
+      map((state) => ({
+        ...state,
+        location: params.location,
+      })),
+    );
+
+    return fileInfo$;
+  }
+
+  public patchFile(params: TussleStoragePatchFileParams)
+  : Observable<TussleStoragePatchFileResponse>
+  {
     const state$ = this.getState(params.location);
 
     const transientState$ = state$.pipe(
@@ -212,7 +262,8 @@ export class TussleStorageB2 implements TussleStorage {
     state: B2PersistentLocationState,
     transientState: B2TransientLocationState,
     params: TussleStoragePatchFileParams
-  ): PatchAction {
+  ): PatchAction
+  {
     if (transientState) {
       const isFirstPart = transientState.currentOffset === 0;
       const isLastPart = (transientState.currentOffset + params.length) === state.createParams.uploadLength;
@@ -278,7 +329,8 @@ export class TussleStorageB2 implements TussleStorage {
   public getOrCreateLargeFileState(
     location: string,
     state: B2CombinedState,
-  ): Observable<B2CombinedState> {
+  ): Observable<B2CombinedState>
+  {
     const initialState$ = of(state);
     const persistedInitialState$ = initialState$.pipe(
       flatMap((initialState) => {
@@ -347,7 +399,7 @@ export class TussleStorageB2 implements TussleStorage {
           contentLength: params.length,
           partNumber: state.transientState.nextPartNumber,
           contentSha1,
-        })
+        });
 
         const uploadPartResponse$ = uploadPart$.pipe(
           flatMap((response) => from(response.getData()).pipe(

@@ -8,5 +8,3 @@ export type TusProtocolExtension =
   | 'expiration'
   | 'termination'
 ;
-
-// export type TusExtensionConfig = Record<TusProtocolExtension, {}>;

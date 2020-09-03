@@ -4,7 +4,6 @@ import type { B2ActionConfig, B2InitOptions, B2Options } from './types';
 import type { TussleRequestService } from '@tussle/core';
 import { B2Auth } from './b2auth';
 import * as actions from './actions';
-import * as operations from './operations';
 
 export const B2_API_URL = "https://api.backblazeb2.com/b2api/v2";
 
@@ -63,15 +62,7 @@ export class B2 {
   public readonly startLargeFile = bindAction(this, actions.b2StartLargeFileRequest);
   public readonly uploadFile = bindAction(this, actions.b2UploadFileRequest);
   public readonly uploadPart = bindAction(this, actions.b2UploadPartRequest);
-
-  public readonly operations = {
-    upload: bindOp(this, operations.upload),
-  }
 }
-
-const bindOp = <O, R>(b2: B2, func: (b2: B2, options: O) => Observable<R>) =>
-  (options: O) =>
-    func(b2, options);
 
 const bindAction = <O, R>(b2: B2, actionFunc: (cfg: B2ActionConfig, options: O) => Observable<R>) =>
   (options: O) =>

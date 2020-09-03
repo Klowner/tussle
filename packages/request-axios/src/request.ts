@@ -3,7 +3,7 @@ import type { AxiosResponse } from 'axios';
 import type { Observable } from 'rxjs';
 import type { TussleOutgoingRequest, TussleOutgoingResponse, TussleRequestService } from '@tussle/core';
 import { Axios as AxiosRx } from 'axios-observable';
-import { tap, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 type TussleRequestAxiosOptions = {
   axios?: AxiosRx;

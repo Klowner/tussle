@@ -20,6 +20,8 @@ function uploadFile(file) {
       console.log('upload: ' + pct + '%');
     },
   });
+  console.log('upload', upload);
+  window.currentUpload = upload;
   return upload.start();
 }
 
