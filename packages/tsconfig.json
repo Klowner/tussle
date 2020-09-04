@@ -9,5 +9,6 @@
     {"path": "./state-memory"},
     {"path": "./request-axios"},
     {"path": "./request-cloudflareworker"}
-  ]
+  ],
+  "exclude": ["**/*.d.ts"]
 }

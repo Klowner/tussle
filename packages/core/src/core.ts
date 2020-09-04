@@ -7,6 +7,7 @@ import { map, mergeMap } from 'rxjs/operators';
 import handleCreate from './handlers/create';
 import handlePatch from './handlers/patch';
 import handleHead from './handlers/head';
+import handleOptions from './handlers/options';
 
 export interface TussleConfig {
   maxSize?: number;
@@ -14,16 +15,6 @@ export interface TussleConfig {
   storage: TussleStorage | Record<'default' | string, TussleStorage>;
   hooks?: Partial<Record<TussleEventHook, TussleHookFunc>>;
   match: RegExp;
-}
-
-function addResponseHeaders(ctx: TussleIncomingRequest<unknown>, headers: Record<string, unknown>): void {
-  ctx.response = {
-    ...ctx.response,
-    headers: {
-      ...ctx.response?.headers,
-      ...headers as Record<string, string>,
-    }
-  };
 }
 
 type IncomingRequestMethod = TussleIncomingRequest<unknown>['request']['method'];
@@ -55,6 +46,7 @@ export class Tussle {
     this.setHandler('POST', handleCreate);
     this.setHandler('PATCH', handlePatch);
     this.setHandler('HEAD', handleHead);
+    this.setHandler('OPTIONS', handleOptions);
     this.storage = isStorageService(cfg.storage) ? { default: cfg.storage } : cfg.storage || {};
     this.hooks = cfg.hooks || {};
   }
@@ -71,14 +63,15 @@ export class Tussle {
     map((ctx: TussleIncomingRequest<T>) => {
       // Ensure meta property exists on incoming request context
       // Verify that the requested Tus protocol version is supported.
-      const version = this.chooseProtocolVersion(ctx);
-      if (!version) {
-        return respondWithUnsupportedProtocolVersion(ctx);
+      if (ctx.request.method !== 'OPTIONS') {
+        const version = this.chooseProtocolVersion(ctx);
+        if (!version) {
+          return respondWithUnsupportedProtocolVersion(ctx);
+        }
+
+        // Set the negotiated protocol version in the context metadata
+        ctx.meta.tusVersion = version;
       }
-
-      // Set the negotiated protocol version in the context metadata
-      ctx.meta.tusVersion = version;
-
       // TODO -- check max-size of transmit in POST requests, somewhere
       return ctx;
     });
@@ -178,3 +171,14 @@ const isStorageService = (storage: unknown): storage is TussleStorage =>
 function isPromise<T>(maybePromise: (Promise<T> | Observable<T>)): maybePromise is Promise<T> {
   return typeof (maybePromise as Promise<T>).then === 'function';
 }
+
+function addResponseHeaders(ctx: TussleIncomingRequest<unknown>, headers: Record<string, unknown>): void {
+  ctx.response = {
+    ...ctx.response,
+    headers: {
+      ...ctx.response?.headers,
+      ...headers as Record<string, string>,
+    }
+  };
+}
+

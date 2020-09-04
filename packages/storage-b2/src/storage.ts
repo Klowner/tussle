@@ -49,7 +49,9 @@ interface B2PersistentLocationState {
   largeFile?: B2StartLargeFileResponse;
 }
 
-type B2PersistentLocationLargeFileState = B2PersistentLocationState & Required<Pick<B2PersistentLocationState, 'largeFile'>>;
+type B2PersistentLocationLargeFileState =
+  B2PersistentLocationState &
+  Required<Pick<B2PersistentLocationState, 'largeFile'>>;
 
 interface B2TransientLocationState {
   fileId: string | null;
@@ -124,6 +126,7 @@ export class TussleStorageB2 implements TussleStorage {
     // Here we don't actually start anything, just determine where we want the
     // user to start sending stuff. The location returned here determines the
     // target location used by the first upload PATCH request.
+    //TODO -- this should be exposed via a hook
     const location = [
       params.path,
       Math.floor(Math.random() * 1e16).toString(16),

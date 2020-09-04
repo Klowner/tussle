@@ -11,6 +11,7 @@
     "skipLibCheck": false
   },
   "exclude": [
+    "**/*.d.ts",
     "node_modules"
   ]
 }
