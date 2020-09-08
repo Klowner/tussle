@@ -1,6 +1,6 @@
 import type { Observable } from 'rxjs';
 import type { TusProtocolExtension } from './tus-protocol.interface';
-import type { TussleOutgoingRequest , TussleIncomingRequest, TussleOutgoingResponse } from './request.interface';
+import type { TussleIncomingRequest } from './request.interface';
 import type { TussleStorage } from './storage.interface';
 import { of, from } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
@@ -11,10 +11,8 @@ import handleOptions from './handlers/options';
 
 export interface TussleConfig {
   maxSize?: number;
-  createOutgoingRequest: <T>(req: TussleOutgoingRequest) => Observable<TussleOutgoingResponse<T, unknown>>;
   storage: TussleStorage | Record<'default' | string, TussleStorage>;
   hooks?: Partial<Record<TussleEventHook, TussleHookFunc>>;
-  match: RegExp;
 }
 
 type IncomingRequestMethod = TussleIncomingRequest<unknown>['request']['method'];
