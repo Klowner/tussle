@@ -126,19 +126,13 @@ export class TussleStorageB2 implements TussleStorage {
     // Here we don't actually start anything, just determine where we want the
     // user to start sending stuff. The location returned here determines the
     // target location used by the first upload PATCH request.
-    //TODO -- this should be exposed via a hook
-    const location = [
-      params.path,
-      Math.floor(Math.random() * 1e16).toString(16),
-      params.uploadMetadata.filename,
-    ].join('/');
 
     if (!params.uploadLength) {
       console.error('upload-length is required (breaks spec)'); // SPEC CAVEAT
     }
 
     const state: B2PersistentLocationState = {
-      location,
+      location: params.path,
       metadata: params.uploadMetadata,
       uploadLength: params.uploadLength,
       createParams: params,
@@ -193,10 +187,9 @@ export class TussleStorageB2 implements TussleStorage {
   }
 
   public patchFile(params: TussleStoragePatchFileParams)
-  : Observable<TussleStoragePatchFileResponse>
-  {
+    : Observable<TussleStoragePatchFileResponse>
+    {
     const state$ = this.getState(params.location);
-
     const transientState$ = state$.pipe(
       filter(isNonNull),
       flatMap((state) => of(state).pipe(
@@ -316,12 +309,14 @@ export class TussleStorageB2 implements TussleStorage {
     );
 
     const response$ = upload$.pipe(
-      map((response) => {
-        response.getData().then((d) => console.log('PATCH', d));
+      map((_response) => {
+        // TODO - length should come from response, not outgoing request
+        const newOffset = state.transientState.currentOffset + params.length;
         return {
           location: params.location,
           success: true,
-          offset: state.transientState.currentOffset + params.length,
+          offset: newOffset,
+          complete: newOffset === params.length,
         };
       }),
     );
@@ -436,6 +431,7 @@ export class TussleStorageB2 implements TussleStorage {
         location: state.state.location,
         offset: state.transientState.currentOffset,
         success: true,
+        complete: false,
       })),
     );
     return response$;
@@ -449,7 +445,6 @@ export class TussleStorageB2 implements TussleStorage {
     const finished$ = uploaded$.pipe(
       switchMap(({ state }) => {
         if (hasLargeFile(state.state)) {
-          console.log(state);
           return this.b2.finishLargeFile({
             partSha1Array: state.transientState.partSha1Array || [],
             fileId: state.state.largeFile.fileId,
@@ -473,6 +468,7 @@ export class TussleStorageB2 implements TussleStorage {
         location: state.state.location,
         offset: state.transientState.currentOffset,
         success: true,
+        complete: true,
       })),
     );
     return response$;

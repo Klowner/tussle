@@ -2,20 +2,40 @@ import type { Observable } from 'rxjs';
 import type { TussleIncomingRequest } from '../request.interface';
 import type { TussleStorageCreateFileResponse } from '../storage.interface';
 import type { Tussle } from '../core';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap, map, flatMap } from 'rxjs/operators';
 import { decode } from 'js-base64';
+
+function defaultPath(path: string, filename: string): string {
+  return [
+    path,
+    Math.floor(Math.random() * 1e16).toString(16),
+    encodeURIComponent(filename),
+  ].join('/');
+}
 
 export default function handleCreate<T>(
   core: Tussle,
   ctx: TussleIncomingRequest<T>
 ): Observable<TussleIncomingRequest<T>>
 {
-  const store = core.getStorage('default');
   const params = extractCreationHeaders(ctx);
-  const params$ = core.hook('before-create', ctx, params);
+  const originalPath = params.path;
+
+  const params$ = core.hook('before-create', ctx, params).pipe(
+    map((params) => {
+      // If the before-create hook didn't set the location,
+      // for the file being created, then generate a default
+      // based on the request path and metadata filename.
+      if (params.path === originalPath) {
+        params.path = defaultPath(params.path, params.uploadMetadata.filename);
+      }
+      return params;
+    }),
+  );
 
   return params$.pipe(
-    switchMap((params) => store.createFile(params).pipe(
+    switchMap((params) => core.create(params).pipe(
+      flatMap((createdFile) => core.hook('after-create', ctx, createdFile)),
       map((createdFile) => toResponse(ctx, createdFile)),
     )),
   );
@@ -39,6 +59,12 @@ const extractCreationHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
 
   // used by 'concatenation' extension
   const uploadConcat = header('upload-concat') as string || null;
+
+  // provide a default file location (this can be altered during
+  // the 'before-create' hook, and then possibly altered further
+  // by the current storage component.
+  // const location = [path, encodeURIComponent(uploadMetadata.filename)].join('/');
+  // console.log('creation location is', location);
 
   return {
     id,

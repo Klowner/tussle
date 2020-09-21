@@ -28,13 +28,17 @@ function serve(port = process.env.PORT || '8080') {
   const tussle = new TussleKoa({
     hooks: {
       'before-create': async (_tussle, _ctx, params) => {
-        console.log('before create called');
+        console.log('before create called', params.path, params.uploadMetadata.filename);
         return params;
       },
       'before-patch': async (_tussle, _ctx, params) => {
         console.log('before patch called');
         return params;
-      }
+      },
+      'upload-complete': async (_tussle, _ctx, params) => {
+        console.log('AFTER COMPLETE', params);
+        return params;
+      },
     },
     storage: new TussleStorageB2({
       applicationKeyId: process.env.TUSSLE_B2_KEY_ID,

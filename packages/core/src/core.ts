@@ -1,7 +1,7 @@
 import type { Observable } from 'rxjs';
 import type { TusProtocolExtension } from './tus-protocol.interface';
 import type { TussleIncomingRequest } from './request.interface';
-import type { TussleStorage } from './storage.interface';
+import type { TussleStorage, TussleStorageCreateFileResponse, TussleStorageCreateFileParams } from './storage.interface';
 import { of, from } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import handleCreate from './handlers/create';
@@ -20,8 +20,10 @@ type IncomingRequestHandler = <T>(core: Tussle, ctx: TussleIncomingRequest<T>) =
 
 export type TussleEventHook =
   | 'before-create'
+  | 'after-create'
   | 'before-patch'
   | 'before-head'
+  | 'after-complete'
 ;
 
 export type TussleHookFunc = <T>(
@@ -45,7 +47,7 @@ export class Tussle {
     this.setHandler('PATCH', handlePatch);
     this.setHandler('HEAD', handleHead);
     this.setHandler('OPTIONS', handleOptions);
-    this.storage = isStorageService(cfg.storage) ? { default: cfg.storage } : cfg.storage || {};
+    this.storage = isStorageService(cfg.storage) ? { default: cfg.storage } : cfg.storage;
     this.hooks = cfg.hooks || {};
   }
 
@@ -151,6 +153,15 @@ export class Tussle {
   public hasHook(name: TussleEventHook): boolean {
     return this.hooks[name] !== undefined;
   }
+
+  public create(
+    params: TussleStorageCreateFileParams,
+    storeName = 'default',
+  ): Observable<TussleStorageCreateFileResponse>
+  {
+    const store = this.getStorage(storeName);
+    return store.createFile(params);
+  }
 }
 
 function respondWithUnsupportedProtocolVersion<T>(ctx: TussleIncomingRequest<T>): TussleIncomingRequest<T> {
@@ -179,4 +190,3 @@ function addResponseHeaders(ctx: TussleIncomingRequest<unknown>, headers: Record
     }
   };
 }
-

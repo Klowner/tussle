@@ -35,6 +35,9 @@ export function b2AuthorizeAccountRequest(
   const req = cfg.requestService.makeRequest<B2AuthorizeAccountResponse>({
     method: 'GET',
     url: cfg.url + fragment,
+    headers: {
+      'X-Bz-Test-Mode': 'expire_some_account_authorization_tokens',
+    },
     auth: {
       username: options.applicationKeyId,
       password: options.applicationKey,

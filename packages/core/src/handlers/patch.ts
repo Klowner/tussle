@@ -3,7 +3,7 @@ import type { Tussle } from '../core';
 import type { TussleIncomingRequest } from '../request.interface';
 import type { TussleStoragePatchFileResponse } from '../storage.interface';
 import { of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, flatMap } from 'rxjs/operators';
 
 export default function handlePatch<T>(
   core: Tussle,
@@ -26,10 +26,22 @@ export default function handlePatch<T>(
 
   return params$.pipe(
     switchMap((params) => store.patchFile(params).pipe(
+      flatMap((patchedFile) => callHooks(core, ctx, patchedFile)),
       map((patchedFile) => toResponse(ctx, patchedFile)),
     )),
   );
 }
+
+const callHooks = <T>(
+  core: Tussle,
+  ctx: TussleIncomingRequest<T>,
+  patchedFile: TussleStoragePatchFileResponse
+): Observable<TussleStoragePatchFileResponse> => {
+  if (patchedFile.complete) {
+    return core.hook('after-complete', ctx, patchedFile);
+  }
+  return of(patchedFile);
+};
 
 const extractPatchHeaders = (ctx: TussleIncomingRequest<unknown>) => {
   const location = ctx.request.path;

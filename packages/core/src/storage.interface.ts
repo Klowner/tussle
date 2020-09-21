@@ -26,6 +26,7 @@ export interface TussleStoragePatchFileResponse {
   location: string;
   success: boolean;
   offset?: number; // only if success
+  complete: boolean; // signifies that upload is complete
 }
 
 

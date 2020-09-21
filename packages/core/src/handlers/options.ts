@@ -12,6 +12,9 @@ export default function handleOptions<T>(
     ...ctx,
     response: {
       status: 204,
+      headers: {
+        'access-control-expose-headers': 'location',
+      }
     }
   });
 }
