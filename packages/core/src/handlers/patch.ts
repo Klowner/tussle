@@ -37,6 +37,7 @@ const callOptionalHooks = <T>(
   ctx: TussleIncomingRequest<T>,
   patchedFile: TussleStoragePatchFileResponse
 ): Observable<TussleStoragePatchFileResponse> => {
+  ctx.meta.storage = patchedFile.details;
   if (patchedFile.complete) {
     return core.hook('after-complete', ctx, patchedFile);
   }

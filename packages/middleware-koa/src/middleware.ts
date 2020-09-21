@@ -9,6 +9,10 @@ type KoaMiddlewareFunction<T extends KoaContext> =
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
+interface TussleKoaState {
+  location: string;
+}
+
 function allowedMethod(method: string, overrideMethod?: string): AllowedMethod | null {
   method = overrideMethod || method;
   switch(method) {
@@ -62,6 +66,9 @@ const handleResponse = async <T extends KoaContext>(ctx: TussleIncomingRequest<T
         ([key, value]) => ctx.originalRequest.set(key, value)
       );
     }
+
+    // expose info about the tus response
+    ctx.originalRequest.state.tussle = ctx.meta;
   } else {
     console.log('tussle did not respond to request');
   }

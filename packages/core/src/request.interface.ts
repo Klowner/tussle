@@ -45,6 +45,7 @@ export type TussleIncomingRequest<T> = {
   meta: {
     tusVersion?: string;
     storageKey?: string;
+    storage?: unknown;
   }
   originalRequest: T;
 };
