@@ -33,6 +33,8 @@ export interface TussleStorageB2Options {
   stateService: TussleStateService<unknown>;
 }
 
+export type B2HookDetails = B2UploadPartResponse;
+
 enum PatchAction {
   SmallFile,
   LargeFileFirstPart,
@@ -186,10 +188,11 @@ export class TussleStorageB2 implements TussleStorage {
     return fileInfo$;
   }
 
-  public patchFile(params: TussleStoragePatchFileParams)
-    : Observable<TussleStoragePatchFileResponse>
-    {
-    const state$ = this.getState(params.location);
+  public patchFile(
+    params: TussleStoragePatchFileParams
+  ): Observable<TussleStoragePatchFileResponse>
+  {
+      const state$ = this.getState(params.location);
     const transientState$ = state$.pipe(
       filter(isNonNull),
       flatMap((state) => of(state).pipe(
@@ -305,18 +308,18 @@ export class TussleStorageB2 implements TussleStorage {
             return caught;
           }),
         ),
-      )
+      ),
     );
 
-    const response$ = upload$.pipe(
-      map((_response) => {
-        // TODO - length should come from response, not outgoing request
-        const newOffset = state.transientState.currentOffset + params.length;
+    const response$ = getResponseData(upload$).pipe( //storedState$.pipe(
+      map((upstreamResponse) => {
+        const newOffset = state.transientState.currentOffset + upstreamResponse.contentLength;
         return {
           location: params.location,
           success: true,
           offset: newOffset,
           complete: newOffset === params.length,
+          details: upstreamResponse,
         };
       }),
     );
@@ -341,9 +344,7 @@ export class TussleStorageB2 implements TussleStorage {
             contentType: (state.state.metadata?.contentType as string) || 'b2/x-auto',
           });
 
-          const largeFileResponse$ = largeFile$.pipe(
-            flatMap((response) => from(response.getData())),
-          );
+          const largeFileResponse$ = getResponseData(largeFile$);
 
           const transformedState$ = largeFileResponse$.pipe(
             flatMap((largeFile) => this.setState(
@@ -442,9 +443,10 @@ export class TussleStorageB2 implements TussleStorage {
     params: TussleStoragePatchFileParams,
   ): Observable<TussleStoragePatchFileResponse> {
     const uploaded$ = this.uploadPart(state, params);
+
     const finished$ = uploaded$.pipe(
       switchMap(({ state }) => {
-        if (hasLargeFile(state.state)) {
+        if (hasLargeFile(state.state)) { // should always be true
           return this.b2.finishLargeFile({
             partSha1Array: state.transientState.partSha1Array || [],
             fileId: state.state.largeFile.fileId,
@@ -463,14 +465,22 @@ export class TussleStorageB2 implements TussleStorage {
         }
       }),
     );
-    const response$ = finished$.pipe(
-      map(({ state }) => ({
+
+    const upstreamResponse$ = finished$.pipe(
+      flatMap(({ response }) => getResponseData(of(response))),
+    );
+
+    // const response$ = finished$.pipe(
+    const response$ = upstreamResponse$.pipe(
+      map((upstreamResponse) => ({
         location: state.state.location,
         offset: state.transientState.currentOffset,
         success: true,
         complete: true,
+        details: upstreamResponse,
       })),
     );
+
     return response$;
   }
 
@@ -525,6 +535,15 @@ export class TussleStorageB2 implements TussleStorage {
 
 function isNonNull<T>(value: T): value is NonNullable<T> {
   return value != null;
+}
+
+function getResponseData<T>(
+  response: Observable<TussleOutgoingResponse<T, unknown>>,
+): Observable<T>
+{
+  return response.pipe(
+    flatMap((response) => from(response.getData())),
+  );
 }
 
 export {B2};

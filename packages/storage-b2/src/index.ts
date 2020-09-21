@@ -1,6 +1,7 @@
-import { TussleStorageB2, B2 } from './storage';
+import { TussleStorageB2, B2, B2HookDetails } from './storage';
 
 export {
-  TussleStorageB2,
   B2,
+  B2HookDetails,
+  TussleStorageB2,
 };

@@ -26,13 +26,13 @@ export default function handlePatch<T>(
 
   return params$.pipe(
     switchMap((params) => store.patchFile(params).pipe(
-      flatMap((patchedFile) => callHooks(core, ctx, patchedFile)),
+      flatMap((patchedFile) => callOptionalHooks(core, ctx, patchedFile)),
       map((patchedFile) => toResponse(ctx, patchedFile)),
     )),
   );
 }
 
-const callHooks = <T>(
+const callOptionalHooks = <T>(
   core: Tussle,
   ctx: TussleIncomingRequest<T>,
   patchedFile: TussleStoragePatchFileResponse

@@ -3,18 +3,6 @@ const { TussleStateMemory } = require('@tussle/state-memory');
 const { TussleRequestCloudflareWorker } = require('@tussle/request-cloudflareworker');
 const { TussleCloudflareWorker } = require('@tussle/middleware-cloudflareworker');
 
-const tussleCloudflare = new TussleCloudflareWorker({
-  hooks: {
-  },
-  storage: new TussleStorageB2({
-      applicationKeyId: TUSSLE_B2_KEY_ID,    // <-- set via worker environment
-      applicationKey: TUSSLE_B2_KEY,         // <-- set via worker environment
-      bucketId: TUSSLE_B2_BUCKET_ID,         // <-- set via worker environment
-      stateService: new TussleStateMemory(),
-      requestService: new TussleRequestCloudflareWorker(),
-  }),
-});
-
 const STATIC_FILES = {
   '/': {
     body: require('./index.html'),
@@ -35,6 +23,18 @@ function staticHandler(request) {
     }
   }) : null;
 }
+
+const tussleCloudflare = new TussleCloudflareWorker({
+  hooks: {
+  },
+  storage: new TussleStorageB2({
+      applicationKeyId: TUSSLE_B2_KEY_ID,    // <-- set via worker environment
+      applicationKey: TUSSLE_B2_KEY,         // <-- set via worker environment
+      bucketId: TUSSLE_B2_BUCKET_ID,         // <-- set via worker environment
+      stateService: new TussleStateMemory(),
+      requestService: new TussleRequestCloudflareWorker(),
+  }),
+});
 
 async function handleRequest(request) {
   const tussleResponse = await tussleCloudflare.handleRequest(request);

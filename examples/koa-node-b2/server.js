@@ -35,8 +35,8 @@ function serve(port = process.env.PORT || '8080') {
         console.log('before patch called');
         return params;
       },
-      'upload-complete': async (_tussle, _ctx, params) => {
-        console.log('AFTER COMPLETE', params);
+      'after-complete': async (_tussle, _ctx, params) => {
+        console.log('AFTER COMPLETE', JSON.stringify(params, null, 2));
         return params;
       },
     },

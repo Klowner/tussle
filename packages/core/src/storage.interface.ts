@@ -27,6 +27,7 @@ export interface TussleStoragePatchFileResponse {
   success: boolean;
   offset?: number; // only if success
   complete: boolean; // signifies that upload is complete
+  details?: unknown;
 }
 
 
@@ -42,6 +43,7 @@ export interface TussleStorageFileInfo {
   info?: {
     currentOffset: number;
   };
+  details?: unknown;
 }
 
 export interface TussleStorage {
