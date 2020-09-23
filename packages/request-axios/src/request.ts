@@ -42,7 +42,6 @@ export class TussleRequestAxios implements TussleRequestService<AxiosResponse> {
       req.data = request.options.sourceRequest.request.getReadable();
     }
 
-
     return this.axios.request<T>(req).pipe(
       map((axiosResponse) => new TussleOutgoingAxiosResponse(request, axiosResponse)),
     );

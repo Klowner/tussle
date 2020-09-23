@@ -102,7 +102,7 @@ export class TussleStorageB2 implements TussleStorage {
   ): Observable<Releasable<PoolType<ReturnType<typeof createUploadURLPool>>>>
   {
     return defer(() => this.uploadURLPool.acquireReleasable()).pipe(
-      catchError((err) => {
+      catchError((err, caught) => {
         console.error('failed to get upload url', err);
         return throwError(err);
       }),
@@ -302,10 +302,9 @@ export class TussleStorageB2 implements TussleStorage {
           contentSha1: 'do_not_verify',
           contentType: 'b2/x-auto',
         }).pipe(
-          tap(() => endpoint.release(true)),
-          catchError((err, caught) => {
-            console.error(err);
-            return caught;
+          tap({
+            complete: () => endpoint.release(true),
+            error: () => endpoint.release(false),
           }),
         ),
       ),

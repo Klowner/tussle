@@ -1,10 +1,10 @@
 import type { B2AuthOptions, B2AuthInitOptions, B2ActionObservable } from './types';
-import type { Observable } from 'rxjs';
-import { B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';
-import { Subject, from} from 'rxjs';
-import { b2AuthorizeAccountRequest } from './actions/b2AuthorizeAccount';
-import { startWith, flatMap, switchMap, shareReplay, } from 'rxjs/operators';
+import { Observable, ReplaySubject } from 'rxjs';
 import type { TussleRequestService } from '@tussle/core';
+import { B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';
+import { b2AuthorizeAccountRequest } from './actions/b2AuthorizeAccount';
+import { Subject, from} from 'rxjs';
+import { startWith, flatMap, switchMap, shareReplay, take, retryWhen, share, tap} from 'rxjs/operators';
 
 export const B2_API_URL = 'https://api.backblazeb2.com/b2api/v2';
 
@@ -70,12 +70,13 @@ export class B2Auth {
 
     this.state$ = this.response$.pipe(
       flatMap((response) => from(response.getData())),
+      tap((authState) => console.log('reauthorized', authState.authorizationToken)),
       shareReplay({ refCount: false, bufferSize: 1 }),
     );
   }
 
   // trigger a reauthorization
   public reauthorize(): void {
-    this.reauth$.next();
+    this.reauth$.next(undefined);
   }
 }
