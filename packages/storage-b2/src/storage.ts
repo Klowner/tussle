@@ -318,7 +318,10 @@ export class TussleStorageB2 implements TussleStorage {
           success: true,
           offset: newOffset,
           complete: newOffset === params.length,
-          details: upstreamResponse,
+          details: {
+            ...upstreamResponse,
+            tussleUploadMetadata: state.state.createParams.uploadMetadata,
+          }
         };
       }),
     );
@@ -476,7 +479,10 @@ export class TussleStorageB2 implements TussleStorage {
         offset: state.transientState.currentOffset,
         success: true,
         complete: true,
-        details: upstreamResponse,
+        details: {
+          ...upstreamResponse,
+          tussleUploadMetadata: state.state.createParams.uploadMetadata,
+        }
       })),
     );
 

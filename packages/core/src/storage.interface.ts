@@ -22,12 +22,16 @@ export interface TussleStoragePatchFileParams {
   request: TussleIncomingRequest<unknown>;
 }
 
+interface Details {
+  tussleUploadMetadata: Record<string, string | number>,
+}
+
 export interface TussleStoragePatchFileResponse {
   location: string;
   success: boolean;
   offset?: number; // only if success
   complete: boolean; // signifies that upload is complete
-  details?: unknown;
+  details?: Details;
 }
 
 
