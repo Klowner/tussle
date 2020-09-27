@@ -25,7 +25,11 @@ export class TussleRequestAxios implements TussleRequestService<AxiosResponse> {
   private readonly axios: AxiosRx;
 
   public constructor (cfg: TussleRequestAxiosOptions = {}) {
-    this.axios = cfg.axios || AxiosRx.create(cfg.axiosOptions || {maxRedirects: 0});
+    this.axios = cfg.axios || AxiosRx.create({
+      maxRedirects: 0,
+      maxContentLength: 100 * 1000 * 1000, // 100MB
+      ...cfg.axiosOptions
+    });
   }
 
   public makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, AxiosResponse>> {

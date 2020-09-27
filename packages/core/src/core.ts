@@ -10,7 +10,7 @@ import handleHead from './handlers/head';
 import handleOptions from './handlers/options';
 
 export interface TussleConfig {
-  maxSize?: number;
+  maxSizeBytes?: number;
   storage: TussleStorage | Record<'default' | string, TussleStorage>;
   hooks?: Partial<Record<TussleEventHook, TussleHookFunc>>;
 }
@@ -105,8 +105,8 @@ export class Tussle {
     }
 
     // Include optional Tux-Max-Size
-    if (this.cfg.maxSize) {
-      extraHeaders['Tus-Max-Size'] = this.cfg.maxSize;
+    if (this.cfg.maxSizeBytes) {
+      extraHeaders['Tus-Max-Size'] = this.cfg.maxSizeBytes;
     }
 
     // Include required Tus-Extension

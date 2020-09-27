@@ -53,7 +53,6 @@ const prepareRequest = async <T extends KoaContext>(
 
 const handleResponse = async <T extends KoaContext>(ctx: TussleIncomingRequest<T>): Promise<T> => {
   if (ctx.response && ctx.response.status) {
-    console.log('<--', ctx.response);
     // Set response status code
     ctx.originalRequest.status = ctx.response.status;
 

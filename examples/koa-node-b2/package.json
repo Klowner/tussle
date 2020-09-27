@@ -10,6 +10,9 @@
     "start:client": "rollup -c --watch --preserveWatchOutput"
   },
   "dependencies": {
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-json": "^2.0.2",
+    "koa-logger": "^3.2.1"
   }
 }

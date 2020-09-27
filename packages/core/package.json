@@ -16,9 +16,11 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
-    "js-base64": "^3.4.5",
-    "npm-run-all": "^4.1.5",
-    "rimraf": "^3.0.2",
+    "js-base64": "^3.5.0",
     "rxjs": "^6.0.0"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2"
   }
 }

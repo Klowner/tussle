@@ -26,6 +26,7 @@ function serve(port = process.env.PORT || '8080') {
   const router = new Router();
 
   const tussle = new TussleKoa({
+    maxSizeBytes: 2 * 1000 * 1000 * 1000, // 2GB
     hooks: {
       'before-create': async (_tussle, _ctx, params) => {
         console.log('before create called', params.path, params.uploadMetadata.filename);
