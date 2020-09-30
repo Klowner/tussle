@@ -18,12 +18,16 @@ export interface TussleConfig {
 type IncomingRequestMethod = TussleIncomingRequest<unknown>['request']['method'];
 type IncomingRequestHandler = <T>(core: Tussle, ctx: TussleIncomingRequest<T>) => Observable<TussleIncomingRequest<T>>;
 
+const commaJoin = (...items: string[]) => items.join(',');
+
 export type TussleEventHook =
   | 'before-create'
   | 'after-create'
   | 'before-patch'
   | 'before-head'
+  | 'before-options'
   | 'after-complete'
+  | 'after-options'
 ;
 
 export type TussleHookFunc = <T>(
@@ -118,6 +122,9 @@ export class Tussle {
 
     // Include required Tus-Version
     extraHeaders['Tus-Version'] = supportedVersions.join(',');
+
+    // Disable caching
+    extraHeaders['Cache-Control'] = 'no-cache';
 
     // Merge extra headers into the current response
     addResponseHeaders(ctx, extraHeaders);
