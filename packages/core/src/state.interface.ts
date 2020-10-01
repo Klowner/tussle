@@ -1,6 +1,6 @@
-export type TussleStateService<T>= {
-  getItem: (key: string) => Promise<T | undefined>;
+export interface TussleStateService<T> {
+  getItem: (key: string) => Promise<T | null>;
   setItem: (key: string, value: T) => Promise<void>;
-  removeItem: (key: string) => Promise<T>;
-  key: (nth: number, opt?: {prefix: string}) => Promise<string | undefined>;
-};
+  removeItem: (key: string) => Promise<T | null>;
+  key: (nth: number, opt?: {prefix: string}) => Promise<string | null>;
+}

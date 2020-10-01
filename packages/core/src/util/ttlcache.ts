@@ -30,10 +30,7 @@ export class TTLCache<T> {
     this.asyncGarbageCollect(now);
     if (!hit) {
       const created = await create();
-      return (this.cache[key] = {
-        atime: now,
-        data: created,
-      }).data;
+      return this.setItem(key, created);
     }
     hit.atime = now;
     return hit.data;
@@ -48,6 +45,22 @@ export class TTLCache<T> {
       return hit.data;
     }
     return null;
+  }
+
+  public setItem(key: string, data: T): T;
+  public setItem(key: string, data: null): null;
+  public setItem(key: string, data: T | null): T | null {
+    const now = this.now();
+    if (data) {
+      this.cache[key] = {
+        atime: now,
+        data,
+      };
+      return data;
+    } else {
+      delete this.cache[key];
+      return null;
+    }
   }
 
   private garbageCollect(): void {

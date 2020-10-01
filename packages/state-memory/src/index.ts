@@ -18,7 +18,7 @@ class TussleStateMemory<T> implements TussleStateService<T> {
     return Promise.resolve(item);
   }
 
-  public key(nth: number): Promise<string | undefined> {
+  public key(nth: number): Promise<string | null> {
     return Promise.resolve(Object.keys(this.state)[nth]);
   }
 }

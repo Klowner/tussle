@@ -1,5 +1,5 @@
 import type { Observable } from "rxjs";
-import { catchError, filter, flatMap, map, share, switchMap, tap, withLatestFrom, take, endWith } from 'rxjs/operators';
+import { catchError, filter, flatMap, mapTo, map, share, switchMap, tap, withLatestFrom, take, endWith } from 'rxjs/operators';
 import { combineLatest, defer, EMPTY, from, of, throwError } from "rxjs";
 import type {
   TusProtocolExtension,
@@ -30,7 +30,7 @@ export interface TussleStorageB2Options {
   applicationKey: string;
   bucketId: string;
   requestService: TussleRequestService;
-  stateService: TussleStateService<unknown>;
+  stateService: TussleStateService<B2PersistentLocationState>;
 }
 
 export type B2HookDetails = B2UploadPartResponse;
@@ -49,6 +49,8 @@ interface B2PersistentLocationState {
   metadata: Record<string, unknown>
   uploadLength: number;
   largeFile?: B2StartLargeFileResponse;
+  complete?: boolean;
+  details?: unknown;
 }
 
 type B2PersistentLocationLargeFileState =
@@ -94,7 +96,7 @@ export class TussleStorageB2 implements TussleStorage {
 
     this.uploadPartURLPools = new TTLCache(60 * 60 * 1000);
 
-    this.persistentState = new TussleStateNamespace(options.stateService, "b2storage");
+    this.persistentState = new TussleStateNamespace(options.stateService, "b2");
     this.transientState = new TTLCache(60 * 60 * 1000);
   }
 
@@ -253,8 +255,25 @@ export class TussleStorageB2 implements TussleStorage {
         }
         return EMPTY; // todo error
       }),
+      share(),
     );
-    return response$;
+
+    const responseWithSavedState$ = combineLatest(response$, combinedState$).pipe(
+      flatMap(([response, state]) => {
+        if (response.complete) {
+          return this.setState(state.state.location, {
+            ...state.state,
+            complete: response.complete,
+            details: response.details,
+          }).pipe(
+            map(() => response),
+          );
+        }
+        return of(response);
+      }),
+    );
+
+    return responseWithSavedState$;
   }
 
   private determinePatchIntent(
@@ -408,7 +427,7 @@ export class TussleStorageB2 implements TussleStorage {
               state.transientState.nextPartNumber++;
               state.transientState.currentOffset += data.contentLength;
               state.transientState.partSha1Array.push(
-                data.contentSha1.replace(/^[^:]+:/, '') // TODO - we're just trusting B2 here.
+                data.contentSha1.replace(/^[^:]+:/, '') // FIXME - we're just trusting B2 here.
               );
               return of({
                 state,
@@ -472,7 +491,6 @@ export class TussleStorageB2 implements TussleStorage {
       flatMap(({ response }) => getResponseData(of(response))),
     );
 
-    // const response$ = finished$.pipe(
     const response$ = upstreamResponse$.pipe(
       map((upstreamResponse) => ({
         location: state.state.location,
@@ -491,7 +509,7 @@ export class TussleStorageB2 implements TussleStorage {
 
   // Termination extension
   deleteFile(params: TussleStorageDeleteFileParams): Observable<unknown> {
-    console.log("b2.deleteFile", params);
+    console.log("b2.deleteFile", params); // TODO
     return of();
   }
 
@@ -507,10 +525,12 @@ export class TussleStorageB2 implements TussleStorage {
     );
   }
 
+  private setState(location: string, value: B2PersistentLocationState): Observable<B2PersistentLocationState>;
+  private setState(location: string, value: null): Observable<null>;
   private setState(
     location: string,
     value: B2PersistentLocationState | null
-  ): Observable<B2PersistentLocationState>
+  ): Observable<B2PersistentLocationState | null>
   {
     if (value === null) {
       return from(this.persistentState.removeItem(location));
