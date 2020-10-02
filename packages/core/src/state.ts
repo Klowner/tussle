@@ -6,7 +6,7 @@ class TussleStateNamespace<T> implements TussleStateService<T> {
   public constructor (
     public readonly state: TussleStateService<T>,
     public readonly namespace: string,
-    private readonly sep = '|'
+    private readonly sep = '.'
   ) {}
 
   private addNs(key: string): string {

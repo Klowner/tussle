@@ -56,11 +56,10 @@ export class TTLCache<T> {
         atime: now,
         data,
       };
-      return data;
     } else {
       delete this.cache[key];
-      return null;
     }
+    return data;
   }
 
   private garbageCollect(): void {

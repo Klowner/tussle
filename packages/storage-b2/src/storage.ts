@@ -228,7 +228,8 @@ export class TussleStorageB2 implements TussleStorage {
           });
         }
         return EMPTY;
-      })
+      }),
+      share(),
     );
 
     const patchIntent$: Observable<PatchAction> = combinedState$.pipe(
@@ -255,7 +256,6 @@ export class TussleStorageB2 implements TussleStorage {
         }
         return EMPTY; // todo error
       }),
-      share(),
     );
 
     const responseWithSavedState$ = combineLatest(response$, combinedState$).pipe(
