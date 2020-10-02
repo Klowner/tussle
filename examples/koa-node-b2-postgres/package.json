@@ -1,5 +1,5 @@
 {
-  "name": "koa-node-b2",
+  "name": "koa-node-b2-postgres",
   "version": "1.0.1",
   "main": "index.js",
   "license": "MIT",
