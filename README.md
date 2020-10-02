@@ -3,7 +3,7 @@
 </p>
 
 # Tussle
-Tussle is a *mostly* spec-compliant implementation of the [tus upload protocol](http://www.tus.io/protocols/resumable-upload.html).
+Tussle is a *mostly* spec-compliant server implementation of the [tus upload protocol](http://www.tus.io/protocols/resumable-upload.html).
 
 ## Component based
 Tussle is implemented as a collection of interchangeable modular components, allowing the developer to choose which services that they'd like to integrate with.
