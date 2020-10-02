@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="../../raw/main/assets/tusslekitty.svg" width="30%"/>
+  <img src="../../raw/main/assets/tusslekitty.svg"/>
 </p>
 
 # Tussle
