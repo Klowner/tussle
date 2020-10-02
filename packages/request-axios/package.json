@@ -1,7 +1,7 @@
 {
   "name": "@tussle/request-axios",
   "version": "0.0.1",
-  "description": "",
+  "description": "Tussle request component utilizing Axios",
   "main": "lib/index.js",
   "files": [
     "lib"

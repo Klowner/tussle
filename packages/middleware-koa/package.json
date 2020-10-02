@@ -1,7 +1,7 @@
 {
   "name": "@tussle/middleware-koa",
   "version": "0.0.1",
-  "description": "",
+  "description": "Tussle middleware for the Koa web framework",
   "main": "lib/index.js",
   "files": [
     "lib"

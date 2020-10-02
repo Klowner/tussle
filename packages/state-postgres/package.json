@@ -1,7 +1,7 @@
 {
   "name": "@tussle/state-postgres",
-  "version": "0.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Tussle state component backed by PostgresSQL",
   "main": "lib/state.js",
   "files": [
     "lib"
