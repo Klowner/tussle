@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="84.533mm" height="70.64mm" version="1.1" viewBox="0 0 84.533 70.64" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <radialGradient id="e" cx="302.39" cy="257.02" r="14.836" gradientTransform="matrix(2.4222 1.6908 -.87164 1.2487 -364.2 -682.04)" gradientUnits="userSpaceOnUse" xlink:href="#a"/>
+  <linearGradient id="a">
+   <stop stop-color="#66bad5" offset="0"/>
+   <stop stop-color="#44a5b6" offset=".5257"/>
+   <stop stop-color="#6349d6" offset="1"/>
+  </linearGradient>
+  <radialGradient id="h" cx="13.904" cy="364.87" r="21.471" gradientTransform="matrix(1.6124 .2091 -.25257 2.2339 74.256 -647.3)" gradientUnits="userSpaceOnUse" xlink:href="#a"/>
+  <radialGradient id="i" cx="252.63" cy="228.96" r="22.312" gradientTransform="matrix(1.8211 -.77908 .64447 1.5064 -508.99 -33.303)" gradientUnits="userSpaceOnUse" xlink:href="#a"/>
+  <radialGradient id="f" cx="73.772" cy="288.79" r="13.256" gradientTransform="matrix(1.129 -2.6734 1.1708 .4944 -321.31 304.4)" gradientUnits="userSpaceOnUse" xlink:href="#a"/>
+  <radialGradient id="g" cx="65.098" cy="270.43" r="13.256" gradientTransform="matrix(2.4209 1.9534 -.79805 .98905 125.06 -136.41)" gradientUnits="userSpaceOnUse" xlink:href="#a"/>
+  <radialGradient id="c" cx="1091.7" cy="951.32" r="20.64" fx="1088.6" fy="943.95" gradientTransform="matrix(4.8294 3.2951e-6 -3.4108e-6 4.9533 -4246 -3752)" gradientUnits="userSpaceOnUse">
+   <stop stop-color="#d73fcc" offset="0"/>
+   <stop stop-color="#ae25a6" offset=".75464"/>
+   <stop stop-color="#a32350" offset="1"/>
+  </radialGradient>
+  <radialGradient id="d" cx="1104.2" cy="951.27" r="20.64" gradientTransform="matrix(2.918 -.29107 .24677 2.4739 -2375.2 -1073.7)" gradientUnits="userSpaceOnUse">
+   <stop stop-color="#d32fc8" offset="0"/>
+   <stop stop-color="#ae25a6" offset=".75464"/>
+   <stop stop-color="#a32350" offset="1"/>
+  </radialGradient>
+  <radialGradient id="j" cx="62.728" cy="242.93" r="6.2355" gradientTransform="matrix(2.0046 1.6974 -1.0472 1.2367 208.61 -175.81)" gradientUnits="userSpaceOnUse" xlink:href="#a"/>
+  <radialGradient id="l" cx="101.22" cy="60.795" r="6.5262" gradientTransform="matrix(3.5318 .21698 -.1073 1.5753 -247.64 -59.661)" gradientUnits="userSpaceOnUse" xlink:href="#b"/>
+  <linearGradient id="b">
+   <stop stop-color="#69a6ba" offset="0"/>
+   <stop stop-color="#3189a7" offset=".64319"/>
+   <stop stop-color="#6349d6" offset="1"/>
+  </linearGradient>
+  <radialGradient id="m" cx="100.68" cy="61.469" r="6.5262" gradientTransform="matrix(3.5318 .21698 -.1073 1.5753 -247.64 -59.661)" gradientUnits="userSpaceOnUse" xlink:href="#b"/>
+  <radialGradient id="k" cx="50.289" cy="247.81" r="6.2355" gradientTransform="matrix(1.7768 -.070548 .12038 3.0319 -69.979 -501.85)" gradientUnits="userSpaceOnUse" xlink:href="#a"/>
+ </defs>
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title/>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <g transform="translate(-72.563 -98.559)">
+  <g>
+   <path d="m123.23 157.07c10.576-1.1611 10.288 13.318 20.163 10.037 6.7846-2.2542 4.8175-9.5663 5.4015-11.415 1.0115-3.202 4.1547-1.0018 6.4038-2.2196 0.81574-0.44169 5.0775-10.429-6.9007-9.9223-6.7414 0.2852-8.6152 5.9755-7.4265 9.2431 1.7003 10.042-5.4096-0.32651-8.4664-0.61651 0 0-8.9277 3.9049-9.1752 4.8929z" fill="url(#e)" stop-color="#000000" stroke-width=".15263" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <ellipse transform="matrix(.80242 -.59677 .65409 .75641 0 0)" cx="-6.2771" cy="182.99" rx="20.341" ry="20.666" fill="url(#h)" stop-color="#000000" stroke-width=".15545" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <path d="m100.96 113.48c-0.61869-1.3989-0.382-10.683 0.46626-13.593 0.22115-1.026 0.6134-0.88558 1.3987-0.69842 6.4408 1.5414 10.798 5.0812 13.906 9.4757z" fill="#69a6ba" stop-color="#000000" stroke-width=".16447" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <path d="m84.064 138.9c-4.027-6.5294-8.2896-11.993-10.976-23.162-0.0616-0.25555-0.08742-0.71557 0.9432-1.0145 4.2721-0.4843 9.2314-0.24664 13.931 1.3542z" fill="#69a6ba" stop-color="#000000" stroke-width=".16447" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <path d="m103.31 112.63c-0.35166 0.37498-1.1617-9.5248-1.0139-11.931-2e-3 -0.8507 0.28917-0.72291 0.85718-0.54522 4.6578 1.46 8.1825 4.5326 10.976 8.285z" fill="#c5e6ff" stop-color="#000000" stroke-width=".16447" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <path d="m83.883 135.46c-3.4081-5.526-6.2452-9.4062-8.5188-18.859-0.05209-0.21631-0.07394-0.60561 0.79824-0.8586 3.6156-0.40988 6.3361 0.23908 10.313 1.5938z" fill="#c5e6ff" stop-color="#000000" stroke-width=".16447" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <path d="m80.232 144.37c9.4707 1.4792 47.117-8.1114 45.995-31.971l-15.181-5.7527c-8.1357-3.0828-30.685 9.9041-30.732 20.141z" fill="url(#i)" stop-color="#000000" stroke-width=".16447" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+  </g>
+  <g transform="matrix(.52197 -.2856 .2856 .52197 47.244 106.86)">
+   <circle cx="89.675" cy="66.626" r="5.4408" fill="#fff" stop-color="#000000" stroke-width=".2306" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <ellipse transform="matrix(.99996 .0094332 .0095057 .99995 0 0)" cx="88.372" cy="66.615" rx="3.8767" ry="3.8472" fill="#6f3c96" stop-color="#000000" stroke-width=".17323" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <ellipse transform="matrix(.99952 -.03094 -.030186 .99954 0 0)" cx="90.542" cy="69.101" rx="1.7751" ry="1.8194" fill="#fff" stop-color="#000000" stroke-width=".063492" style="paint-order:stroke fill markers"/>
+   <ellipse transform="matrix(.99409 -.10859 -.099876 .995 0 0)" cx="99.69" cy="77.875" rx=".6081" ry=".66116" fill="#fff" stop-color="#000000" stroke-width=".022402" style="paint-order:stroke fill markers"/>
+  </g>
+  <g transform="matrix(.69936 -.38267 .38267 .69936 3.1088 115.15)">
+   <circle cx="89.675" cy="66.626" r="5.4408" fill="#fff" stop-color="#000000" stroke-width=".2306" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <ellipse transform="matrix(.99958 -.02892 -.02826 .9996 0 0)" cx="92.391" cy="69.922" rx="4.162" ry="4.2592" fill="#6f3c96" stop-color="#000000" stroke-width=".10676" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <ellipse transform="matrix(.99485 -.10139 -.09375 .9956 0 0)" cx="97.396" cy="76" rx="2.0521" ry="2.2194" fill="#fff" stop-color="#000000" stroke-width=".075399" style="paint-order:stroke fill markers"/>
+   <ellipse transform="matrix(.99485 -.10139 -.09375 .9956 0 0)" cx="100.48" cy="76.249" rx=".52183" ry=".56438" fill="#fff" stop-color="#000000" stroke-width=".019173" style="paint-order:stroke fill markers"/>
+  </g>
+  <g>
+   <g transform="matrix(1.0569 -.060643 .060643 1.0569 26.001 -125.49)" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers">
+    <path d="m83.233 264.09c1.3749-10.275-0.39398-13.039 0.0872-16.806 0.67659-5.2982 4.746-4.5021 4.746-4.5021s1.5269-2.4613 4.2738-1.8648c2.1235 0.46109 2.2335 2.808 2.2335 2.808 2.8778 0.25192 2.4768 5.381-0.38404 4.3925 2.2327 6.1506-6.2266 26.225-10.956 15.973z" fill="url(#f)" stop-color="#000000" stroke-width=".15535" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+    <g transform="translate(-3.7071 .75476)" fill="#c5e6ff" stop-color="#000000" stroke-width=".15535" style="font-variation-settings:normal;paint-order:stroke fill markers">
+     <ellipse cx="98.642" cy="246" rx="1.0305" ry=".94153" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <ellipse cx="96.163" cy="244.51" rx="1.3341" ry="1.7602" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <ellipse cx="94.149" cy="247.25" rx=".88591" ry="1.1688" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <ellipse cx="96.188" cy="249.46" rx="1.2478" ry="2.7807" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+    </g>
+   </g>
+   <g transform="matrix(.57946 -.7417 .7417 .57946 -127.03 55.475)" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers">
+    <path d="m56.046 266.67c7.5699 5.9702 17.419 10.571 19.528 10.322 2.109-0.24955 3.3128-2.2665 3.7287-3.4888 0.52109-1.5316-10.731-14.589-11.874-15.89 0.32892-1.0942-1.5754-5.5451-5.546-3.8158-3.0041-1.2454-6.0524 0.42912-6.432 2.6888-3.9297 2.285-3.2641 7.1391 0.59611 10.184z" fill="url(#g)" stop-color="#000000" stroke-width=".17474" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+    <g transform="matrix(1.1026 -.13046 .13046 1.1026 -45.728 -19.707)" fill="#c5e6ff" stop-color="#000000" stroke-width=".15916" style="font-variation-settings:normal;paint-order:stroke fill markers">
+     <ellipse transform="matrix(.9778 .20955 0 1 0 0)" cx="70.598" cy="247.73" rx="2.9764" ry="2.5809" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <ellipse transform="matrix(.9778 .20955 0 1 0 0)" cx="65.109" cy="247.53" rx="2.0976" ry="1.8189" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <ellipse transform="matrix(.9778 .20955 0 1 0 0)" cx="67.141" cy="244.27" rx="1.7554" ry="1.5221" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <ellipse transform="matrix(.9778 .20955 0 1 0 0)" cx="70.744" cy="243.35" rx="1.424" ry="1.2348" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+    </g>
+   </g>
+   <g transform="matrix(1.0974 .10208 -.10208 1.0974 -155.17 -163.27)" stop-color="#000000" stroke-width=".10072" style="font-variation-settings:normal;paint-order:stroke fill markers">
+    <path transform="matrix(.25054 -.023305 .023305 .25054 -10.304 35.002)" d="m1029.2 895.28a66.355 66.355 0 0 0-39.584 13.266 66.355 66.355 0 0 0-13.283 92.895 66.355 66.355 0 0 0 0.0176 0.023c-0.62929 2.3629 0.94865 2.8282 2.2559 2.8398a66.355 66.355 0 0 0 0.7793 0.9122c-0.59282 1.0177-1.1283 2.4813 0.21874 3.0683 1.1131 0.485 1.9736 0.2552 2.5508-0.08a66.355 66.355 0 0 0 1.2051 1.1914c0.51044 1.948 1.6838 4.8949 4.3145 6.4532 2.4316 1.4403 4.7543 1.803 6.2754 1.8652a66.355 66.355 0 0 0 72.361-0.9238c3.1401-0.866 9.7786-3.3031 12.859-7.2227 1.7809-2.2659 3.0816-5.8022 4.002-9.0254a66.355 66.355 0 0 0 0.7148-1.0058c2.147-1.0919 6.4143-3.6463 7.6172-7.3555 0.6794-2.0949 0.7104-5.4221 0.5332-8.582a66.355 66.355 0 0 0-9.5254-61.77 66.355 66.355 0 0 0-53.312-26.549z" fill="url(#c)" stop-color="#000000" stroke-width=".4003" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+    <path id="n" transform="matrix(.24151 -.022465 .022465 .24151 -1.1059 42.305)" d="m1098.5 931.63c-4.544-0.0381-10.936 1.7831-18.816 4.4258 1.7268 0.0494 24.708-3.8899 23.615 6.5332-4.7016-1.2612-10.405-2.3628-16.893-3.4668 0.9862 0.54601 8.814 3.1939 15.389 7.0078-5.1723 6.0651-21.588 3.4297-21.588 3.4297s18.368 6.5156 24.228-1.7832c5.4471 3.6984 8.9804 8.2363 4.7344 12.953-9.6335 10.702-32.822-6.5723-32.822-6.5723s21.735 24.028 35.693 8.9023c9.7705-10.588 6.0612-15.899-5.9785-19.66 0.01-0.0734 0.028-0.13833 0.037-0.21289 1.03-8.3877-1.7574-11.508-7.5996-11.557z" fill="url(#d)" stop-color="#000000" stroke-width=".41526" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+    <use transform="matrix(.53565 .15195 -.15195 .53565 171.13 80.267)" width="100%" height="100%" fill="#e96800" xlink:href="#n"/>
+   </g>
+  </g>
+  <g>
+   <path d="m110.78 125.92c-0.66396 0.36925-6.4066 4.7034-7.468 10.083-1.0614 5.38 2.3177-5.5156 7.468-10.083z" fill="#df66d6" fill-opacity=".43106" stop-color="#000000" stroke-width=".11636" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <g transform="matrix(.93746 -.13388 .13388 .93746 17.287 -86.66)" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers">
+    <g fill="#fff" stroke-width=".25083">
+     <path d="m74.913 234.75-0.6 1.8398 1.8758-0.59821c-0.05809-0.87999-0.20144-1.6517-1.2758-1.2416z" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <path d="m77.385 237.96-0.52638 1.7304 1.8282-0.65854c-0.08656-0.76956-0.1349-1.5845-1.3019-1.0719z" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <path d="m81.586 240.52 0.1925 1.8002 1.4732-1.348c-0.2949-0.5979-0.95215-1.2621-1.6657-0.45224z" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+    </g>
+    <path d="m74.546 234.12c0.12509 1.4814 1.196 2.1 2.1169 2.8554 0.84925 2.3981 2.5143 3.019 4.1716 2.8963 0.93537 1.8037 3.5364 1.9913 4.6867 0.7434 1.5465-3.5331 1.7666-8.6792-4.8614-10.376-2.474-0.49294-6.3081 1.5786-6.1137 3.8805z" fill="url(#j)" stop-color="#000000" stroke-width=".17368" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   </g>
+   <g transform="matrix(.64948 -.10515 .10515 .64948 28.38 94.904)" fill="#85a4bf" stop-color="#000000" stroke-width=".23198" style="font-variation-settings:normal;paint-order:stroke fill markers">
+    <g transform="matrix(1.3023 -.17431 .17431 1.3023 -39.028 .63457)" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers">
+     <path d="m108.8 64.175 2.6156 2.8902 0.73854-2.9312z" fill="#fffefd" stop-color="#000000" stroke-width=".19024" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <path d="m101.11 67.705 2.7226 2.2217 1.3044-3.9781z" fill="#fffefd" stop-color="#000000" stroke-width=".27358" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <ellipse cx="109.57" cy="61.309" rx="4.9405" ry="3.93" fill="url(#l)" stop-color="#000000" stroke-width=".19024" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <ellipse transform="matrix(.99997 .0071282 .0081913 .99997 0 0)" cx="100.86" cy="62.435" rx="6.5262" ry="5.2116" fill="url(#m)" stop-color="#000000" stroke-width=".19026" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <path d="m101.29 59.046c-0.0591-1.7434 5.9265-2.8525 6.9232-2.0303 0.61813 0.50992-1.1465 4.4931-1.9989 4.678-0.85239 0.18486-5.0062-1.6155-4.9243-2.6476z" fill="#c5e6ff" stop-color="#000000" stroke-width=".19024" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+    </g>
+   </g>
+   <path d="m107.17 143.16c-0.11873-2.2306 0.34398-6.4596 1.4368-9.3133 1.7304-4.5189 4.4933-7.3955 4.8713-7.1454 0.63072 0.41728-1.9423 3.1672-3.6122 7.3288-1.7601 4.3861-2.641 10.159-2.6958 9.1299z" fill="#df66d6" fill-opacity=".43106" stop-color="#000000" stroke-width=".11101" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <g transform="matrix(1.062 -.09224 .09224 1.062 19.425 -117)" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers">
+    <g fill="#fff" stroke-width=".22283">
+     <path d="m55.329 242.73 1.9092 0.31594-1.3957 1.3886c-0.75407-0.45731-1.3728-0.94037-0.5135-1.7046z" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <path d="m57.468 245.96 1.7782 0.33082-1.4274 1.3186c-0.64295-0.43165-1.3438-0.85031-0.35082-1.6494z" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+     <path d="m57.811 249.89 1.5086 1.0009-1.8754 0.68565c-0.39456-0.53737-0.68084-1.4268 0.36675-1.6866z" stop-color="#000000" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+    </g>
+    <path d="m46.805 245.93c5.9945-6.3544 8.5851-3.9564 9.5686-1.818 2.0111 0.98051 1.7069 4.0534 1.3747 4.9319 1.2425 2.7163-1.6376 4.1635-1.6376 4.1635s-4.0508 4.3916-8.2012 1.2334c-4.1504-3.1582-1.5616-7.8597-1.1045-8.5108z" fill="url(#k)" stop-color="#000000" stroke-width=".15429" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   </g>
+   <path d="m113.82 156.46c0.74511 0.14835 7.9279 0.56195 12.219-2.8518 4.2916-3.4138-5.3368 2.7039-12.219 2.8518z" fill="#d535c9" fill-opacity=".43106" stop-color="#000000" stroke-width=".11636" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+   <path d="m127.73 145.65c-1.3534 1.7771-4.4435 4.701-7.1237 6.1688-4.2441 2.3243-8.2121 2.7285-8.3384 2.2932-0.21064-0.72634 3.5307-1.1569 7.4974-3.248 4.1807-2.2039 8.5889-6.0336 7.9647-5.214z" fill="#d535c9" fill-opacity=".43106" stop-color="#000000" stroke-width=".11101" style="font-variation-settings:normal;paint-order:stroke fill markers"/>
+  </g>
+ </g>
+</svg>
