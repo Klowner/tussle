@@ -16,5 +16,8 @@
   "license": "MIT",
   "devDependencies": {
     "types-cloudflare-worker": "^1.2.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

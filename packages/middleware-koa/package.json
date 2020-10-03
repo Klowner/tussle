@@ -16,5 +16,8 @@
   "license": "MIT",
   "dependencies": {
     "@types/koa": "^2.11.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
