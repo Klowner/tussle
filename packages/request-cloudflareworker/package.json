@@ -20,5 +20,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "jest": "^26.4.2"
   }
 }

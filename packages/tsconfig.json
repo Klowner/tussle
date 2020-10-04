@@ -3,6 +3,7 @@
   "files": [],
   "references": [
     {"path": "./core"},
+    {"path": "./spec"},
     {"path": "./middleware-koa"},
     {"path": "./middleware-cloudflareworker"},
     {"path": "./storage-b2"},

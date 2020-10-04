@@ -15,6 +15,7 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "devDependencies": {
+    "jest": "^26.4.2",
     "types-cloudflare-worker": "^1.2.0"
   },
   "publishConfig": {
