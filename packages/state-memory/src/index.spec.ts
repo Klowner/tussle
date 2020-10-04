@@ -1,9 +1,9 @@
-import type { TestRecord } from '@tussle/spec/test/state';
+import { StateTestRecord } from '@tussle/spec';
 import { TussleStateService } from '@tussle/spec/interface/state';
 import { stateTests as stateSpecConformanceTests } from '@tussle/spec';
 import { TussleStateMemory } from './index';
 
-function runStorageTest<T extends TussleStateService<TestRecord>>(
+function runStorageTest<T extends TussleStateService<StateTestRecord>>(
   name: string,
   create: () => T,
 ): void {
@@ -11,6 +11,6 @@ function runStorageTest<T extends TussleStateService<TestRecord>>(
 }
 
 runStorageTest(
-  require('../package.json').name,
-  () => new TussleStateMemory<TestRecord>(),
+  '@tussle/state-memory',
+  () => new TussleStateMemory<StateTestRecord>(),
 );

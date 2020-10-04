@@ -24,7 +24,6 @@ export class Pool<T> {
     const item = await this.acquire();
     return Object.assign(item, {
       release: (keep = false): void => {
-        console.log('release', keep ? 'keep' : 'discard', (item as any).uploadUrl);
         keep && this.release(item);
       }
     });

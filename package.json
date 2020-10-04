@@ -1,6 +1,5 @@
 {
   "name": "@klowner/tussle",
-  "version": "0.0.0",
   "description": "summon your own tus daemon",
   "workspaces": [
     "packages/*",

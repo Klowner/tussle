@@ -1,10 +1,10 @@
 import type { B2AuthOptions, B2AuthInitOptions, B2ActionObservable } from './types';
-import { Observable, ReplaySubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import type { TussleRequestService } from '@tussle/core';
 import { B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';
 import { b2AuthorizeAccountRequest } from './actions/b2AuthorizeAccount';
 import { Subject, from} from 'rxjs';
-import { startWith, flatMap, switchMap, shareReplay, take, retryWhen, share, tap} from 'rxjs/operators';
+import { startWith, flatMap, switchMap, shareReplay, tap} from 'rxjs/operators';
 
 export const B2_API_URL = 'https://api.backblazeb2.com/b2api/v2';
 

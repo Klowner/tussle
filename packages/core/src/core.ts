@@ -18,8 +18,6 @@ export interface TussleConfig {
 type IncomingRequestMethod = TussleIncomingRequest<unknown>['request']['method'];
 type IncomingRequestHandler = <T>(core: Tussle, ctx: TussleIncomingRequest<T>) => Observable<TussleIncomingRequest<T>>;
 
-const commaJoin = (...items: string[]) => items.join(',');
-
 export type TussleEventHook =
   | 'before-create'
   | 'after-create'

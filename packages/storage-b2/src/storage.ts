@@ -1,5 +1,5 @@
 import type { Observable } from "rxjs";
-import { catchError, filter, flatMap, mapTo, map, share, switchMap, tap, withLatestFrom, take, endWith } from 'rxjs/operators';
+import { catchError, filter, flatMap, map, share, switchMap, tap, withLatestFrom, take, endWith } from 'rxjs/operators';
 import { combineLatest, defer, EMPTY, from, of, throwError } from "rxjs";
 import type {
   TusProtocolExtension,

@@ -1,2 +1,3 @@
+import type { StateTestRecord } from './stateTests';
 import { stateTests } from './stateTests';
-export { stateTests, };
+export { stateTests, StateTestRecord, };

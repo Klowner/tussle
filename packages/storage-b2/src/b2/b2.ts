@@ -1,5 +1,5 @@
 import { Observable, throwError } from "rxjs";
-import { switchMap, skip, tap, flatMap, take, catchError, filter } from "rxjs/operators";
+import { switchMap, skip, tap, take, catchError }  from "rxjs/operators";
 import type { B2ActionConfig, B2InitOptions, B2Options } from './types';
 import type { TussleRequestService } from '@tussle/core';
 import { B2Auth } from './b2auth';

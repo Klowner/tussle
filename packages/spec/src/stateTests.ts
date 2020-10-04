@@ -1,12 +1,12 @@
 import type { TussleStateService } from '../interface/state';
 
-export interface TestRecord {
+export interface StateTestRecord {
   id: number;
   name: string;
   data: Record<string, unknown> | null;
 }
 
-const exampleRecords: TestRecord[] = [
+const exampleRecords: StateTestRecord[] = [
   {
     id: 42,
     name: 'unicorn',
@@ -27,7 +27,7 @@ const exampleRecords: TestRecord[] = [
   }
 ];
 
-export function stateTests<T extends TussleStateService<TestRecord>>(
+export function stateTests<T extends TussleStateService<StateTestRecord>>(
   name: string,
   create: () => T,
 ): void
