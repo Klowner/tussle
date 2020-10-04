@@ -9,15 +9,17 @@ export interface StateTestRecord {
 const exampleRecords: StateTestRecord[] = [
   {
     id: 42,
-    name: 'unicorn',
+    name: '🦄unicorn',
     data: {
-      rainbow: 'dolphin',
+      rainbow: '🐬dolphin',
       description: [
+        'good strings goOd sTrings',
         '👀👌👀👌👀',
-        'good stuff',
+        'good strings',
         '✔✔if i do ƽaү so my self 💯',
         '(chorus: ʳᶦᵍʰᵗ ᵗʰᵉʳᵉ) mMMMMᎷМ💯 👌',
       ],
+      '🥞': 'pancakey',
     },
   },
   {
