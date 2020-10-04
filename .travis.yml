@@ -1,4 +1,7 @@
 language: node_js
+node_js:
+  - node
+  - lts/*
 services:
   - postgresql # for @tussle/state-postgres
 before_script:
