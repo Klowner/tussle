@@ -1,0 +1,4 @@
+CREATE TABLE tussle_state (
+  key TEXT NOT NULL PRIMARY KEY,
+  value JSON NOT NULL,
+);

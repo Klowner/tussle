@@ -2,13 +2,6 @@ import type { TussleStateService } from '@tussle/core/src/state.interface';
 import { TTLCache } from '@tussle/core';
 import { Pool } from 'pg';
 
-/*
-CREATE TABLE tussle_state (
-  key TEXT NOT NULL PRIMARY KEY,
-  value JSON NOT NULL,
-);
-*/
-
 export interface TussleStatePostgresConfig {
   pool: () => Pool;
   table: string;

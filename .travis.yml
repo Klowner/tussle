@@ -1,0 +1,7 @@
+language: node_js
+services:
+  - postgresql # for @tussle/state-postgres
+before_script:
+  - psql -c 'create database tussle_test;' -U postgres
+  - psql -f ./packages/state-postgres/create_table.psql -U postgres
+
