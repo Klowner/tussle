@@ -81,6 +81,11 @@ function stateTests(name, create) {
                 const other = yield state.getItem('beta');
                 expect(other).toEqual(original);
             }));
+            test('returns null if no match was found for removal', () => __awaiter(this, void 0, void 0, function* () {
+                yield state.removeItem('alpha');
+                const gone = yield state.removeItem('alpha');
+                expect(gone).toBeNull();
+            }));
         });
         describe('key()', () => {
             let state;

@@ -92,6 +92,12 @@ export function stateTests<T extends TussleStateService<StateTestRecord>>(
         const other = await state.getItem('beta');
         expect(other).toEqual(original);
       });
+
+      test('returns null if no match was found for removal', async () => {
+        await state.removeItem('alpha');
+        const gone = await state.removeItem('alpha');
+        expect(gone).toBeNull();
+      });
     });
 
     describe('key()', () => {
