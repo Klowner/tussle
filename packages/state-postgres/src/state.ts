@@ -35,7 +35,6 @@ class TussleStatePostgres<T> implements TussleStateService<T> {
       ],
     );
     const result = res.rowCount ? res.rows[0].value : cached;
-    console.log('GETITEM', result);
     return result;
   }
 
