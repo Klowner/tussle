@@ -22,7 +22,7 @@ class TussleStatePostgres<T> implements TussleStateService<T> {
     };
 
     this.pool = this.config.pool();
-    this.cache = new TTLCache<T>(30 * 1000);
+    this.cache = new TTLCache<T>(30 * 1000 * 1000);
   }
 
   public async getItem(key: string): Promise<T | null> {
@@ -71,7 +71,7 @@ class TussleStatePostgres<T> implements TussleStateService<T> {
         nth,
       ],
     );
-    return res.rows[0];
+    return res.rows[0]?.key || null;
   }
 }
 
