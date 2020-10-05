@@ -8,6 +8,6 @@ services:
   - postgresql # for @tussle/state-postgres
 before_script:
   - psql -c 'create database tussle_test;' -U postgres
-  - psql -f ./packages/state-postgres/create_table.psql -U postgres
+  - psql -f ./packages/state-postgres/create_table.psql -d tussle_test -U postgres
 env:
   - POSTGRES_CONNECT_STRING=postgres://postgres:postgres@localhost/tussle_test
