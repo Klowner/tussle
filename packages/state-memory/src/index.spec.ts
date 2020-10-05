@@ -3,14 +3,14 @@ import { TussleStateService } from '@tussle/spec/interface/state';
 import { stateTests as stateSpecConformanceTests } from '@tussle/spec';
 import { TussleStateMemory } from './index';
 
-function runStorageTest<T extends TussleStateService<StateTestRecord>>(
+function runStateTest<T extends TussleStateService<StateTestRecord>>(
   name: string,
-  create: () => T,
+  create: () => Promise<T>,
 ): void {
   stateSpecConformanceTests(name, create);
 }
 
-runStorageTest(
+runStateTest(
   '@tussle/state-memory',
-  () => new TussleStateMemory<StateTestRecord>(),
+  async () => new TussleStateMemory<StateTestRecord>(),
 );

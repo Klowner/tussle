@@ -13,15 +13,17 @@ exports.stateTests = void 0;
 const exampleRecords = [
     {
         id: 42,
-        name: 'unicorn',
+        name: '🦄unicorn',
         data: {
-            rainbow: 'dolphin',
+            rainbow: '🐬dolphin',
             description: [
+                'good strings goOd sTrings',
                 '👀👌👀👌👀',
-                'good stuff',
+                'good strings',
                 '✔✔if i do ƽaү so my self 💯',
                 '(chorus: ʳᶦᵍʰᵗ ᵗʰᵉʳᵉ) mMMMMᎷМ💯 👌',
             ],
+            '🥞': 'pancakey',
         },
     },
     {
@@ -34,9 +36,9 @@ function stateTests(name, create) {
     describe(`${name} - state service specification conformance`, () => {
         describe('setItem()', () => {
             let state;
-            beforeEach(() => {
-                state = create();
-            });
+            beforeEach(() => __awaiter(this, void 0, void 0, function* () {
+                state = yield create();
+            }));
             test('replaces existing items with an identical key', () => __awaiter(this, void 0, void 0, function* () {
                 yield state.setItem('alpha', exampleRecords[1]);
                 const result1 = yield state.getItem('alpha');
@@ -48,9 +50,9 @@ function stateTests(name, create) {
         });
         describe('getItem()', () => {
             let state;
-            beforeEach(() => {
-                state = create();
-            });
+            beforeEach(() => __awaiter(this, void 0, void 0, function* () {
+                state = yield create();
+            }));
             test('returns null when item is not found', () => __awaiter(this, void 0, void 0, function* () {
                 const result = yield state.getItem('alpha');
                 expect(result).toBe(null);
@@ -64,9 +66,9 @@ function stateTests(name, create) {
         });
         describe('removeItem()', () => {
             let state;
-            beforeEach(() => {
-                state = create();
-            });
+            beforeEach(() => __awaiter(this, void 0, void 0, function* () {
+                state = yield create();
+            }));
             test('returns removed item', () => __awaiter(this, void 0, void 0, function* () {
                 const original = exampleRecords[0];
                 // set two items
@@ -79,12 +81,17 @@ function stateTests(name, create) {
                 const other = yield state.getItem('beta');
                 expect(other).toEqual(original);
             }));
+            test('returns null if no match was found for removal', () => __awaiter(this, void 0, void 0, function* () {
+                yield state.removeItem('alpha');
+                const gone = yield state.removeItem('alpha');
+                expect(gone).toBeNull();
+            }));
         });
         describe('key()', () => {
             let state;
-            beforeEach(() => {
-                state = create();
-            });
+            beforeEach(() => __awaiter(this, void 0, void 0, function* () {
+                state = yield create();
+            }));
             test('returns nth key in no particular order', () => __awaiter(this, void 0, void 0, function* () {
                 const originalKeys = ['alpha', 'beta'];
                 yield state.setItem('alpha', exampleRecords[0]);

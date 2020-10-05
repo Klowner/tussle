@@ -9,15 +9,17 @@ export interface StateTestRecord {
 const exampleRecords: StateTestRecord[] = [
   {
     id: 42,
-    name: 'unicorn',
+    name: '🦄unicorn',
     data: {
-      rainbow: 'dolphin',
+      rainbow: '🐬dolphin',
       description: [
+        'good strings goOd sTrings',
         '👀👌👀👌👀',
-        'good stuff',
+        'good strings',
         '✔✔if i do ƽaү so my self 💯',
         '(chorus: ʳᶦᵍʰᵗ ᵗʰᵉʳᵉ) mMMMMᎷМ💯 👌',
       ],
+      '🥞': 'pancakey',
     },
   },
   {
@@ -29,14 +31,14 @@ const exampleRecords: StateTestRecord[] = [
 
 export function stateTests<T extends TussleStateService<StateTestRecord>>(
   name: string,
-  create: () => T,
+  create: () => Promise<T>,
 ): void
 {
   describe(`${name} - state service specification conformance`, () => {
     describe('setItem()', () => {
-      let state: ReturnType<typeof create>;
-      beforeEach(() => {
-        state = create();
+      let state: T;
+      beforeEach(async () => {
+        state = await create();
       });
 
       test('replaces existing items with an identical key', async () => {
@@ -51,9 +53,9 @@ export function stateTests<T extends TussleStateService<StateTestRecord>>(
     });
 
     describe('getItem()', () => {
-      let state: ReturnType<typeof create>;
-      beforeEach(() => {
-        state = create();
+      let state: T;
+      beforeEach(async () => {
+        state = await create();
       });
 
       test('returns null when item is not found', async () => {
@@ -70,9 +72,9 @@ export function stateTests<T extends TussleStateService<StateTestRecord>>(
     });
 
     describe('removeItem()', () => {
-      let state: ReturnType<typeof create>;
-      beforeEach(() => {
-        state = create();
+      let state: T;
+      beforeEach(async () => {
+        state = await create();
       });
 
       test('returns removed item', async () => {
@@ -90,12 +92,18 @@ export function stateTests<T extends TussleStateService<StateTestRecord>>(
         const other = await state.getItem('beta');
         expect(other).toEqual(original);
       });
+
+      test('returns null if no match was found for removal', async () => {
+        await state.removeItem('alpha');
+        const gone = await state.removeItem('alpha');
+        expect(gone).toBeNull();
+      });
     });
 
     describe('key()', () => {
-      let state: ReturnType<typeof create>;
-      beforeEach(() => {
-        state = create();
+      let state: T;
+      beforeEach(async () => {
+        state = await create();
       });
 
       test('returns nth key in no particular order', async () => {
