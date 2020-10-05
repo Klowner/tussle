@@ -1,6 +1,7 @@
-node_modules
-yarn-error.log
-tsconfig.tsbuildinfo
 .env
+coverage
+node_modules
+tsconfig.tsbuildinfo
+yarn-error.log
 
 
