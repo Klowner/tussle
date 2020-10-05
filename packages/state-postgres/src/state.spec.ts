@@ -11,11 +11,12 @@ function runStateTest<T extends TussleStateService<StateTestRecord>>(
   stateSpecConformanceTests(name, create);
 }
 
-declare const POSTGRES_CONNECT_STRING: string;
-
 const pool = new Pool({
   max: 1,
-  connectionString: POSTGRES_CONNECT_STRING,
+  connectionString: (
+    process.env['POSTGRES_CONNECT_STRING'] ||
+    'postgresql://postgres:postgres@localhost/tussle_test'
+  ),
 });
 
 runStateTest(
