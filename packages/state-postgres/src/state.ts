@@ -71,7 +71,7 @@ class TussleStatePostgres<T> implements TussleStateService<T> {
         nth,
       ],
     );
-    return res.rows[0]?.key || null;
+    return res.rowCount && res.rows[0].key || null;
   }
 }
 

@@ -8,7 +8,7 @@ const pool = new Pool({
   max: 1,
   connectionString: (
     process.env['POSTGRES_CONNECT_STRING'] ||
-    'postgresql://postgres:postgres@localhost/tussle_test'
+    'postgresql://postgres:postgres@localhost'
   ),
 });
 

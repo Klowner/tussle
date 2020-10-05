@@ -120,7 +120,7 @@ export function stateTests<T extends TussleStateService<StateTestRecord>>(
       });
 
       test('returns null if key does not exist at requested index', async () => {
-        const result = await state.getItem('nonexistant-key');
+        const result = await state.key(42);
         expect(result).toBeNull();
       });
     });
