@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "test": "run-s test:unit",
-    "test:unit": "npm run build:lib && jest",
+    "test:unit": "npm run build:lib && jest --coverage",
     "build": "run-s clean && run-p build:lib",
     "build:lib": "tsc -b packages/tsconfig.json",
     "watch": "yarn run build:lib --watch --preserveWatchOutput",
