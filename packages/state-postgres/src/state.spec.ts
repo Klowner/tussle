@@ -4,9 +4,9 @@ import { stateTests as stateSpecConformanceTests } from '@tussle/spec';
 import { TussleStatePostgres } from './state';
 import { Pool } from 'pg';
 
-function runStorageTest<T extends TussleStateService<StateTestRecord>>(
+function runStateTest<T extends TussleStateService<StateTestRecord>>(
   name: string,
-  create: () => T,
+  create: () => Promise<T>,
 ): void {
   stateSpecConformanceTests(name, create);
 }
@@ -18,13 +18,10 @@ const pool = new Pool({
   connectionString: POSTGRES_CONNECT_STRING,
 });
 
-runStorageTest(
+runStateTest(
   '@tussle/state-memory',
-  () => new TussleStatePostgres<StateTestRecord>({
+  async () => new TussleStatePostgres<StateTestRecord>({
     table: 'tussle_state',
-    pool: async () => {
-      await pool.query('TRUNCATE tussle_state;');
-      return pool;
-    }
+    pool: () => pool,
   }),
 );

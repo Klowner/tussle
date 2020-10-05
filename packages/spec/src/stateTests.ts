@@ -31,14 +31,14 @@ const exampleRecords: StateTestRecord[] = [
 
 export function stateTests<T extends TussleStateService<StateTestRecord>>(
   name: string,
-  create: () => T,
+  create: () => Promise<T>,
 ): void
 {
   describe(`${name} - state service specification conformance`, () => {
     describe('setItem()', () => {
-      let state: ReturnType<typeof create>;
-      beforeEach(() => {
-        state = create();
+      let state: T;
+      beforeEach(async () => {
+        state = await create();
       });
 
       test('replaces existing items with an identical key', async () => {
@@ -53,9 +53,9 @@ export function stateTests<T extends TussleStateService<StateTestRecord>>(
     });
 
     describe('getItem()', () => {
-      let state: ReturnType<typeof create>;
-      beforeEach(() => {
-        state = create();
+      let state: T;
+      beforeEach(async () => {
+        state = await create();
       });
 
       test('returns null when item is not found', async () => {
@@ -72,9 +72,9 @@ export function stateTests<T extends TussleStateService<StateTestRecord>>(
     });
 
     describe('removeItem()', () => {
-      let state: ReturnType<typeof create>;
-      beforeEach(() => {
-        state = create();
+      let state: T;
+      beforeEach(async () => {
+        state = await create();
       });
 
       test('returns removed item', async () => {
@@ -95,9 +95,9 @@ export function stateTests<T extends TussleStateService<StateTestRecord>>(
     });
 
     describe('key()', () => {
-      let state: ReturnType<typeof create>;
-      beforeEach(() => {
-        state = create();
+      let state: T;
+      beforeEach(async () => {
+        state = await create();
       });
 
       test('returns nth key in no particular order', async () => {
