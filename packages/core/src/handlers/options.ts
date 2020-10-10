@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import type { TussleIncomingRequest } from '../request.interface';
+import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { Tussle } from '../core';
 import { map } from 'rxjs/operators';
 

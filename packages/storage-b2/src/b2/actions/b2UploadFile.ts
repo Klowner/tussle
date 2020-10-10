@@ -1,6 +1,6 @@
 // https://www.backblaze.com/b2/docs/b2_upload_file.html
 import type { B2ActionConfig, B2Capability, B2ActionObservable, B2FileInfo } from '../types';
-import type { TussleIncomingRequest } from '@tussle/core/src/request.interface';
+import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 
 export const requiredCapability: B2Capability = 'writeFiles';
 

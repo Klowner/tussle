@@ -1,7 +1,7 @@
 import type { Observable } from 'rxjs';
-import type { TusProtocolExtension } from './tus-protocol.interface';
-import type { TussleIncomingRequest } from './request.interface';
-import type { TussleStorage, TussleStorageCreateFileResponse, TussleStorageCreateFileParams } from './storage.interface';
+import type { TusProtocolExtension } from '@tussle/spec/interface/tus';
+import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
+import type { TussleStorage, TussleStorageCreateFileResponse, TussleStorageCreateFileParams } from '@tussle/spec/interface/storage';
 import { of, from } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import handleCreate from './handlers/create';

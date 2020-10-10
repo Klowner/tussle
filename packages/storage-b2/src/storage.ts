@@ -6,8 +6,8 @@ import type {
   TussleRequestService,
   TussleStorage
 } from "@tussle/core";
-import type {TussleOutgoingResponse} from "@tussle/core/src/request.interface";
-import type {TussleStateService} from "@tussle/core/src/state.interface";
+import type {TussleOutgoingResponse} from '@tussle/spec/interface/request';
+import type {TussleStateService} from '@tussle/spec/interface/state';
 import type {
   TussleStorageCreateFileParams,
   TussleStorageCreateFileResponse,
@@ -16,7 +16,7 @@ import type {
   TussleStoragePatchFileResponse,
   TussleStorageFileInfoParams,
   TussleStorageFileInfo,
-} from "@tussle/core/src/storage.interface";
+} from '@tussle/spec/interface/storage';
 import type {B2StartLargeFileResponse} from "./b2/actions/b2StartLargeFile";
 import type {B2UploadPartResponse} from './b2/actions/b2UploadPart';
 import type {PoolType, Releasable} from './b2/pool';

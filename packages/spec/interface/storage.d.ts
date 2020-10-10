@@ -1,6 +1,6 @@
 import type { Readable } from 'stream';
-import type { TusProtocolExtension } from './tus-protocol.interface';
-import type { TussleIncomingRequest } from './request.interface';
+import type { TusProtocolExtension } from './tus';
+import type { TussleIncomingRequest } from './request';
 import type { Observable } from 'rxjs';
 
 export interface TussleStorageCreateFileParams {
@@ -64,5 +64,4 @@ export interface TussleStorage {
   getFileInfo(
     params: TussleStorageFileInfoParams
   ): Observable<TussleStorageFileInfo>;
-  // deleteFile(params: TussleStorageDeleteFileParams): Observable<unknown>;
 }

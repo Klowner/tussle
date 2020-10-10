@@ -1,8 +1,4 @@
-// import type CloudflareWorkerGlobalScope from 'types-cloudflare-worker';
-// import type { Response, Request } from 'types-cloudflare-worker';
-// declare let self: CloudflareWorkerGlobalScope;
-
-import type { TussleIncomingRequest } from '@tussle/core/src/request.interface';
+import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import { Tussle, TussleConfig } from '@tussle/core';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';

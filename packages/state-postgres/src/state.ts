@@ -1,4 +1,4 @@
-import type { TussleStateService } from '@tussle/core/src/state.interface';
+import type { TussleStateService } from '@tussle/spec/interface/state';
 import { TTLCache } from '@tussle/core';
 import { Pool } from 'pg';
 

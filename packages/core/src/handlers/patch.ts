@@ -1,7 +1,7 @@
 import type { Observable } from 'rxjs';
 import type { Tussle } from '../core';
-import type { TussleIncomingRequest } from '../request.interface';
-import type { TussleStoragePatchFileResponse } from '../storage.interface';
+import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
+import type { TussleStoragePatchFileResponse } from '@tussle/spec/interface/storage';
 import { of } from 'rxjs';
 import { map, switchMap, flatMap } from 'rxjs/operators';
 

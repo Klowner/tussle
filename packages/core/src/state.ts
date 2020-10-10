@@ -1,4 +1,4 @@
-import type { TussleStateService } from './state.interface';
+import type { TussleStateService } from '@tussle/spec/interface/state';
 
 type SuperReturnType<T, U extends keyof TussleStateService<T>> = ReturnType<TussleStateService<T>[U]>;
 

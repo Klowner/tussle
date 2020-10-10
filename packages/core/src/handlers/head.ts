@@ -1,6 +1,6 @@
 import type { Observable } from "rxjs";
-import type { TussleIncomingRequest } from "../request.interface";
-import type { TussleStorageFileInfo } from '../storage.interface';
+import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
+import type { TussleStorageFileInfo } from '@tussle/spec/interface/storage';
 import type { Tussle } from '../core';
 import { switchMap, map } from 'rxjs/operators';
 

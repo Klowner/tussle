@@ -1,6 +1,6 @@
 import type { Observable } from 'rxjs';
 import type { TussleOutgoingRequest, TussleOutgoingResponse, TussleRequestService } from '@tussle/core';
-import type { TussleIncomingRequest } from '@tussle/core/src/request.interface';
+import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import { map } from 'rxjs/operators';
 import { from, defer } from 'rxjs';
 import { Base64 } from 'js-base64';
