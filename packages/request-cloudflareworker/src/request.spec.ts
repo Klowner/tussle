@@ -3,5 +3,5 @@ import { TussleRequestCloudflareWorker } from './request';
 
 requestServiceTests(
   '@tussle/request-cloudflareworker',
-  async () => new TussleRequestAxios(),
+  async () => new TussleRequestCloudflareWorker(),
 );
