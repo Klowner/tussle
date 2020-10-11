@@ -4,7 +4,7 @@ import { combineLatest, defer, EMPTY, from, of, throwError } from "rxjs";
 import type {
   TusProtocolExtension,
   TussleRequestService,
-  TussleStorage
+  TussleStorageService
 } from "@tussle/core";
 import type {TussleOutgoingResponse} from '@tussle/spec/interface/request';
 import type {TussleStateService} from '@tussle/spec/interface/state';
@@ -74,7 +74,7 @@ function hasLargeFile(state: B2PersistentLocationState): state is B2PersistentLo
   return !!state.largeFile;
 }
 
-export class TussleStorageB2 implements TussleStorage {
+export class TussleStorageB2 implements TussleStorageService {
   private readonly b2: B2;
   private readonly uploadURLPool: ReturnType<typeof createUploadURLPool>;
   private readonly uploadPartURLPools: TTLCache<B2UploadPartURLPool>;

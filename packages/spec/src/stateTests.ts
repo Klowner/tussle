@@ -29,7 +29,7 @@ const exampleRecords: StateTestRecord[] = [
   }
 ];
 
-export function stateTests<T extends TussleStateService<StateTestRecord>>(
+export function stateServiceTests<T extends TussleStateService<StateTestRecord>>(
   name: string,
   create: () => Promise<T>,
 ): void

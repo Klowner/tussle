@@ -1,7 +1,7 @@
 import type { Observable } from 'rxjs';
 import type { TusProtocolExtension } from '@tussle/spec/interface/tus';
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
-import type { TussleStorage, TussleStorageCreateFileResponse, TussleStorageCreateFileParams } from '@tussle/spec/interface/storage';
+import type { TussleStorageService, TussleStorageCreateFileResponse, TussleStorageCreateFileParams } from '@tussle/spec/interface/storage';
 import { of, from } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import handleCreate from './handlers/create';
@@ -11,7 +11,7 @@ import handleOptions from './handlers/options';
 
 export interface TussleConfig {
   maxSizeBytes?: number;
-  storage: TussleStorage | Record<'default' | string, TussleStorage>;
+  storage: TussleStorageService | Record<'default' | string, TussleStorageService>;
   hooks?: Partial<Record<TussleEventHook, TussleHookFunc>>;
 }
 
@@ -41,7 +41,7 @@ const supportedVersions = [
 export class Tussle {
   public readonly handlers: Partial<Record<IncomingRequestMethod, IncomingRequestHandler>> = {};
   public readonly extensions: Partial<Record<TusProtocolExtension, boolean>> = {};
-  public readonly storage: Partial<Record<'default' | string, TussleStorage>>;
+  public readonly storage: Partial<Record<'default' | string, TussleStorageService>>;
   public readonly hooks: Partial<Record<TussleEventHook, TussleHookFunc>> = {};
 
   constructor(private readonly cfg: TussleConfig) {
@@ -134,7 +134,7 @@ export class Tussle {
     this.handlers[method] = handler.bind(this);
   }
 
-  public getStorage(name = 'default'): TussleStorage {
+  public getStorage(name = 'default'): TussleStorageService {
     const storage = this.storage[name];
     if (!storage) {
       throw new Error('Unable to find storage: ' + name);
@@ -179,8 +179,8 @@ function respondWithUnsupportedProtocolVersion<T>(ctx: TussleIncomingRequest<T>)
   return ctx;
 }
 
-const isStorageService = (storage: unknown): storage is TussleStorage =>
-  storage && (storage as TussleStorage).createFile !== undefined;
+const isStorageService = (storage: unknown): storage is TussleStorageService =>
+  storage && (storage as TussleStorageService).createFile !== undefined;
 
 function isPromise<T>(maybePromise: (Promise<T> | Observable<T>)): maybePromise is Promise<T> {
   return typeof (maybePromise as Promise<T>).then === 'function';

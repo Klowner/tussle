@@ -50,7 +50,7 @@ export interface TussleStorageFileInfo {
   details?: unknown;
 }
 
-export interface TussleStorage {
+export interface TussleStorageService {
   readonly extensionsRequired: TusProtocolExtension[];
 
   createFile(

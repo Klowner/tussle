@@ -1,6 +1,6 @@
 import { StateTestRecord } from '@tussle/spec';
 import { TussleStateService } from '@tussle/spec/interface/state';
-import { stateTests as stateSpecConformanceTests } from '@tussle/spec';
+import { stateServiceTests as stateSpecConformanceTests } from '@tussle/spec';
 import { TussleStatePostgres } from './state';
 import { Pool } from 'pg';
 

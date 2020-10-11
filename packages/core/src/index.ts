@@ -1,6 +1,6 @@
 import { Tussle, TussleConfig } from './core';
 import type { TusProtocolExtension } from '@tussle/spec/interface/tus';
-import type { TussleStorage } from '@tussle/spec/interface/storage';
+import type { TussleStorageService } from '@tussle/spec/interface/storage';
 import type { TussleIncomingRequest, TussleOutgoingResponse, TussleOutgoingRequest, TussleRequestService } from '@tussle/spec/interface/request';
 import { TussleStateNamespace } from './state';
 import { TTLCache } from './util/ttlcache';
@@ -14,6 +14,6 @@ export {
   TussleOutgoingResponse,
   TussleRequestService,
   TussleStateNamespace,
-  TussleStorage,
+  TussleStorageService,
   TTLCache,
 };
