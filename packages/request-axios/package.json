@@ -10,7 +10,8 @@
     "build": "run-s clean build:tsc",
     "build:tsc": "tsc -b",
     "watch": "tsc -b -w --preserveWatchOutput",
-    "clean": "rimraf lib coverage tsconfig.tsbuildinfo"
+    "clean": "rimraf lib coverage tsconfig.tsbuildinfo",
+    "test": "jest"
   },
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
