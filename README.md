@@ -22,7 +22,7 @@ Middleware components handle communication between clients and the Tussle instan
 Tracking state is tricky and often your options are limited by your deployment environment.
 Tussle state components are modeled after the [Web Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API)
  - [state-memory](/packages/state-memory) - simple in-memory store, works anywhere
- - [state-postgres](/packages/state-postgers) - store upload state in a PostgreSQL database
+ - [state-postgres](/packages/state-postgres) - store upload state in a PostgreSQL database
  
 ### Storage
 Uploaded files have to be stored somewhere, that's the purpose of the *storage* components.
