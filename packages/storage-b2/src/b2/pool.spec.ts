@@ -8,7 +8,7 @@ describe('b2/pool', () => {
   describe('acquire', () => {
     test('calls alloc() when pool is empty', async () => {
       const alloc = incremental(0);
-      const pool = new Pool(async () => await alloc(), []);;
+      const pool = new Pool(async () => await alloc(), []);
       const result = await pool.acquire();
       expect(alloc).toHaveBeenCalled();
       expect(result).toBe(0);
@@ -33,7 +33,7 @@ describe('b2/pool', () => {
       expect(pool.toJSON()).toEqual([
         'already-in-pool-string',
         'released-string',
-      ])
+      ]);
     });
   });
 }); 
