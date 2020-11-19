@@ -23,6 +23,7 @@ export interface TussleStoragePatchFileParams {
 }
 
 interface Details {
+  [key: string]: unknown,
   tussleUploadMetadata: Record<string, string | number>,
 }
 
@@ -34,6 +35,13 @@ export interface TussleStoragePatchFileResponse {
   details?: Details;
 }
 
+export interface TussleStoragePatchFileCompleteResponse {
+  location: string;
+  success: boolean;
+  offset: number;
+  complete: true;
+  details: Details;
+}
 
 export interface TussleStorageDeleteFileParams {
 }

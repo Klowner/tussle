@@ -26,7 +26,7 @@ function allowedMethod(method: string, overrideMethod?: string): AllowedMethod |
 }
 
 const prepareRequest = async <T extends KoaContext>(
-  core: Tussle,
+  _core: Tussle,
   originalRequest: T
 ): Promise<TussleIncomingRequest<T> | null> =>
 {

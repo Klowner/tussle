@@ -86,6 +86,7 @@ const toResponse = <T>(
       headers: {
         'Location': createdFile.location,
         'Tussle-Storage': 'b2',
+        ...ctx.response?.headers,
       },
     };
   } else {

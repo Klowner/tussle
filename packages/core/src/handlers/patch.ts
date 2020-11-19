@@ -1,7 +1,7 @@
 import type { Observable } from 'rxjs';
 import type { Tussle } from '../core';
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
-import type { TussleStoragePatchFileResponse } from '@tussle/spec/interface/storage';
+import type { TussleStoragePatchFileResponse, TussleStoragePatchFileCompleteResponse } from '@tussle/spec/interface/storage';
 import { of } from 'rxjs';
 import { map, switchMap, flatMap } from 'rxjs/operators';
 
@@ -32,13 +32,18 @@ export default function handlePatch<T>(
   );
 }
 
+function isComplete(response: TussleStoragePatchFileResponse):
+response is TussleStoragePatchFileCompleteResponse {
+  return response.complete;
+}
+
 const callOptionalHooks = <T>(
   core: Tussle,
   ctx: TussleIncomingRequest<T>,
   patchedFile: TussleStoragePatchFileResponse
 ): Observable<TussleStoragePatchFileResponse> => {
   ctx.meta.storage = patchedFile.details;
-  if (patchedFile.complete) {
+  if (isComplete(patchedFile)) {
     return core.hook('after-complete', ctx, patchedFile);
   }
   return of(patchedFile);
@@ -73,6 +78,7 @@ const toResponse = <T>(
       status: 204, // no content (success),
       headers: {
         'Upload-Offset': patchedFile.offset.toString(10),
+        ...ctx.response?.headers,
       }
     };
   } else {
