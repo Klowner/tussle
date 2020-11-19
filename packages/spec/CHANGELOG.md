@@ -5,12 +5,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.0.2](https://github.com/Klowner/tussle/compare/v0.0.1...v0.0.2) (2020-11-19)
 
-**Note:** Version bump only for package @tussle/middleware-koa
-
-
-
-
-
-## [0.0.1](https://github.com/Klowner/tussle/compare/v0.0.0...v0.0.1) (2020-10-03)
-
-**Note:** Version bump only for package @tussle/middleware-koa
+**Note:** Version bump only for package @tussle/spec
