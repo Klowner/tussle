@@ -19,12 +19,6 @@ export interface TussleConfig {
 type IncomingRequestMethod = TussleIncomingRequest<unknown>['request']['method'];
 type IncomingRequestHandler = <T>(core: Tussle, ctx: TussleIncomingRequest<T>) => Observable<TussleIncomingRequest<T>>;
 
-export type TussleHookFunc = <T>(
-  core: Tussle,
-  ctx: TussleIncomingRequest<unknown>,
-  params: T
-) => Observable<T>;
-
 const supportedVersions = [
   '1.0.0',
 ];
