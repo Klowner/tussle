@@ -2,7 +2,7 @@ import type { Observable } from 'rxjs';
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStorageCreateFileResponse } from '@tussle/spec/interface/storage';
 import type { Tussle } from '../core';
-import { switchMap, map, flatMap } from 'rxjs/operators';
+import { switchMap, map, mergeMap } from 'rxjs/operators';
 import { decode } from 'js-base64';
 
 function defaultPath(path: string, filename: string): string {
@@ -35,7 +35,7 @@ export default function handleCreate<T>(
 
   return params$.pipe(
     switchMap((params) => core.create(params).pipe(
-      flatMap((createdFile) => core.hook('after-create', ctx, createdFile)),
+      mergeMap((createdFile) => core.hook('after-create', ctx, createdFile)),
       map((createdFile) => toResponse(ctx, createdFile)),
     )),
   );
