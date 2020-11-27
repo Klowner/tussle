@@ -26,6 +26,8 @@ const extractParamsFromHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
   };
 };
 
+export type ExtractedHeadHeaders = ReturnType<typeof extractParamsFromHeaders>;
+
 const toResponse = <T>(
   ctx: TussleIncomingRequest<T>,
   fileInfo: TussleStorageFileInfo,

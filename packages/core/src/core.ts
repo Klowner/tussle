@@ -2,31 +2,22 @@ import type { Observable } from 'rxjs';
 import type { TusProtocolExtension } from '@tussle/spec/interface/tus';
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStorageService, TussleStorageCreateFileResponse, TussleStorageCreateFileParams } from '@tussle/spec/interface/storage';
-import { of, from } from 'rxjs';
+import { of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import handleCreate from './handlers/create';
 import handlePatch from './handlers/patch';
 import handleHead from './handlers/head';
 import handleOptions from './handlers/options';
+import {TussleCoreHooks } from './hooks';
 
 export interface TussleConfig {
   maxSizeBytes?: number;
   storage: TussleStorageService | Record<'default' | string, TussleStorageService>;
-  hooks?: Partial<Record<TussleEventHook, TussleHookFunc>>;
+  hooks?: Partial<TussleCoreHooks>;
 }
 
 type IncomingRequestMethod = TussleIncomingRequest<unknown>['request']['method'];
 type IncomingRequestHandler = <T>(core: Tussle, ctx: TussleIncomingRequest<T>) => Observable<TussleIncomingRequest<T>>;
-
-export type TussleEventHook =
-  | 'before-create'
-  | 'after-create'
-  | 'before-patch'
-  | 'before-head'
-  | 'before-options'
-  | 'after-complete'
-  | 'after-options'
-;
 
 export type TussleHookFunc = <T>(
   core: Tussle,
@@ -42,7 +33,7 @@ export class Tussle {
   public readonly handlers: Partial<Record<IncomingRequestMethod, IncomingRequestHandler>> = {};
   public readonly extensions: Partial<Record<TusProtocolExtension, boolean>> = {};
   public readonly storage: Partial<Record<'default' | string, TussleStorageService>>;
-  public readonly hooks: Partial<Record<TussleEventHook, TussleHookFunc>> = {};
+  public readonly hooks: Partial<TussleCoreHooks> = {};
 
   constructor(private readonly cfg: TussleConfig) {
     this.setHandler('POST', handleCreate);
@@ -142,21 +133,16 @@ export class Tussle {
     return storage;
   }
 
-  public hook<T>(
-    name: TussleEventHook,
+  hook<K extends keyof TussleCoreHooks, H extends TussleCoreHooks[K]>(
+    which: K,
     ctx: TussleIncomingRequest<unknown>,
-    params: T
-  ) : Observable<T> {
-    const hook = this.hooks[name];
+    params: Parameters<H>[2]
+  ): ReturnType<H>|Observable<Parameters<H>[2]> {
+    const hook = this.hooks[which];
     if (hook) {
-      const result = hook(this, ctx, params);
-      return isPromise(result) ? from(result) : result;
+      return hook(this, ctx, params);
     }
     return of(params);
-  }
-
-  public hasHook(name: TussleEventHook): boolean {
-    return this.hooks[name] !== undefined;
   }
 
   public create(
@@ -180,11 +166,7 @@ function respondWithUnsupportedProtocolVersion<T>(ctx: TussleIncomingRequest<T>)
 }
 
 const isStorageService = (storage: unknown): storage is TussleStorageService =>
-  storage && (storage as TussleStorageService).createFile !== undefined;
-
-function isPromise<T>(maybePromise: (Promise<T> | Observable<T>)): maybePromise is Promise<T> {
-  return typeof (maybePromise as Promise<T>).then === 'function';
-}
+  storage !== undefined && (storage as TussleStorageService).createFile !== undefined;
 
 function addResponseHeaders(ctx: TussleIncomingRequest<unknown>, headers: Record<string, unknown>): void {
   ctx.response = {

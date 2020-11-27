@@ -69,6 +69,8 @@ const extractPatchHeaders = (ctx: TussleIncomingRequest<unknown>) => {
   };
 };
 
+export type ExtractedPatchHeaders = ReturnType<typeof extractPatchHeaders>;
+
 const toResponse = <T>(
   ctx: TussleIncomingRequest<T>,
   patchedFile: TussleStoragePatchFileResponse

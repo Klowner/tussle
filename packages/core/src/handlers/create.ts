@@ -76,6 +76,8 @@ const extractCreationHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
   };
 };
 
+export type ExtractedCreateHeaders = ReturnType<typeof extractCreationHeaders>;
+
 const toResponse = <T>(
   ctx: TussleIncomingRequest<T>,
   createdFile: TussleStorageCreateFileResponse
