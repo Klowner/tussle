@@ -75,7 +75,7 @@ function hasLargeFile(state: B2PersistentLocationState): state is B2PersistentLo
 }
 
 export class TussleStorageB2 implements TussleStorageService {
-  private readonly b2: B2;
+  readonly b2: B2;
   private readonly uploadURLPool: ReturnType<typeof createUploadURLPool>;
   private readonly uploadPartURLPools: TTLCache<B2UploadPartURLPool>;
   private readonly persistentState: TussleStateService<B2PersistentLocationState>;

@@ -76,7 +76,6 @@ const createTussleRequest = (_core, originalRequest) => __awaiter(void 0, void 0
 // request as described by the `response`.  If no `response`, then return null
 // and potentially handle the request elsewhere.
 const handleTussleResponse = (ctx) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('res', ctx.response);
     if (ctx.response && ctx.response.status) {
         return new Response(ctx.response.body, {
             headers: ctx.response.headers,

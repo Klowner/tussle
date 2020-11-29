@@ -88,7 +88,6 @@ export default class TussleKoaMiddleware {
 
   public readonly middleware = <T extends KoaContext>(): KoaMiddlewareFunction<T> =>
     async (ctx, next) => {
-      console.log('tussle-->', ctx.request.method, ctx.path);
       const req = await prepareRequest(this.core, ctx);
       if (req) {
         return this.core.handle(req)

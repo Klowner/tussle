@@ -77,7 +77,6 @@ const createTussleRequest = async <T extends Request>(
 const handleTussleResponse = async <T extends Request>(ctx: TussleIncomingRequest<T>):
   Promise<Response | null> =>
 {
-  console.log('res', ctx.response);
   if (ctx.response && ctx.response.status) {
     return new Response(ctx.response.body, {
       headers: ctx.response.headers,
