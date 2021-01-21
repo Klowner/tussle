@@ -18,13 +18,15 @@
   "dependencies": {
     "axios": "^0.21.1",
     "axios-observable": "^1.1.6",
-    "rxjs": "^6.0.0"
+    "rxjs": "^6.2.2"
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "jest": "^26.4.2"
+    "jest": "^26.4.2",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2"
   },
   "jest": {
     "preset": "ts-jest",

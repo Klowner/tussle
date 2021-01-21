@@ -16,7 +16,9 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
-    "rxjs": "^6.0.0"
+    "axios": "^0.21.1",
+    "axios-observable": "^1.1.6",
+    "rxjs": "^6.2.2"
   },
   "devDependencies": {
     "@types/pg": "^7.14.5",
