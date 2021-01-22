@@ -6,7 +6,7 @@ orbs:
 workflows:
   workflow:
     jobs:
-      - run-tests:
+      - run-tests
 
 jobs:
   run-tests:
