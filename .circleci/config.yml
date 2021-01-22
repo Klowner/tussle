@@ -5,8 +5,8 @@ workflows:
   workflow:
     jobs:
       - run-tests:
-        context:
-          - coveralls
+          context:
+            - coveralls
 jobs:
   run-tests:
     docker:
