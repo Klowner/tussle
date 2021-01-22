@@ -2,8 +2,8 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: node:latest
-      - image: postgres:latest
+      - image: circleci/node:latest
+      - image: circleci/postgres:latest
     environment:
       POSTGRES_CONNECT_STRING: postgres://postgres:postgres@localhost/tussle_test
     steps:
