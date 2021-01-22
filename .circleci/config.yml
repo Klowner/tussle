@@ -6,6 +6,7 @@ jobs:
       - image: circleci/postgres:latest
         environment:
           - POSTGRES_USER: postgres
+          - POSTGRES_PASSWORD: postgres
           - POSTGRES_DB: tussle_test
     environment:
       POSTGRES_CONNECT_STRING: postgres://postgres:postgres@localhost/tussle_test
