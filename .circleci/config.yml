@@ -1,12 +1,12 @@
 version: 2.1
 orbs:
   coveralls: coveralls/coveralls@1.0.6
-workflows:
-  workflow:
-    jobs:
-      - run-tests:
-          context:
-            - coveralls
+# workflows:
+#   workflow:
+#     jobs:
+#       - run-tests:
+#           context:
+#             - coveralls
 jobs:
   run-tests:
     docker:
