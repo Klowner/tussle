@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  coveralls: coveralls/coveralls@1.0.6
 jobs:
   build:
     docker:
@@ -35,3 +37,4 @@ jobs:
           name: create database tables for @tussle/state-postgres tests
           command: psql -h localhost -p 5432 -f ./packages/state-postgres/create_table.psql -d tussle_test -U postgres
       - run: yarn run test
+      - coveralls/upload
