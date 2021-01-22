@@ -4,8 +4,7 @@
 
 # Tussle
 Tussle is a *mostly* spec-compliant server implementation of the [tus upload protocol](http://www.tus.io/protocols/resumable-upload.html).
-
-[![Build Status](https://travis-ci.org/Klowner/tussle.svg?branch=main)](https://travis-ci.org/Klowner/tussle)
+[![CircleCI](https://circleci.com/gh/Klowner/tussle.svg?style=shield)](https://circleci.com/gh/klowner/tussle)
 [![Coverage Status](https://coveralls.io/repos/github/Klowner/tussle/badge.svg?branch=main)](https://coveralls.io/github/Klowner/tussle?branch=main)
 
 ## Component based
