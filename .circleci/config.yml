@@ -1,0 +1,25 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: node:latest
+      - image: postgres:latest
+    environment:
+      POSTGRES_CONNECT_STRING: postgres://postgres:postgres@localhost/tussle_test
+    steps:
+      - run:
+          name: install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.3.0
+      - checkout
+      - restore_cache:
+          key: v1-deps={{ checksum "package.json" }}
+      - run: yarn install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-deps-{{ checksum "package.json" }}
+      - run: yarn run build
+      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run: yarn run test
