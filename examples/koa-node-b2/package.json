@@ -16,6 +16,6 @@
     "koa-logger": "^3.2.1"
   },
   "devDependencies": {
-    "jest": "^26.4.2"
+    "jest": "^26.6.3"
   }
 }

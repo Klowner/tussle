@@ -20,7 +20,7 @@
     "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
     "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
     "@tussle/storage-b2": "link:../../packages/storage-b2",
-    "jest": "^26.4.2",
+    "jest": "^26.6.3",
     "rollup-plugin-string": "^3.0.0"
   }
 }

@@ -1,5 +1,5 @@
 import type { Observable } from "rxjs";
-import { catchError, filter, flatMap, map, share, switchMap, tap, withLatestFrom, take, endWith } from 'rxjs/operators';
+import { catchError, filter, mergeMap, map, share, switchMap, tap, withLatestFrom, take, endWith } from 'rxjs/operators';
 import { combineLatest, defer, EMPTY, from, of, throwError } from "rxjs";
 import type {
   TusProtocolExtension,
@@ -119,7 +119,7 @@ export class TussleStorageB2 implements TussleStorageService {
     const create = async () => createUploadPartURLPool(b2, { fileId: b2LargeFileId, });
     const pool = this.uploadPartURLPools.getOrCreate(b2LargeFileId, create);
     return from(pool).pipe(
-      flatMap((pool) => pool.acquireReleasable()),
+      mergeMap((pool) => pool.acquireReleasable()),
     );
   }
 
@@ -157,7 +157,7 @@ export class TussleStorageB2 implements TussleStorageService {
     const state$ = this.getState(params.location);
     const combinedState$ = state$.pipe(
       filter(isNonNull),
-      flatMap((state) => of(this.transientState.getItem(params.location)).pipe(
+      mergeMap((state) => of(this.transientState.getItem(params.location)).pipe(
         filter(isNonNull),
         map((transientState) => ({
           state,
@@ -197,7 +197,7 @@ export class TussleStorageB2 implements TussleStorageService {
       const state$ = this.getState(params.location);
     const transientState$ = state$.pipe(
       filter(isNonNull),
-      flatMap((state) => of(state).pipe(
+      mergeMap((state) => of(state).pipe(
         this.getOrCreateTransientState(
           params.location,
           async function create() {
@@ -220,7 +220,7 @@ export class TussleStorageB2 implements TussleStorageService {
         transientState,
       })
     ).pipe(
-      flatMap(({ state, transientState }) => {
+      mergeMap(({ state, transientState }) => {
         if (state && transientState) {
           return of({
             state,
@@ -244,7 +244,7 @@ export class TussleStorageB2 implements TussleStorageService {
     const response$ = combinedState$.pipe(
       filter((combined) => !!combined.state),
       withLatestFrom(patchIntent$),
-      flatMap(([combinedState, intent]) => {
+      mergeMap(([combinedState, intent]) => {
         switch (intent) {
           case PatchAction.SmallFile:
             return this.patchSmallFile(combinedState, params);
@@ -259,7 +259,7 @@ export class TussleStorageB2 implements TussleStorageService {
     );
 
     const responseWithSavedState$ = combineLatest(response$, combinedState$).pipe(
-      flatMap(([response, state]) => {
+      mergeMap(([response, state]) => {
         if (response.complete) {
           return this.setState(state.state.location, {
             ...state.state,
@@ -355,7 +355,7 @@ export class TussleStorageB2 implements TussleStorageService {
   {
     const initialState$ = of(state);
     const persistedInitialState$ = initialState$.pipe(
-      flatMap((initialState) => {
+      mergeMap((initialState) => {
         if (hasLargeFile(initialState.state)) {
           return of(initialState);
         } else {
@@ -368,7 +368,7 @@ export class TussleStorageB2 implements TussleStorageService {
           const largeFileResponse$ = getResponseData(largeFile$);
 
           const transformedState$ = largeFileResponse$.pipe(
-            flatMap((largeFile) => this.setState(
+            mergeMap((largeFile) => this.setState(
               location,
               {
                 ...initialState.state,
@@ -401,7 +401,7 @@ export class TussleStorageB2 implements TussleStorageService {
 
     // Find an upload URL and authorization for this part.
     const endpoint$ = state$.pipe(
-      flatMap(({ state }) => {
+      mergeMap(({ state }) => {
         if (hasLargeFile(state)) {
           return from(this.getUploadPartURL(state.largeFile.fileId));
         }
@@ -422,7 +422,7 @@ export class TussleStorageB2 implements TussleStorageService {
         });
 
         const uploadPartResponse$ = uploadPart$.pipe(
-          flatMap((response) => from(response.getData()).pipe(
+          mergeMap((response) => from(response.getData()).pipe(
             switchMap((data) => {
               state.transientState.nextPartNumber++;
               state.transientState.currentOffset += data.contentLength;
@@ -488,7 +488,7 @@ export class TussleStorageB2 implements TussleStorageService {
     );
 
     const upstreamResponse$ = finished$.pipe(
-      flatMap(({ response }) => getResponseData(of(response))),
+      mergeMap(({ response }) => getResponseData(of(response))),
     );
 
     const response$ = upstreamResponse$.pipe(
@@ -547,7 +547,7 @@ export class TussleStorageB2 implements TussleStorageService {
   ) {
     return <T extends B2PersistentLocationState>(source: Observable<T>) =>
       source.pipe(
-        flatMap((state) => {
+        mergeMap((state) => {
           if (state) {
             return from(this.transientState.getOrCreate(location, create));
           } else {
@@ -567,7 +567,7 @@ function getResponseData<T>(
 ): Observable<T>
 {
   return response.pipe(
-    flatMap((response) => from(response.getData())),
+    mergeMap((response) => from(response.getData())),
   );
 }
 

@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { map, tap } from "rxjs/operators";
+import { map } from "rxjs/operators";
 import { B2AuthorizeAccountResponse } from "./actions/b2AuthorizeAccount";
 import type { B2Auth } from "./b2auth";
 

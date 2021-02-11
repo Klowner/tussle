@@ -11,7 +11,6 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
   ],
   rules: {
-    'no-unused-vars': ['error', { args: 'none' }],
     'semi': 1,
     'rxjs/no-async-subscribe': 'error',
     'rxjs/no-ignored-observable': 'error',

@@ -18,11 +18,11 @@
   "dependencies": {
     "axios": "^0.21.1",
     "axios-observable": "^1.1.6",
-    "rxjs": "^6.2.2"
+    "rxjs": "^6.6.3"
   },
   "devDependencies": {
     "@types/pg": "^7.14.5",
-    "jest": "^26.2.2",
+    "jest": "^26.6.3",
     "nock": "^13.0.3",
     "npm-run-all": "^4.1.5"
   },
