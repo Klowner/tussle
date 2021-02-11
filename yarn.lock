@@ -1895,7 +1895,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/middleware-koa@workspace:packages/middleware-koa"
   dependencies:
-    "@types/koa": ^2.11.3
+    "@types/koa": ^2.11.7
     jest: ^26.4.2
   languageName: unknown
   linkType: soft
@@ -2207,7 +2207,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/koa@npm:*, @types/koa@npm:^2.11.3":
+"@types/koa@npm:*":
   version: 2.11.6
   resolution: "@types/koa@npm:2.11.6"
   dependencies:
@@ -2220,6 +2220,22 @@ __metadata:
     "@types/koa-compose": "*"
     "@types/node": "*"
   checksum: 38887e8baea2db1b3ec9007aa165306ccd84d0f47560712fe197cf26d5eb931e9cd8891f12d77970f0d7f24de29920a764a65f2c31b4491f5cc162e3b9390089
+  languageName: node
+  linkType: hard
+
+"@types/koa@npm:^2.11.7":
+  version: 2.11.7
+  resolution: "@types/koa@npm:2.11.7"
+  dependencies:
+    "@types/accepts": "*"
+    "@types/content-disposition": "*"
+    "@types/cookies": "*"
+    "@types/http-assert": "*"
+    "@types/http-errors": "*"
+    "@types/keygrip": "*"
+    "@types/koa-compose": "*"
+    "@types/node": "*"
+  checksum: 7197fcc5280a81848eb300c7283fb2b02bcd95ffe04af963efe766090a950166845c123d00472355b34d0a4df499e84cc3ca355b8332a4ae3597f6b322cfecea
   languageName: node
   linkType: hard
 

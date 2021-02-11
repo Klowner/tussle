@@ -14,13 +14,11 @@
   },
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
-  "dependencies": {
-    "@types/koa": "^2.11.3"
-  },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
+    "@types/koa": "^2.11.7",
     "jest": "^26.4.2"
   }
 }

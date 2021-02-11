@@ -2,16 +2,12 @@ import type Koa from 'koa';
 import { Tussle } from '@tussle/core';
 import type { TussleConfig, TussleIncomingRequest }  from '@tussle/core';
 
-type KoaContext = Koa.ParameterizedContext;
+type KoaContext = Koa.Context;
 
 type KoaMiddlewareFunction<T extends KoaContext> =
   (ctx: T, next: Koa.Next) => Promise<unknown>;
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
-
-interface TussleKoaState {
-  location: string;
-}
 
 function allowedMethod(method: string, overrideMethod?: string): AllowedMethod | null {
   method = overrideMethod || method;
