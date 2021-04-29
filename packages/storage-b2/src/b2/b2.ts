@@ -51,7 +51,7 @@ export class B2 {
   }
 
   public readonly cancelLargeFile = bindAction(this, actions.b2CancelLargeFileRequest, true);
-  public readonly deleteFileVersion = bindAction(this, actions.b2DeleteFileVersionRequest, true);
+  public readonly deleteFileVersion = bindAction(this, actions.b2DeleteFileVersionRequest, false);
   public readonly finishLargeFile = bindAction(this, actions.b2FinishLargeFileRequest, true);
   public readonly getFileInfo  = bindAction(this, actions.b2GetFileInfoRequest, true);
   public readonly getUploadPartURL = bindAction(this, actions.b2GetUploadPartURLRequest, true);
