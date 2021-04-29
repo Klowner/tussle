@@ -12,3 +12,4 @@ export { b2ListUnfinishedLargeFilesRequest } from './b2ListUnfinishedLargeFiles'
 export { b2StartLargeFileRequest } from './b2StartLargeFile';
 export { b2UploadFileRequest } from './b2UploadFile';
 export { b2UploadPartRequest } from './b2UploadPart';
+export { b2DeleteFileVersionRequest } from './b2DeleteFileVersion';
