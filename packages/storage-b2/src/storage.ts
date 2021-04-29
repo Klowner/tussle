@@ -329,7 +329,7 @@ export class TussleStorageB2 implements TussleStorageService {
       ),
     );
 
-    const response$ = getResponseData(upload$).pipe( //storedState$.pipe(
+    const response$ = getResponseData(upload$).pipe(
       map((upstreamResponse) => {
         const newOffset = state.transientState.currentOffset + upstreamResponse.contentLength;
         return {
