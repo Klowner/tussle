@@ -22,7 +22,6 @@ function allowedMethod(method, overrideMethod) {
     }
     return null;
 }
-// type AsyncRequestHandler = (request: Request) => Promise<Response | undefined>;
 class TussleCloudflareWorker {
     constructor(options) {
         if (options instanceof core_1.Tussle) {
@@ -58,7 +57,10 @@ const createTussleRequest = (_core, originalRequest) => __awaiter(void 0, void 0
     if (method) {
         return {
             request: {
-                getHeader: (key) => ctx.headers.get(key),
+                getHeader: (key) => {
+                    const header = ctx.headers.get(key);
+                    return header || undefined;
+                },
                 getReadable: () => {
                     throw new Error('not implemented');
                 },

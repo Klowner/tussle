@@ -30,12 +30,12 @@ export type TussleOutgoingResponse<T, R> = {
   originalResponse: R;
 };
 
-export type TussleIncomingRequest<T> = {
+export interface TussleIncomingRequest<T> {
   request: {
     method: 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH' | 'DELETE';
     path: string;
     getReadable: () => Readable;
-    getHeader: (header: string) => string | null;
+    getHeader: (header: string) => string|undefined;
   };
   response: null | {
     status?: number;
@@ -48,8 +48,8 @@ export type TussleIncomingRequest<T> = {
     storage?: unknown;
   }
   originalRequest: T;
-};
+}
 
-export type TussleRequestService<R = unknown> = {
+export interface TussleRequestService<R = unknown> {
   makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, R>>;
 }

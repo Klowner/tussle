@@ -15,8 +15,6 @@ function allowedMethod(method: string, overrideMethod: string | null): AllowedMe
   return null;
 }
 
-// type AsyncRequestHandler = (request: Request) => Promise<Response | undefined>;
-
 export class TussleCloudflareWorker {
   private readonly core: Tussle;
 
@@ -56,7 +54,10 @@ const createTussleRequest = async <T extends Request>(
   if (method) {
     return {
       request: {
-        getHeader: (key: string) => ctx.headers.get(key),
+        getHeader: (key: string) => {
+          const header = ctx.headers.get(key);
+          return header || undefined;
+        },
         getReadable: () => {
           throw new Error('not implemented');
         },

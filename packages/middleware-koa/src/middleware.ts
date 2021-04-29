@@ -21,19 +21,29 @@ function allowedMethod(method: string, overrideMethod?: string): AllowedMethod |
   return null;
 }
 
+const firstOrUndefined = (v: string|string[]|undefined) => {
+  if (v) {
+    if (typeof v === 'string') {
+      return v;
+    }
+    return v[0];
+  }
+};
+
+
 const prepareRequest = async <T extends KoaContext>(
   _core: Tussle,
   originalRequest: T
 ): Promise<TussleIncomingRequest<T> | null> =>
 {
   const ctx = originalRequest;
-  const overrideMethod = ctx.headers['x-http-method-override'];
+  const overrideMethod = firstOrUndefined(ctx.headers['x-http-method-override']);
   const method = allowedMethod(ctx.method, overrideMethod);
   if (method) {
     ctx.req.pause(); // TODO -- is this necessary?
     return {
       request: {
-        getHeader: (key: string) => ctx.headers[key],
+        getHeader: (key: string) => firstOrUndefined(ctx.headers[key]),
         getReadable: () => ctx.req,
         method,
         path: ctx.path,
