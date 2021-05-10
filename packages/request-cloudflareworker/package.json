@@ -16,7 +16,7 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
-    "@cloudflare/workers-types": "^2.1.0",
+    "@cloudflare/workers-types": "^2.2.2",
     "rxjs": "^6.6.3"
   },
   "publishConfig": {

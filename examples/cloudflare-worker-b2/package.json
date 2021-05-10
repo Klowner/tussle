@@ -13,10 +13,10 @@
     "wrangler": "wrangler"
   },
   "dependencies": {
-    "dotenv": "^8.2.0"
+    "dotenv": "^9.0.0"
   },
   "devDependencies": {
-    "@cloudflare/wrangler": "^1.11.0",
+    "@cloudflare/wrangler": "^1.16.1",
     "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
     "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
     "@tussle/storage-b2": "link:../../packages/storage-b2",
