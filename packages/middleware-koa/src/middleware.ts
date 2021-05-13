@@ -2,11 +2,6 @@ import type Koa from 'koa';
 import { Tussle } from '@tussle/core';
 import type { TussleConfig, TussleIncomingRequest }  from '@tussle/core';
 
-type KoaContext = Koa.Context;
-
-type KoaMiddlewareFunction<T extends KoaContext> =
-  (ctx: T, next: Koa.Next) => Promise<unknown>;
-
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
 function allowedMethod(method: string, overrideMethod?: string): AllowedMethod | null {
@@ -31,7 +26,7 @@ const firstOrUndefined = (v: string|string[]|undefined) => {
 };
 
 
-const prepareRequest = async <T extends KoaContext>(
+const prepareRequest = async <T extends Koa.Context>(
   _core: Tussle,
   originalRequest: T
 ): Promise<TussleIncomingRequest<T> | null> =>
@@ -57,7 +52,7 @@ const prepareRequest = async <T extends KoaContext>(
   return null; // ignore this request
 };
 
-const handleResponse = async <T extends KoaContext>(ctx: TussleIncomingRequest<T>): Promise<T> => {
+const handleResponse = async <T extends Koa.Context>(ctx: TussleIncomingRequest<T>): Promise<T> => {
   if (ctx.response && ctx.response.status) {
     // Set response status code
     ctx.originalRequest.status = ctx.response.status;
@@ -92,7 +87,7 @@ export default class TussleKoaMiddleware {
     }
   }
 
-  public readonly middleware = <T extends KoaContext>(): KoaMiddlewareFunction<T> =>
+  public readonly middleware = (): Koa.Middleware =>
     async (ctx, next) => {
       const req = await prepareRequest(this.core, ctx);
       if (req) {

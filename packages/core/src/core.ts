@@ -127,11 +127,11 @@ export class Tussle {
     return storage;
   }
 
-  hook<K extends keyof TussleCoreHooks, H extends TussleCoreHooks[K]>(
+  hook<K extends keyof TussleCoreHooks, T>(
     which: K,
-    ctx: TussleIncomingRequest<unknown>,
-    params: Parameters<H>[2]
-  ): ReturnType<H>|Observable<Parameters<H>[2]> {
+    ctx: TussleIncomingRequest<T>,
+    params: Parameters<TussleCoreHooks[K]>[2],
+  ): ReturnType<TussleCoreHooks[K]>|Observable<typeof params> {
     const hook = this.hooks[which];
     if (hook) {
       return hook(this, ctx, params);
