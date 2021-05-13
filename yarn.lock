@@ -1893,7 +1893,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/middleware-koa@workspace:packages/middleware-koa"
   dependencies:
-    "@types/koa": ^2.11.7
+    "@types/koa": "*"
     jest: ^26.6.3
   languageName: unknown
   linkType: soft
@@ -2196,7 +2196,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/koa@npm:*, @types/koa@npm:^2.11.7":
+"@types/koa@npm:*":
   version: 2.13.1
   resolution: "@types/koa@npm:2.13.1"
   dependencies:

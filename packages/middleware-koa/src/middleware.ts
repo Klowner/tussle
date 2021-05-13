@@ -1,4 +1,4 @@
-import type Koa from 'koa';
+import type { Context, Middleware } from 'koa';
 import { Tussle } from '@tussle/core';
 import type { TussleConfig, TussleIncomingRequest }  from '@tussle/core';
 
@@ -26,7 +26,7 @@ const firstOrUndefined = (v: string|string[]|undefined) => {
 };
 
 
-const prepareRequest = async <T extends Koa.Context>(
+const prepareRequest = async <T extends Context>(
   _core: Tussle,
   originalRequest: T
 ): Promise<TussleIncomingRequest<T> | null> =>
@@ -52,7 +52,7 @@ const prepareRequest = async <T extends Koa.Context>(
   return null; // ignore this request
 };
 
-const handleResponse = async <T extends Koa.Context>(ctx: TussleIncomingRequest<T>): Promise<T> => {
+const handleResponse = async <T extends Context>(ctx: TussleIncomingRequest<T>): Promise<T> => {
   if (ctx.response && ctx.response.status) {
     // Set response status code
     ctx.originalRequest.status = ctx.response.status;
@@ -87,7 +87,7 @@ export default class TussleKoaMiddleware {
     }
   }
 
-  public readonly middleware = (): Koa.Middleware =>
+  public readonly middleware = (): Middleware =>
     async (ctx, next) => {
       const req = await prepareRequest(this.core, ctx);
       if (req) {
