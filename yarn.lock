@@ -1977,6 +1977,7 @@ __metadata:
     jest: ^26.6.3
     nock: ^13.0.3
     npm-run-all: ^4.1.5
+    rimraf: ^3.0.2
     rxjs: ^6.6.3
   languageName: unknown
   linkType: soft
@@ -7210,6 +7211,9 @@ __metadata:
     koa-bodyparser: ^4.3.0
     koa-json: ^2.0.2
     koa-logger: ^3.2.1
+    nodemon: ^2.0.7
+    npm-run-all: ^4.1.5
+    rollup: ^2.48.0
   languageName: unknown
   linkType: soft
 
@@ -8227,7 +8231,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemon@npm:^2.0.4":
+"nodemon@npm:^2.0.4, nodemon@npm:^2.0.7":
   version: 2.0.7
   resolution: "nodemon@npm:2.0.7"
   dependencies:
@@ -9995,6 +9999,20 @@ __metadata:
   bin:
     rollup: dist/bin/rollup
   checksum: b07c6051c35ed30916f529cbfb3731c9ac10355daca167ba8d863bcda6499e39593e078eb8e29b4bf94a1e3d112e1cdfa908fe147a231b6a93b9fd6b732beb98
+  languageName: node
+  linkType: hard
+
+"rollup@npm:^2.48.0":
+  version: 2.48.0
+  resolution: "rollup@npm:2.48.0"
+  dependencies:
+    fsevents: ~2.3.1
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  bin:
+    rollup: dist/bin/rollup
+  checksum: 3f50c1e023adcf9fc14100b7ca128482ea58cd27af0aad344affbd9622fc35bbd28ca13ceac35b252d137aedd36df39886b3a308e42b437bcb46918584ee89d3
   languageName: node
   linkType: hard
 
