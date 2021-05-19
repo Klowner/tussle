@@ -194,7 +194,7 @@ export class TussleStorageB2 implements TussleStorageService {
     params: TussleStoragePatchFileParams
   ): Observable<TussleStoragePatchFileResponse>
   {
-      const state$ = this.getState(params.location);
+    const state$ = this.getState(params.location);
     const transientState$ = state$.pipe(
       filter(isNonNull),
       mergeMap((state) => of(state).pipe(
