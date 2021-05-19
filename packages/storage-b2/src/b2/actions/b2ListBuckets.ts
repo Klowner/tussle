@@ -11,8 +11,21 @@ export interface B2ListBucketsParams {
   bucketTypes?: B2BucketType[];
 }
 
+interface B2BucketInfo {
+  accountId: string;
+  bucketId: string;
+  bucketName: string;
+  bucketInfo: Record<string, unknown>;
+  corsRules: unknown; // TODO
+  fileLockConfiguration: unknown; // TODO
+  defaultServerSideEncryption: unknown // TODO
+  lifecycleRules: unknown; // TODO
+  revision: number;
+  options: unknown;
+}
+
 export interface B2ListBucketsResponse {
-  buckets: unknown[];
+  buckets: B2BucketInfo[];
   accountId: string;
   bucketId: string;
   bucketName: string;
