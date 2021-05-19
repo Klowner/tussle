@@ -29,7 +29,7 @@ export class TussleRequestCloudflareWorker implements TussleRequestService<Cloud
     const sourceRequest = request.options?.sourceRequest;
     if (sourceRequest) {
       const newRequestInit = {
-        method: request.method, 
+        method: request.method,
         headers: request.headers,
       };
       const originalRequest = (sourceRequest as TussleIncomingRequest<Request>).originalRequest;
