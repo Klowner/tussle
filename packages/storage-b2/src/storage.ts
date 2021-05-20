@@ -1,4 +1,4 @@
-import type { Observable } from "rxjs";
+import { Observable, OperatorFunction, pipe } from "rxjs";
 import { catchError, filter, mergeMap, map, share, switchMap, tap, withLatestFrom, take, endWith } from 'rxjs/operators';
 import { combineLatest, defer, EMPTY, from, of, throwError } from "rxjs";
 import type {
@@ -24,6 +24,7 @@ import type {PoolType, Releasable} from './b2/pool';
 import { TTLCache, TussleStateNamespace} from "@tussle/core";
 import { B2UploadPartURLPool, createUploadPartURLPool, createUploadURLPool } from './b2/endpointpool';
 import { B2 } from "./b2";
+import {B2AuthorizeAccountResponse} from "./b2/actions/b2AuthorizeAccount";
 
 export interface TussleStorageB2Options {
   applicationKeyId: string;
@@ -74,12 +75,33 @@ function hasLargeFile(state: B2PersistentLocationState): state is B2PersistentLo
   return !!state.largeFile;
 }
 
+function getBucketName(
+  b2: B2,
+  bucketId: string,
+): OperatorFunction<B2AuthorizeAccountResponse, string> {
+  return pipe(
+    switchMap(state =>
+      b2.listBuckets({
+        accountId: state.accountId,
+        bucketId,
+      }).pipe(
+        mergeMap(res => from(res.getData())),
+        catchError((err: unknown) => {
+          return throwError(err);
+        }),
+        map(res => res.buckets[0].bucketName),
+      ),
+    ),
+  );
+}
+
 export class TussleStorageB2 implements TussleStorageService {
   readonly b2: B2;
   private readonly uploadURLPool: ReturnType<typeof createUploadURLPool>;
   private readonly uploadPartURLPools: TTLCache<B2UploadPartURLPool>;
   private readonly persistentState: TussleStateService<B2PersistentLocationState>;
   private readonly transientState: TTLCache<B2TransientLocationState>;
+  readonly bucketName$: Observable<string>;
 
   constructor(
     readonly options: TussleStorageB2Options
@@ -98,6 +120,10 @@ export class TussleStorageB2 implements TussleStorageService {
 
     this.persistentState = new TussleStateNamespace(options.stateService, "b2");
     this.transientState = new TTLCache(60 * 60 * 1000);
+
+    this.bucketName$ = this.b2.auth.state$.pipe(
+      getBucketName(this.b2, this.options.bucketId),
+    );
   }
 
   public getUploadURL(

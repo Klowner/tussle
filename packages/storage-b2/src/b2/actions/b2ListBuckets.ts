@@ -15,6 +15,7 @@ interface B2BucketInfo {
   accountId: string;
   bucketId: string;
   bucketName: string;
+  bucketType: B2BucketType;
   bucketInfo: Record<string, unknown>;
   corsRules: unknown; // TODO
   fileLockConfiguration: unknown; // TODO
@@ -26,10 +27,6 @@ interface B2BucketInfo {
 
 export interface B2ListBucketsResponse {
   buckets: B2BucketInfo[];
-  accountId: string;
-  bucketId: string;
-  bucketName: string;
-  bucketType: B2BucketType;
 }
 
 export const b2ListBucketsRequest = createGenericAction<
