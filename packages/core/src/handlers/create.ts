@@ -41,7 +41,18 @@ export default function handleCreate<T>(
   );
 }
 
-const extractCreationHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
+export interface TussleCreationParams {
+  id: string;
+  path: string;
+  contentLength: number;
+  uploadLength: number;
+  uploadMetadata: Record<string, string>;
+  uploadConcat: string|null;
+}
+
+const extractCreationHeaders = <T>(
+  ctx: TussleIncomingRequest<T>
+): TussleCreationParams => {
   const id = ctx.request.path;
   const path = ctx.request.path;
   const header = ctx.request.getHeader;
@@ -59,12 +70,6 @@ const extractCreationHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
 
   // used by 'concatenation' extension
   const uploadConcat = header('upload-concat') as string || null;
-
-  // provide a default file location (this can be altered during
-  // the 'before-create' hook, and then possibly altered further
-  // by the current storage component.
-  // const location = [path, encodeURIComponent(uploadMetadata.filename)].join('/');
-  // console.log('creation location is', location);
 
   return {
     id,
