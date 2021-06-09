@@ -28,7 +28,6 @@ export class TussleCloudflareWorker {
 
   public async handleRequest(request: Request): Promise<Response | null> {
     const req = await createTussleRequest(this.core, request);
-    console.log('req', req);
     if (req) {
       return this.core.handle(req)
         .toPromise()

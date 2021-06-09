@@ -95,6 +95,9 @@ function getBucketName(
   );
 }
 
+const stripLeadingSlash = (str: string): string =>
+  str.replace(/^\/+/, '');
+
 export class TussleStorageB2 implements TussleStorageService {
   readonly b2: B2;
   private readonly uploadURLPool: ReturnType<typeof createUploadURLPool>;
@@ -341,7 +344,7 @@ export class TussleStorageB2 implements TussleStorageService {
         (endpoint) => this.b2.uploadFile({
           authorizationToken: endpoint.authorizationToken,
           uploadUrl: endpoint.uploadUrl,
-          filename: state.state.location,
+          filename: stripLeadingSlash(state.state.location),
           sourceRequest: params.request,
           contentLength: params.length,
           contentSha1: 'do_not_verify',
@@ -387,7 +390,7 @@ export class TussleStorageB2 implements TussleStorageService {
         } else {
           const largeFile$ = this.b2.startLargeFile({
             bucketId: this.options.bucketId,
-            fileName: state.state.location,
+            fileName: stripLeadingSlash(state.state.location),
             contentType: (state.state.metadata?.contentType as string) || 'b2/x-auto',
           });
 
@@ -435,7 +438,7 @@ export class TussleStorageB2 implements TussleStorageService {
       }),
     );
 
-    const uploaded$ = combineLatest(endpoint$, state$).pipe(
+    const uploaded$ = combineLatest([endpoint$, state$]).pipe(
       switchMap(([endpoint, state]) => {
         const contentSha1 = 'do_not_verify';
         const uploadPart$ = this.b2.uploadPart({

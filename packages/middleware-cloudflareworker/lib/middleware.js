@@ -34,7 +34,6 @@ class TussleCloudflareWorker {
     handleRequest(request) {
         return __awaiter(this, void 0, void 0, function* () {
             const req = yield createTussleRequest(this.core, request);
-            console.log('req', req);
             if (req) {
                 return this.core.handle(req)
                     .toPromise()
