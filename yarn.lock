@@ -3504,6 +3504,7 @@ __metadata:
     "@tussle/storage-b2": "link:../../packages/storage-b2"
     dotenv: ^9.0.0
     jest: ^26.6.3
+    rollup: ^2.67.3
     rollup-plugin-string: ^3.0.0
   languageName: unknown
   linkType: soft
@@ -5123,7 +5124,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fsevents@^2.1.2, fsevents@~2.3.1":
+"fsevents@^2.1.2, fsevents@~2.3.1, fsevents@~2.3.2":
   version: 2.3.2
   resolution: "fsevents@npm:2.3.2"
   dependencies:
@@ -5132,7 +5133,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fsevents@patch:fsevents@^2.1.2#builtin<compat/fsevents>, fsevents@patch:fsevents@~2.3.1#builtin<compat/fsevents>":
+"fsevents@patch:fsevents@^2.1.2#builtin<compat/fsevents>, fsevents@patch:fsevents@~2.3.1#builtin<compat/fsevents>, fsevents@patch:fsevents@~2.3.2#builtin<compat/fsevents>":
   version: 2.3.2
   resolution: "fsevents@patch:fsevents@npm%3A2.3.2#builtin<compat/fsevents>::version=2.3.2&hash=11e9ea"
   dependencies:
@@ -10013,6 +10014,20 @@ __metadata:
   bin:
     rollup: dist/bin/rollup
   checksum: 3f50c1e023adcf9fc14100b7ca128482ea58cd27af0aad344affbd9622fc35bbd28ca13ceac35b252d137aedd36df39886b3a308e42b437bcb46918584ee89d3
+  languageName: node
+  linkType: hard
+
+"rollup@npm:^2.67.3":
+  version: 2.67.3
+  resolution: "rollup@npm:2.67.3"
+  dependencies:
+    fsevents: ~2.3.2
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  bin:
+    rollup: dist/bin/rollup
+  checksum: 477354533b9aa5521bfcdf8ff817c5beaed6f2d68594750ac4c025c0ec743f00e1d2297277696027e73d437caea994f4305164d5bad62e62b02cd650e3ece00b
   languageName: node
   linkType: hard
 

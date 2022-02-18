@@ -59,3 +59,5 @@ self.addEventListener('install', () => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(handleRequest(event.request));
 });
+
+export {};

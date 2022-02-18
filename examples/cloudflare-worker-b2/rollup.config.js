@@ -28,9 +28,15 @@ const worker = {
             include: ["**/*.html", "client-bundle.js"],
         }),
         resolve({
-            mainFields: ['module', 'main', 'browser'],
+            preferBuiltins: true,
+            browser: true,
+            jsnext: true,
+            // mainFields: ['module', 'main', 'browser'],
         }),
-        commonjs(),
+        commonjs({
+            transformMixedEsModules: true,
+            // ignoreDynamicRequires: true,
+        }),
     ],
 }
 
