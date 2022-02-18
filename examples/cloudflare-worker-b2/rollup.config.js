@@ -12,7 +12,9 @@ const client = {
         resolve({
             browser: true,
         }),
-        commonjs(),
+        commonjs({
+            transformMixedEsModules: true,
+        }),
     ],
 }
 

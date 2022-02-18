@@ -17,7 +17,7 @@ const STATIC_FILES = {
 function staticHandler(request) {
   const { pathname } = new URL(request.url);
   const match = STATIC_FILES[pathname];
-  return match ? new Response(match.body, {
+  return match ? new Response(match.body.default || match.body, {
     headers: {
       'Content-Type': match.contentType,
     }
