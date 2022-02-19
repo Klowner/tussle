@@ -31,7 +31,10 @@ export default function handleOptions<T>(
     map((response) => ({
       ...ctx,
       response,
+      originalRequest: ctx,
     })),
   );
   return response$;
 }
+
+export type OptionsDefaultResponse = typeof defaultResponse;

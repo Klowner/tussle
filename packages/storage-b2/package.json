@@ -16,14 +16,14 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.4",
     "axios-observable": "^1.1.6",
-    "rxjs": "^6.6.3"
+    "rxjs": "^6.6.7"
   },
   "devDependencies": {
-    "@types/pg": "^7.14.5",
-    "jest": "^26.6.3",
-    "nock": "^13.0.3",
+    "@types/pg": "^7.14.11",
+    "jest": "^27.5.1",
+    "nock": "^13.2.4",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2"
   },

@@ -1,5 +1,5 @@
 import type {TussleIncomingRequest} from "@tussle/spec/interface/request";
-import {TussleStorageCreateFileResponse} from "@tussle/spec/interface/storage";
+import {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResponse} from "@tussle/spec/interface/storage";
 import {Observable} from "rxjs";
 import type {Tussle} from "./core";
 import {ExtractedCreateHeaders} from "./handlers/create";
@@ -18,6 +18,7 @@ export interface TussleCoreHookDef {
 
 export interface TussleCoreHooks extends TussleCoreHookDef {
   'after-create': TussleHookMethod<TussleStorageCreateFileResponse, Observable<TussleStorageCreateFileResponse>>;
+  'after-complete': TussleHookMethod<TussleStoragePatchFileCompleteResponse, Observable<TussleStoragePatchFileCompleteResponse>>;
   'before-create': TussleHookMethod<ExtractedCreateHeaders, Observable<ExtractedCreateHeaders>>;
   'before-patch': TussleHookMethod<ExtractedPatchHeaders, Observable<ExtractedPatchHeaders>>;
   'before-head': TussleHookMethod<ExtractedHeadHeaders, Observable<ExtractedHeadHeaders>>;

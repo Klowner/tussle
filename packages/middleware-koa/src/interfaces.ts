@@ -1,2 +1,1 @@
-export type TussleKoaMiddlewareOptions = {
-}
+export type TussleKoaMiddlewareOptions = Record<string, unknown>

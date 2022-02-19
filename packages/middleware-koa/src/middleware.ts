@@ -98,6 +98,6 @@ export default class TussleKoaMiddleware {
           });
       }
       await next();
-    }
+    };
 }
 

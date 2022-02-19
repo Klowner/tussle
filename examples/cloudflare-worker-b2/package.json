@@ -13,14 +13,14 @@
     "wrangler": "wrangler"
   },
   "dependencies": {
-    "dotenv": "^9.0.0"
+    "dotenv": "^16.0.0"
   },
   "devDependencies": {
-    "@cloudflare/wrangler": "^1.16.1",
+    "@cloudflare/wrangler": "^1.19.8",
     "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
     "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
     "@tussle/storage-b2": "link:../../packages/storage-b2",
-    "jest": "^26.6.3",
+    "jest": "^27.5.1",
     "rollup": "^2.67.3",
     "rollup-plugin-string": "^3.0.0"
   }

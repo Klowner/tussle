@@ -16,14 +16,14 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
-    "@cloudflare/workers-types": "^2.2.2",
-    "rxjs": "^6.6.3"
+    "@cloudflare/workers-types": "^3.4.0",
+    "rxjs": "^6.6.7"
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "jest": "^26.6.3"
+    "jest": "^27.5.1"
   },
   "jest": {
     "preset": "ts-jest",

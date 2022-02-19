@@ -45,5 +45,5 @@ jobs:
           command: psql -h localhost -p 5432 -f ./packages/state-postgres/create_table.psql -d tussle_test -U postgres
       - run:
           name: Unit tests with coverage
-          command: yarn run coveralls
+          command: yarn run coverage
       - coveralls/upload

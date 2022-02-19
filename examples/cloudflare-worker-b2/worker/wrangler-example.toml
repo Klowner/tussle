@@ -3,3 +3,4 @@ type = "javascript"
 account_id = "<cloudflareAccountId>"
 workers_dev = true
 vars = { TUSSLE_B2_KEY_ID = "<b2KeyId>", TUSSLE_B2_KEY = "<b2Key>", TUSSLE_B2_BUCKET_ID = "<b2BucketId>" }
+compatibility_date = "2022-01-01"

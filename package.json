@@ -8,7 +8,7 @@
   "scripts": {
     "test": "run-s test:unit",
     "test:unit": "npm run build:lib && jest",
-    "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
+    "coverage": "jest --coverage --ci --runInBand --detectOpenHandles && cat ./coverage/lcov.info | coveralls",
     "build": "run-s clean && run-p build:lib",
     "build:lib": "tsc -b packages/tsconfig.json",
     "watch": "yarn run build:lib --watch --preserveWatchOutput",
@@ -21,18 +21,18 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/jest": "^26.0.20",
-    "@typescript-eslint/eslint-plugin": "^4.15.0",
-    "@typescript-eslint/parser": "^4.15.0",
-    "coveralls": "^3.1.0",
-    "eslint": "^7.26.0",
-    "eslint-plugin-rxjs": "^3.3.0",
-    "jest": "^26.6.3",
+    "@types/jest": "^27.4.0",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "coveralls": "^3.1.1",
+    "eslint": "^8.9.0",
+    "eslint-plugin-rxjs": "^5.0.2",
+    "jest": "^27.5.1",
     "lerna": "^4.0.0",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
-    "ts-jest": "^26.5.1",
-    "typescript": "^3.9.9"
+    "ts-jest": "^27.1.3",
+    "typescript": "^3.9.10"
   },
   "private": true
 }
