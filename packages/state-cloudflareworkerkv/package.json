@@ -1,0 +1,34 @@
+{
+  "name": "@tussle/state-cloudflareworkerkv",
+  "version": "0.0.5",
+  "description": "Tussle Cloudflare Workers KV state handler component",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "run-s clean build:tsc",
+    "build:tsc": "tsc -b",
+    "watch": "tsc -b --watch",
+    "clean": "rimraf lib coverage tsconfig.tsbuildinfo",
+    "test": "jest --coverage"
+  },
+  "author": "Mark Riedesel <mark@klowner.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^2.2.2",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2"
+  },
+  "devDependencies": {
+    "@tussle/spec": "^0.0.5",
+    "jest": "^26.6.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  }
+}

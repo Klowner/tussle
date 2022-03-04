@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.settings.json",
+  "files": [
+    "src/index.ts"
+  ],
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src",
+    "baseUrl": "./",
+    "lib": ["ES2020", "WebWorker"],
+    "types": ["@cloudflare/workers-types", "node"]
+  }
+}
