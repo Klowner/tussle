@@ -60,7 +60,10 @@ const createTussleRequest = <T extends Request>(
           return header || undefined;
         },
         getReadable: () => {
-          throw new Error('not implemented');
+          if (ctx.body) {
+            return ctx.body;
+          }
+          throw new Error('failed to get request body');
         },
         method,
         path: pathname,

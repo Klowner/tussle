@@ -1,5 +1,5 @@
 import { Observable, OperatorFunction, pipe } from "rxjs";
-import { catchError, filter, mergeMap, map, share, switchMap, tap, withLatestFrom, take, endWith, defaultIfEmpty } from 'rxjs/operators';
+import { catchError, filter, mergeMap, map, share, switchMap, tap, withLatestFrom, } from 'rxjs/operators';
 import { combineLatest, defer, EMPTY, from, of, throwError } from "rxjs";
 import type {
   TusProtocolExtension,
@@ -177,21 +177,6 @@ export class TussleStorageB2 implements TussleStorageService {
     })));
     return response$;
   }
-
-  // private readonly toCombinedState:
-  //   OperatorFunction<B2PersistentLocationState | null, B2CombinedState | null> =
-  //   pipe(
-  //     filter(isNonNull),
-  //     mergeMap((state) => of(this.transientState.getItem(state.location)).pipe(
-  //       filter(isNonNull),
-  //       map((transientState) => ({
-  //         state,
-  //         transientState,
-  //       })),
-  //     )),
-  //     endWith(null),
-  //     take(1),
-  //   );
 
   public getFileInfo(
     params: TussleStorageFileInfoParams

@@ -2,24 +2,7 @@ import { Observable, throwError } from "rxjs";
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStorageFileInfo } from '@tussle/spec/interface/storage';
 import type { Tussle } from '../core';
-import { switchMap, map, defaultIfEmpty } from 'rxjs/operators';
-
-/*
-export default function handleHead<T>(
-  core: Tussle,
-  ctx: TussleIncomingRequest<T>,
-): Observable<TussleIncomingRequest<T>>
-{
-  const store = core.getStorage('default');
-  const params = extractParamsFromHeaders(ctx);
-  const params$ = core.hook('before-head', ctx, params);
-  return params$.pipe(
-    switchMap((params) => store.getFileInfo(params).pipe(
-      map((fileInfo) => toResponse(ctx, fileInfo)),
-    )),
-  );
-}
-*/
+import { switchMap, map } from 'rxjs/operators';
 
 export default function handleHead<Req>(
   core: Tussle,
@@ -38,7 +21,6 @@ export default function handleHead<Req>(
     );
   }
 }
-
 
 const extractParamsFromHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
   const location = ctx.request.path;

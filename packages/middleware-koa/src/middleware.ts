@@ -82,17 +82,20 @@ const handleResponse = async <T extends Context>(ctx: TussleIncomingRequest<T>):
 };
 
 interface TussleKoaMiddlewareConfig {
-  core: TussleConfig;
+  core: TussleConfig | Tussle;
   hooks: Partial<TussleHooks<Context>>;
 }
 
 export default class TussleKoaMiddleware extends TussleBaseMiddleware<Context> {
-  private readonly core: Tussle;
-
-  constructor (options: TussleKoaMiddlewareConfig) {
+  constructor (readonly options: TussleKoaMiddlewareConfig) {
     super(options.hooks);
-    this.core = new Tussle(options.core);
   }
+
+  private readonly core: Tussle = (
+    this.options.core instanceof Tussle ?
+    this.options.core :
+    new Tussle(this.options.core)
+  );
 
   public readonly middleware = (): Middleware =>
     async (ctx, next) => {
