@@ -1,0 +1,6 @@
+{
+  "name": "tussle-worker",
+  "version": "1.0.0",
+  "main": "../dist/worker.js",
+  "license": "MIT"
+}

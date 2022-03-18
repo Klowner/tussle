@@ -1,0 +1,6 @@
+name = "cloudflare-worker-s3"
+type = "javascript"
+account_id = "<cloudflareAccountId>"
+workers_dev = true
+vars = {}
+compatibility_date = "2022-01-01"
