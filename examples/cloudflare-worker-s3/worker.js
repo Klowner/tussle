@@ -30,6 +30,15 @@ const tussleCloudflare = new TussleCloudflareWorker({
   storage: new TussleStorageS3({
       stateService: new TussleStateMemory(),
       requestService: new TussleRequestCloudflareWorker(),
+      s3bucket: TUSSLE_S3_BUCKET,
+      s3: {
+        endpoint: TUSSLE_S3_ENDPOINT,
+        region: 'us-west-001',
+        credentials: {
+          accessKeyId: TUSSLE_S3_KEY_ID,
+          secretAccessKey: TUSSLE_S3_KEY,
+        }
+      }
   }),
 });
 
