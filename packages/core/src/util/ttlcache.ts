@@ -24,6 +24,8 @@ export class TTLCache<T> {
     this.lastGarbageCollection = this.now();
   }
 
+  public onRelease(_key: string, _data: T): void { /* NOOP */ }
+
   public async getOrCreate(key: string, create: () => Promise<T>): Promise<T> {
     const hit = this.cache[key];
     const now = this.now();
@@ -57,7 +59,7 @@ export class TTLCache<T> {
         data,
       };
     } else {
-      delete this.cache[key];
+      this.release(key);
     }
     return data;
   }
@@ -67,8 +69,18 @@ export class TTLCache<T> {
     const { ttl, cache } = this;
     for (const key in cache) {
       if (isExpired(now, cache[key].atime, ttl)) {
-        delete cache[key];
+        this.release(key);
       }
+    }
+  }
+
+  private release(key: string): void {
+    var item = this.cache[key];
+    if (item) {
+      if (this.onRelease) {
+        this.onRelease(key, item.data);
+      }
+      delete this.cache[key];
     }
   }
 
