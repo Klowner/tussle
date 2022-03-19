@@ -75,7 +75,7 @@ export class TTLCache<T> {
   }
 
   private release(key: string): void {
-    var item = this.cache[key];
+    const item = this.cache[key];
     if (item) {
       if (this.onRelease) {
         this.onRelease(key, item.data);
