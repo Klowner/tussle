@@ -16,11 +16,6 @@ class TussleStateNamespace<T> implements TussleStateService<T> {
   getItem(key: string): SuperReturnType<T, 'getItem'> {
     key = this.addNs(key);
     const item = this.state.getItem(key);
-    item.then((item) => {
-      if (!item) {
-        console.error('MISSING', key);
-      }
-    });
     return item;
   }
 
