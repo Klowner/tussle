@@ -10,7 +10,7 @@
     "start:client": "rollup -c --watch --preserveWatchOutput",
     "build": "rollup -c",
     "deploy": "cd worker && wrangler publish",
-    "wrangler": "wrangler"
+    "wrangler": "wrangler -c worker/wrangler.toml"
   },
   "dependencies": {
     "dotenv": "^16.0.0"

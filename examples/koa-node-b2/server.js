@@ -41,13 +41,17 @@ function serve(port = process.env.PORT || '8080') {
         return params;
       },
     },
-    storage: new TussleStorageB2({
-      applicationKeyId: process.env.TUSSLE_B2_KEY_ID,
-      applicationKey: process.env.TUSSLE_B2_KEY,
-      bucketId: process.env.TUSSLE_B2_BUCKET_ID,
-      stateService: new TussleStateMemory(),
-      requestService: new TussleRequestAxios(),
-    }),
+    // storage: new TussleStorageB2({
+    //   applicationKeyId: process.env.TUSSLE_B2_KEY_ID,
+    //   applicationKey: process.env.TUSSLE_B2_KEY,
+    //   bucketId: process.env.TUSSLE_B2_BUCKET_ID,
+    //   stateService: new TussleStateMemory(),
+    //   requestService: new TussleRequestAxios(),
+    // }),
+    storage: {
+      backblaze: TussleStorageB2,
+      aws: TussleStorageB2,
+    }
   });
 
   router.all(/\/files\/?.*/, tussle.middleware());

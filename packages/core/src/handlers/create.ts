@@ -1,8 +1,8 @@
-import type { Observable } from 'rxjs';
+import { from, MonoTypeOperatorFunction, Observable, of, OperatorFunction, pipe, throwError } from 'rxjs';
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStorageCreateFileResponse } from '@tussle/spec/interface/storage';
 import type { Tussle } from '../core';
-import { switchMap, map, mergeMap } from 'rxjs/operators';
+import { switchMap, map, mergeMap, withLatestFrom, tap } from 'rxjs/operators';
 import { decode } from 'js-base64';
 
 function defaultPath(path: string, filename: string): string {
@@ -13,32 +13,39 @@ function defaultPath(path: string, filename: string): string {
   ].join('/');
 }
 
-export default function handleCreate<T>(
+// If the before-create hook didn't set the location, for the file being
+// created, then generate a default based on the request path and metadata
+// filename.
+const ensureFilePath = (originalPath: string): MonoTypeOperatorFunction<TussleCreationParams> =>
+  map(params => {
+    if (params.path === originalPath) {
+      params.path = defaultPath(params.path, params.uploadMetadata.filename);
+    }
+    return params;
+  });
+
+
+
+export default function handleCreate<R>(
   core: Tussle,
-  ctx: TussleIncomingRequest<T>
-): Observable<TussleIncomingRequest<T>>
-{
+  ctx: Readonly<TussleIncomingRequest<R>>
+): Observable<TussleIncomingRequest<R>> {
   const params = extractCreationHeaders(ctx);
   const originalPath = params.path;
+  const store = ctx.cfg.storage;
 
-  const params$ = core.hook('before-create', ctx, params).pipe(
-    map((params) => {
-      // If the before-create hook didn't set the location,
-      // for the file being created, then generate a default
-      // based on the request path and metadata filename.
-      if (params.path === originalPath) {
-        params.path = defaultPath(params.path, params.uploadMetadata.filename);
-      }
-      return params;
-    }),
-  );
-
-  return params$.pipe(
-    switchMap((params) => core.create(params).pipe(
-      mergeMap((createdFile) => core.hook('after-create', ctx, createdFile)),
+  if (!store) {
+    return throwError('no storage service selected');
+  } else {
+    const params$ = ctx.source.hook('before-create', ctx, params).pipe(
+      ensureFilePath(originalPath),
+    );
+    return params$.pipe(
+      switchMap((params) => store.createFile(params)),
+      switchMap((createdFile) => ctx.source.hook('after-create', ctx, createdFile)),
       map((createdFile) => toResponse(ctx, createdFile)),
-    )),
-  );
+    );
+  }
 }
 
 export interface TussleCreationParams {

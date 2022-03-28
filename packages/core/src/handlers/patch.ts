@@ -1,17 +1,21 @@
-import type { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import type { Tussle } from '../core';
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStoragePatchFileResponse, TussleStoragePatchFileCompleteResponse } from '@tussle/spec/interface/storage';
 import { of } from 'rxjs';
-import { map, switchMap, mergeMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 
 export default function handlePatch<T>(
   core: Tussle,
   ctx: TussleIncomingRequest<T>
 ): Observable<TussleIncomingRequest<T>>
 {
-  const store = core.getStorage('default');
   const params = extractPatchHeaders(ctx);
+  const store = ctx.cfg.storage;
+
+  if (!store) {
+    return throwError('no storage service selected');
+  }
 
   // PATCH requests MUST use Content-Type: application/offset+octet-stream
   if (params.contentType !== 'application/offset+octet-stream') {
@@ -22,13 +26,12 @@ export default function handlePatch<T>(
     return of(ctx);
   }
 
-  const params$ = core.hook('before-patch', ctx, params);
+  const params$ = ctx.source.hook('before-patch', ctx, params);
 
   return params$.pipe(
-    switchMap((params) => store.patchFile(params).pipe(
-      mergeMap((patchedFile) => callOptionalHooks(core, ctx, patchedFile)),
-      map((patchedFile) => toResponse(ctx, patchedFile)),
-    )),
+    switchMap((params) => store.patchFile(params)),
+    switchMap((patchedFile) => callOptionalHooks(ctx, patchedFile)),
+    map((patchedFile) => toResponse(ctx, patchedFile)),
   );
 }
 
@@ -38,18 +41,17 @@ response is TussleStoragePatchFileCompleteResponse {
 }
 
 const callOptionalHooks = <T>(
-  core: Tussle,
   ctx: TussleIncomingRequest<T>,
   patchedFile: TussleStoragePatchFileResponse
 ): Observable<TussleStoragePatchFileResponse> => {
   ctx.meta.storage = patchedFile.details;
   if (isComplete(patchedFile)) {
-    return core.hook('after-complete', ctx, patchedFile);
+    return ctx.source.hook('after-complete', ctx, patchedFile);
   }
   return of(patchedFile);
 };
 
-const extractPatchHeaders = (ctx: TussleIncomingRequest<unknown>) => {
+const extractPatchHeaders = <Req>(ctx: TussleIncomingRequest<Req>) => {
   const location = ctx.request.path;
   const header = ctx.request.getHeader;
   const intHeader = (key: string) => parseInt(header(key) as string || '', 10);

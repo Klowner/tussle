@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TussleCloudflareWorker = void 0;
 const core_1 = require("@tussle/core");
+const rxjs_1 = require("rxjs");
 function allowedMethod(method, overrideMethod) {
     method = overrideMethod || method;
     switch (method) {
@@ -22,8 +23,9 @@ function allowedMethod(method, overrideMethod) {
     }
     return null;
 }
-class TussleCloudflareWorker {
+class TussleCloudflareWorker extends core_1.TussleBaseMiddleware {
     constructor(options) {
+        super({});
         if (options instanceof core_1.Tussle) {
             this.core = options;
         }
@@ -33,9 +35,9 @@ class TussleCloudflareWorker {
     }
     handleRequest(request) {
         return __awaiter(this, void 0, void 0, function* () {
-            const req = yield createTussleRequest(this.core, request);
+            const req = createTussleRequest(this, request);
             if (req) {
-                return this.core.handle(req)
+                return (0, rxjs_1.of)(req).pipe(this.core.handle)
                     .toPromise()
                     .then((response) => {
                     return response ? handleTussleResponse(response) : null;
@@ -46,9 +48,8 @@ class TussleCloudflareWorker {
     }
 }
 exports.TussleCloudflareWorker = TussleCloudflareWorker;
-// convert cloudflare worker fetch request
-// to a TussleIncomingRequest
-const createTussleRequest = (_core, originalRequest) => __awaiter(void 0, void 0, void 0, function* () {
+// convert cloudflare worker fetch request to a TussleIncomingRequest
+const createTussleRequest = (source, originalRequest) => {
     const ctx = originalRequest;
     const overrideMethod = ctx.headers.get('x-http-method-override');
     const method = allowedMethod(ctx.method, overrideMethod);
@@ -68,11 +69,13 @@ const createTussleRequest = (_core, originalRequest) => __awaiter(void 0, void 0
             },
             response: null,
             meta: {},
+            cfg: {},
             originalRequest,
+            source,
         };
     }
     return null; // ignore this request
-});
+};
 // If the request context has a `response` attached then respond to the client
 // request as described by the `response`.  If no `response`, then return null
 // and potentially handle the request elsewhere.

@@ -22,18 +22,17 @@ const defaultResponse = {
   },
 };
 
-export default function handleOptions<T>(
+export default function handleOptions<Req>(
   core: Tussle,
-  ctx: TussleIncomingRequest<T>
-): Observable<TussleIncomingRequest<T>>
+  ctx: TussleIncomingRequest<Req>
+): Observable<TussleIncomingRequest<Req>>
 {
-  const response$ = core.hook('before-options', ctx, {...defaultResponse}).pipe(
+  const response$ = ctx.source.hook('before-options', ctx, {...defaultResponse}).pipe(
     map((response) => ({
       ...ctx,
       response,
-      originalRequest: ctx,
     })),
-  );
+  )
   return response$;
 }
 

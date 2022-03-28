@@ -1,9 +1,10 @@
-import type { Observable } from "rxjs";
+import { Observable, throwError } from "rxjs";
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStorageFileInfo } from '@tussle/spec/interface/storage';
 import type { Tussle } from '../core';
 import { switchMap, map } from 'rxjs/operators';
 
+/*
 export default function handleHead<T>(
   core: Tussle,
   ctx: TussleIncomingRequest<T>,
@@ -18,6 +19,26 @@ export default function handleHead<T>(
     )),
   );
 }
+*/
+
+export default function handleHead<Req>(
+  core: Tussle,
+  ctx: TussleIncomingRequest<Req>
+): Observable<TussleIncomingRequest<Req>>
+{
+  const params = extractParamsFromHeaders(ctx);
+  const store = ctx.cfg.storage;
+  if (!store) {
+    return throwError('no storage service selected');
+  } else {
+    const params$ = ctx.source.hook('before-head', ctx, params);
+    return params$.pipe(
+      switchMap((params) => store.getFileInfo(params)),
+      map(fileInfo => toResponse(ctx, fileInfo)),
+    );
+  }
+}
+
 
 const extractParamsFromHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
   const location = ctx.request.path;

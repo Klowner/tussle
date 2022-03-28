@@ -4,7 +4,7 @@ function uploadFile(file) {
   const upload = new Upload(file, {
     endpoint: '/files', // the cloudflare worker should be running at this URL
     retryDelays: [0, 5000],
-    chunkSize: 1000 * 1000 * 100,
+    chunkSize: 1000 * 1000 * 8, // 8MB (cloudflare multi-part upload chunks must be at least 5MB!)
     parallelUploads: 1,
     metadata: {
       filename: file.name,
@@ -13,11 +13,16 @@ function uploadFile(file) {
     },
     onError: (err) => {
       console.error(err);
-      // setTimeout(() => uploadFile(file), 2000); // retry in 5 seconds
     },
     onProgress: (uploaded, total) => {
       const pct = Math.floor(uploaded / total * 100);
       console.log('upload: ' + pct + '%');
+    },
+    onChunkComplete: (size, bytesComplete, bytesTotal) => {
+      console.log(`chunk completed: ${bytesComplete} bytes`);
+    },
+    onSuccess: () => {
+      console.log('upload success!');
     },
   });
   return upload.start();

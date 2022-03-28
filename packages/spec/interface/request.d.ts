@@ -1,5 +1,7 @@
 import type { Readable } from 'stream';
 import type { Observable } from 'rxjs';
+import type { TussleMiddlewareService } from './middleware';
+import type { TussleStorageService } from './storage';
 
 type RequestBody =
   | Readable
@@ -30,7 +32,7 @@ export type TussleOutgoingResponse<T, R> = {
   originalResponse: R;
 };
 
-export interface TussleIncomingRequest<T> {
+export interface TussleIncomingRequest<Req> {
   request: {
     method: 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH' | 'DELETE';
     path: string;
@@ -46,8 +48,13 @@ export interface TussleIncomingRequest<T> {
     tusVersion?: string;
     storageKey?: string;
     storage?: unknown;
-  }
-  originalRequest: T;
+  };
+  cfg: {
+    storage?: TussleStorageService;
+    maxSizeBytes?: number;
+  };
+  source: TussleMiddlewareService<Req>;
+  originalRequest: Req;
 }
 
 export interface TussleRequestService<R = unknown> {

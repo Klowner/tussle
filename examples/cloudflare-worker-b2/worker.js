@@ -1,5 +1,6 @@
 const { TussleStorageB2 } = require('@tussle/storage-b2');
-const { TussleStateMemory } = require('@tussle/state-memory');
+// const { TussleStateMemory } = require('@tussle/state-memory');
+const { TussleStateCloudflareWorkersKV } = require('@tussle/state-cloudflareworkerkv');
 const { TussleRequestCloudflareWorker } = require('@tussle/request-cloudflareworker');
 const { TussleCloudflareWorker } = require('@tussle/middleware-cloudflareworker');
 
@@ -31,7 +32,7 @@ const tussleCloudflare = new TussleCloudflareWorker({
       applicationKeyId: TUSSLE_B2_KEY_ID,    // <-- set via worker environment
       applicationKey: TUSSLE_B2_KEY,         // <-- set via worker environment
       bucketId: TUSSLE_B2_BUCKET_ID,         // <-- set via worker environment
-      stateService: new TussleStateMemory(),
+      stateService: new TussleStateCloudflareWorkersKV(TUSSLE_WORKER_KV, {expirationTtl: 60 * 60}),
       requestService: new TussleRequestCloudflareWorker(),
   }),
 });

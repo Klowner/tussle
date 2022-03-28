@@ -1,5 +1,6 @@
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
-import { Tussle, TussleConfig } from '@tussle/core';
+import { Tussle, TussleConfig, TussleBaseMiddleware } from '@tussle/core';
+import { from, of  } from 'rxjs';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
@@ -15,10 +16,11 @@ function allowedMethod(method: string, overrideMethod: string | null): AllowedMe
   return null;
 }
 
-export class TussleCloudflareWorker {
+export class TussleCloudflareWorker extends TussleBaseMiddleware<Request> {
   private readonly core: Tussle;
 
   constructor (options: Tussle | TussleConfig) {
+    super({});
     if (options instanceof Tussle) {
       this.core = options;
     } else {
@@ -27,9 +29,9 @@ export class TussleCloudflareWorker {
   }
 
   public async handleRequest(request: Request): Promise<Response | null> {
-    const req = await createTussleRequest(this.core, request);
+    const req = createTussleRequest(this, request);
     if (req) {
-      return this.core.handle(req)
+      return of(req).pipe(this.core.handle)
         .toPromise()
         .then((response) => {
           return response ? handleTussleResponse(response): null;
@@ -39,12 +41,11 @@ export class TussleCloudflareWorker {
   }
 }
 
-// convert cloudflare worker fetch request
-// to a TussleIncomingRequest
-const createTussleRequest = async <T extends Request>(
-  _core: Tussle,
+// convert cloudflare worker fetch request to a TussleIncomingRequest
+const createTussleRequest = <T extends Request>(
+  source: TussleCloudflareWorker,
   originalRequest: T
-): Promise<TussleIncomingRequest<T> | null> =>
+): TussleIncomingRequest<T> | null =>
 {
   const ctx = originalRequest;
   const overrideMethod = ctx.headers.get('x-http-method-override');
@@ -65,7 +66,9 @@ const createTussleRequest = async <T extends Request>(
       },
       response: null,
       meta: {},
+      cfg: {},
       originalRequest,
+      source,
     };
   }
   return null; // ignore this request

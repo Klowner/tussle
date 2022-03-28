@@ -241,15 +241,11 @@ export class TussleStorageB2 implements TussleStorageService {
       )),
     );
 
-    const combinedState$: Observable<B2CombinedState> = combineLatest(
+    const combinedState$: Observable<B2CombinedState> = combineLatest([
       state$,
       transientState$,
-      (state, transientState) => ({
-        state,
-        transientState,
-      })
-    ).pipe(
-      mergeMap(({ state, transientState }) => {
+    ]).pipe(
+      mergeMap(([ state, transientState ]) => {
         if (state && transientState) {
           return of({
             state,
@@ -287,7 +283,7 @@ export class TussleStorageB2 implements TussleStorageService {
       }),
     );
 
-    const responseWithSavedState$ = combineLatest(response$, combinedState$).pipe(
+    const responseWithSavedState$ = combineLatest([response$, combinedState$]).pipe(
       mergeMap(([response, state]) => {
         if (response.complete) {
           return this.setState(state.state.location, {

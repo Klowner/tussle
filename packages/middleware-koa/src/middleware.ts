@@ -1,6 +1,9 @@
 import type { Context, Middleware } from 'koa';
-import { Tussle } from '@tussle/core';
+import { Tussle, TussleBaseMiddleware } from '@tussle/core';
 import type { TussleConfig, TussleIncomingRequest }  from '@tussle/core';
+import {TussleMiddlewareService} from '@tussle/spec/interface/middleware';
+import { from, defer, EMPTY, concat } from 'rxjs';
+import { filter, take, map} from 'rxjs/operators';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
@@ -27,7 +30,7 @@ const firstOrUndefined = (v: string|string[]|undefined) => {
 
 
 const prepareRequest = async <T extends Context>(
-  _core: Tussle,
+  source: TussleMiddlewareService<T>,
   originalRequest: T
 ): Promise<TussleIncomingRequest<T> | null> =>
 {
@@ -44,8 +47,11 @@ const prepareRequest = async <T extends Context>(
         path: ctx.path,
       },
       response: null,
+      cfg: {
+      },
       meta: {
       },
+      source,
       originalRequest,
     };
   }
@@ -76,10 +82,11 @@ const handleResponse = async <T extends Context>(ctx: TussleIncomingRequest<T>):
   return ctx.originalRequest;
 };
 
-export default class TussleKoaMiddleware {
+export default class TussleKoaMiddleware extends TussleBaseMiddleware<Context> {
   private readonly core: Tussle;
 
   constructor (options: Tussle | TussleConfig) {
+    super({});
     if (options instanceof Tussle) {
       this.core = options;
     } else {
@@ -89,15 +96,42 @@ export default class TussleKoaMiddleware {
 
   public readonly middleware = (): Middleware =>
     async (ctx, next) => {
-      const req = await prepareRequest(this.core, ctx);
-      if (req) {
-        return this.core.handle(req)
-          .toPromise()
-          .then((response) => {
-            return response ? handleResponse(response) : next();
-          });
-      }
-      await next();
+      const next$ = defer(next);
+      const request$ = from(prepareRequest(this, ctx)).pipe(
+        filter(isNonNull),
+        this.core.handle,
+        map((res) => res ? handleResponse(res) : EMPTY),
+      );
+
+      return concat(next$, request$).pipe(take(1));
+
+
+      // const req = await prepareRequest(this, ctx);
+      // if (req) {
+      //   return of(req).pipe(
+      //     this.core.handle,
+      //     filter(Boolean),
+      //   );
+      // }
+      // const request$ = from(prepareRequest(this, ctx));
+
+      // return request$.pipe(
+      //   // mergeMap((res) => res ? handleResponse(res) : next()),
+      //   this.core.handle,
+      // )
+
+      // const req = await prepareRequest(this, ctx);
+      // if (req) {
+      //   return this.core.handle(req)
+      //     .toPromise()
+      //     .then((response) => {
+      //       return response ? handleResponse(response) : next();
+      //     });
+      // }
+      // await next();
     };
 }
 
+function isNonNull<T>(value: T): value is NonNullable<T> {
+  return value != null;
+}

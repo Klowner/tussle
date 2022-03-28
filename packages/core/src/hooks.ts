@@ -23,3 +23,22 @@ export interface TussleCoreHooks extends TussleCoreHookDef {
   'before-patch': TussleHookMethod<ExtractedPatchHeaders, Observable<ExtractedPatchHeaders>>;
   'before-head': TussleHookMethod<ExtractedHeadHeaders, Observable<ExtractedHeadHeaders>>;
 }
+
+
+export type TussleHookFunc<M, P, R> = (
+  tussle: Tussle,
+  ctx: TussleIncomingRequest<M>,
+  params: P,
+) => R;
+
+export interface TussleHookDef {
+  [key: string]: <R>(tussle: Tussle, ctx: TussleIncomingRequest<R>, params: unknown) => unknown;
+}
+
+export interface TussleHooks<M> {
+  'after-create': TussleHookFunc<M, TussleStorageCreateFileResponse, Observable<TussleStorageCreateFileResponse>>;
+  'after-complete': TussleHookFunc<M, TussleStoragePatchFileCompleteResponse, Observable<TussleStoragePatchFileCompleteResponse>>;
+  'before-create': TussleHookFunc<M, ExtractedCreateHeaders, Observable<ExtractedCreateHeaders>>;
+  'before-patch': TussleHookFunc<M, ExtractedPatchHeaders, Observable<ExtractedPatchHeaders>>;
+  'before-head': TussleHookFunc<M, ExtractedHeadHeaders, Observable<ExtractedHeadHeaders>>;
+}
