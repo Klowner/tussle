@@ -32,3 +32,5 @@ function uploadFile(file) {
     uploadFile(file);
   });
 })();
+
+export {};

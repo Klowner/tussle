@@ -11,6 +11,8 @@ export default {
         resolve({
             browser: true,
         }),
-        commonjs(),
+        commonjs({
+            transformMixedEsModules: true,
+        }),
     ],
 }
