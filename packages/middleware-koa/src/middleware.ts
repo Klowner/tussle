@@ -1,9 +1,8 @@
-import type { Context, Middleware } from 'koa';
+import type { TussleConfig, TussleIncomingRequest } from '@tussle/core';
 import { Tussle, TussleBaseMiddleware } from '@tussle/core';
-import type { TussleConfig, TussleIncomingRequest }  from '@tussle/core';
-import {TussleMiddlewareService} from '@tussle/spec/interface/middleware';
-import { from, defer, EMPTY, concat } from 'rxjs';
-import { filter, take, map} from 'rxjs/operators';
+import { TussleMiddlewareService } from '@tussle/spec/interface/middleware';
+import type { Context, Middleware } from 'koa';
+import { of } from 'rxjs';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
@@ -96,42 +95,13 @@ export default class TussleKoaMiddleware extends TussleBaseMiddleware<Context> {
 
   public readonly middleware = (): Middleware =>
     async (ctx, next) => {
-      const next$ = defer(next);
-      const request$ = from(prepareRequest(this, ctx)).pipe(
-        filter(isNonNull),
-        this.core.handle,
-        map((res) => res ? handleResponse(res) : EMPTY),
-      );
-
-      return concat(next$, request$).pipe(take(1));
-
-
-      // const req = await prepareRequest(this, ctx);
-      // if (req) {
-      //   return of(req).pipe(
-      //     this.core.handle,
-      //     filter(Boolean),
-      //   );
-      // }
-      // const request$ = from(prepareRequest(this, ctx));
-
-      // return request$.pipe(
-      //   // mergeMap((res) => res ? handleResponse(res) : next()),
-      //   this.core.handle,
-      // )
-
-      // const req = await prepareRequest(this, ctx);
-      // if (req) {
-      //   return this.core.handle(req)
-      //     .toPromise()
-      //     .then((response) => {
-      //       return response ? handleResponse(response) : next();
-      //     });
-      // }
-      // await next();
+      const req = await prepareRequest(this, ctx);
+      if (req) {
+        return of(req).pipe(this.core.handle)
+          .toPromise()
+          .then((response) => {
+            return response ? handleResponse(response) : next();
+          });
+      }
     };
-}
-
-function isNonNull<T>(value: T): value is NonNullable<T> {
-  return value != null;
 }
