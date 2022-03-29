@@ -32,7 +32,7 @@ export default function handleOptions<Req>(
       ...ctx,
       response,
     })),
-  )
+  );
   return response$;
 }
 

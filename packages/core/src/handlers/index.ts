@@ -15,4 +15,4 @@ export const defaultHandlers = {
   'PATCH': handlePatch,
   'HEAD': handleHead,
   'OPTIONS': handleOptions,
-}
+};
