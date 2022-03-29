@@ -1,6 +1,6 @@
 import type { TussleConfig, TussleIncomingRequest } from '@tussle/core';
 import { Tussle, TussleBaseMiddleware } from '@tussle/core';
-import { TussleMiddlewareService } from '@tussle/spec/interface/middleware';
+import { TussleHooks, TussleMiddlewareService } from '@tussle/spec/interface/middleware';
 import type { Context, Middleware } from 'koa';
 import { of } from 'rxjs';
 
@@ -81,16 +81,17 @@ const handleResponse = async <T extends Context>(ctx: TussleIncomingRequest<T>):
   return ctx.originalRequest;
 };
 
+interface TussleKoaMiddlewareConfig {
+  core: TussleConfig;
+  hooks: Partial<TussleHooks<Context>>;
+}
+
 export default class TussleKoaMiddleware extends TussleBaseMiddleware<Context> {
   private readonly core: Tussle;
 
-  constructor (options: Tussle | TussleConfig) {
-    super({});
-    if (options instanceof Tussle) {
-      this.core = options;
-    } else {
-      this.core = new Tussle(options);
-    }
+  constructor (options: TussleKoaMiddlewareConfig) {
+    super(options.hooks);
+    this.core = new Tussle(options.core);
   }
 
   public readonly middleware = (): Middleware =>

@@ -1,6 +1,6 @@
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
-import { Tussle, TussleConfig, TussleBaseMiddleware } from '@tussle/core';
-import { from, of  } from 'rxjs';
+import { Tussle, TussleBaseMiddleware, TussleConfig } from '@tussle/core';
+import { of } from 'rxjs';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 

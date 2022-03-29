@@ -1,19 +1,14 @@
-
-// import type {Tussle} from '@tussle/core';
-import type {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResponse, TussleStorageService} from "@tussle/spec/interface/storage";
+import type {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResponse} from "@tussle/spec/interface/storage";
 import type {Observable} from 'rxjs';
 import type {TussleIncomingRequest} from './request';
 
-type Tussle = unknown;
-
 export type TussleHookFunc<Req, P, R> = (
-  tussle: Tussle,
   ctx: TussleIncomingRequest<Req>,
   params: P,
 ) => R;
 
 export interface TussleHookDef<Req> {
-  [key: string]: (tussle: Tussle, ctx: TussleIncomingRequest<Req>, params: any) => any;
+  [key: string]: (ctx: TussleIncomingRequest<Req>, params: any) => any;
 }
 
 interface TussleCreationParams {
@@ -42,11 +37,6 @@ interface TussleOptionsParams {
   headers: Record<string, string>;
 }
 
-// interface TusslePatchParams {
-//   contentType: string;
-//   getReadable: () => Readable;
-// }
-
 export interface TussleHooks<Req> extends TussleHookDef<Req> {
   'after-create': TussleHookFunc<Req, TussleStorageCreateFileResponse, Observable<TussleStorageCreateFileResponse>>;
   'after-complete': TussleHookFunc<Req, TussleStoragePatchFileCompleteResponse, Observable<TussleStoragePatchFileCompleteResponse>>;
@@ -54,7 +44,6 @@ export interface TussleHooks<Req> extends TussleHookDef<Req> {
   'before-patch': TussleHookFunc<Req, TusslePatchParams<Req>, Observable<TusslePatchParams<Req>>>;
   'before-head': TussleHookFunc<Req, TussleHeadParams, Observable<TussleHeadParams>>;
   'before-options': TussleHookFunc<Req, TussleOptionsParams, Observable<TussleOptionsParams>>;
-  // 'before-head': TussleHookFunc<M, ExtractedHeadHeaders, Observable<ExtractedHeadHeaders>>;
 }
 
 export interface TussleMiddlewareService<Req> {
@@ -62,6 +51,6 @@ export interface TussleMiddlewareService<Req> {
   hook<K extends keyof TussleHooks<Req>>(
     which: K,
     ctx: TussleIncomingRequest<Req>,
-    params: Parameters<TussleHooks<Req>[K]>[2],
+    params: Parameters<TussleHooks<Req>[K]>[1],
   ): ReturnType<TussleHooks<Req>[K]> | Observable<typeof params>;
 }
