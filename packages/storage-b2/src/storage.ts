@@ -1,5 +1,5 @@
 import { Observable, OperatorFunction, pipe } from "rxjs";
-import { catchError, filter, mergeMap, map, share, switchMap, tap, withLatestFrom, take, endWith } from 'rxjs/operators';
+import { catchError, filter, mergeMap, map, share, switchMap, tap, withLatestFrom, take, endWith, defaultIfEmpty } from 'rxjs/operators';
 import { combineLatest, defer, EMPTY, from, of, throwError } from "rxjs";
 import type {
   TusProtocolExtension,
@@ -157,9 +157,8 @@ export class TussleStorageB2 implements TussleStorageService {
   ): Observable<TussleStorageCreateFileResponse>
   {
     // Here we don't actually start anything, just determine where we want the
-    // user to start sending stuff. The location returned here determines the
-    // target location used by the first upload PATCH request.
-
+    // user to sending their file upload. The location returned here determines
+    // the target location used by the first upload PATCH request.
     if (!params.uploadLength) {
       console.error('upload-length is required (breaks spec)'); // SPEC CAVEAT
     }
@@ -171,51 +170,48 @@ export class TussleStorageB2 implements TussleStorageService {
       createParams: params,
     };
 
-    return defer(() => this.setState(state.location, state).pipe(
-      map((state) => ({
-        ...state,
-        success: true,
-      })),
-    ));
+    const persistedState$ = this.setState(state.location, state);
+    const response$ = persistedState$.pipe(map((state) => ({
+      ...state,
+      success: true,
+    })));
+    return response$;
   }
+
+  // private readonly toCombinedState:
+  //   OperatorFunction<B2PersistentLocationState | null, B2CombinedState | null> =
+  //   pipe(
+  //     filter(isNonNull),
+  //     mergeMap((state) => of(this.transientState.getItem(state.location)).pipe(
+  //       filter(isNonNull),
+  //       map((transientState) => ({
+  //         state,
+  //         transientState,
+  //       })),
+  //     )),
+  //     endWith(null),
+  //     take(1),
+  //   );
 
   public getFileInfo(
     params: TussleStorageFileInfoParams
   ): Observable<TussleStorageFileInfo>
   {
-    const state$ = this.getState(params.location);
-    const combinedState$ = state$.pipe(
-      filter(isNonNull),
-      mergeMap((state) => of(this.transientState.getItem(params.location)).pipe(
-        filter(isNonNull),
-        map((transientState) => ({
-          state,
-          transientState,
-        })),
-      )),
-      endWith(null),
-      take(1),
-    );
+    const { location } = params;
+    const state$ = this.getState(location);
 
-    const fileInfo$ = combinedState$.pipe(
+    const fileInfo$: Observable<TussleStorageFileInfo> = state$.pipe(
       map((state) => {
-        if (state) {
-          const { currentOffset } = state.transientState;
-          return {
-            info: {
-              currentOffset,
-            }
-          };
-        } else {
-          return {};
-        }
+        const transientState = this.transientState.getItem(location);
+        return {
+          location,
+          info: state ? {
+            uploadLength: state?.uploadLength,
+            currentOffset: transientState?.currentOffset || 0,
+          } : null,
+        };
       }),
-      map((state) => ({
-        ...state,
-        location: params.location,
-      })),
     );
-
     return fileInfo$;
   }
 

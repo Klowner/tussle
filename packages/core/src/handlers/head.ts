@@ -2,7 +2,7 @@ import { Observable, throwError } from "rxjs";
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStorageFileInfo } from '@tussle/spec/interface/storage';
 import type { Tussle } from '../core';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap, map, defaultIfEmpty } from 'rxjs/operators';
 
 /*
 export default function handleHead<T>(
@@ -53,12 +53,17 @@ const toResponse = <T>(
   ctx: TussleIncomingRequest<T>,
   fileInfo: TussleStorageFileInfo,
 ): TussleIncomingRequest<T> => {
-  if (fileInfo.info) {
+  const { info } = fileInfo;
+  if (info) {
+    const headers: Record<string, string> = {
+      'Upload-Offset': (info.currentOffset || 0).toString(),
+    };
+    if (typeof info.uploadLength === 'number') {
+      headers['Upload-Length'] = info.uploadLength.toString();
+    }
     ctx.response = {
       status: 200, // OK
-      headers: {
-        'Upload-Offset': fileInfo.info.currentOffset.toString(),
-      },
+      headers,
     };
   } else {
     ctx.response = {

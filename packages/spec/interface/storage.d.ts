@@ -50,9 +50,10 @@ export interface TussleStorageFileInfoParams {
 
 export interface TussleStorageFileInfo {
   location: string;
-  info?: {
+  info: {
     currentOffset: number;
-  };
+    uploadLength?: number;
+  } | null;
   details?: unknown;
 }
 

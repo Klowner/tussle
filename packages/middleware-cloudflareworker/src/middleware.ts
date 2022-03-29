@@ -1,6 +1,7 @@
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import { Tussle, TussleBaseMiddleware, TussleConfig } from '@tussle/core';
 import { of } from 'rxjs';
+import {TussleHooks} from '@tussle/spec/interface/middleware';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
@@ -16,17 +17,17 @@ function allowedMethod(method: string, overrideMethod: string | null): AllowedMe
   return null;
 }
 
-export class TussleCloudflareWorker extends TussleBaseMiddleware<Request> {
-  private readonly core: Tussle;
+interface TussleCloudflareWorkerMiddlewareConfig {
+  core: TussleConfig;
+  hooks: Partial<TussleHooks<Request>>;
+}
 
-  constructor (options: Tussle | TussleConfig) {
-    super({});
-    if (options instanceof Tussle) {
-      this.core = options;
-    } else {
-      this.core = new Tussle(options);
-    }
+export class TussleCloudflareWorker extends TussleBaseMiddleware<Request> {
+  constructor(readonly options: TussleCloudflareWorkerMiddlewareConfig) {
+    super(options.hooks);
   }
+
+  private readonly core: Tussle = new Tussle(this.options.core);
 
   public async handleRequest(request: Request): Promise<Response | null> {
     const req = createTussleRequest(this, request);
@@ -82,6 +83,7 @@ const handleTussleResponse = async <T extends Request>(ctx: TussleIncomingReques
 {
   if (ctx.response && ctx.response.status) {
     return new Response(ctx.response.body, {
+      status: ctx.response.status,
       headers: ctx.response.headers,
     });
   } else {
