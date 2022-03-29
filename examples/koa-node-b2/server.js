@@ -26,28 +26,29 @@ function serve(port = process.env.PORT || '8080') {
   const router = new Router();
 
   const tussle = new TussleKoa({
-    maxSizeBytes: 10 * 1024 * 1000, // 10MB
     hooks: {
-      'before-create': async (_tussle, _ctx, params) => {
+      'before-create': async (_ctx, params) => {
         console.log('before create called', params.path, params.uploadMetadata.filename);
         return params;
       },
-      'before-patch': async (_tussle, _ctx, params) => {
+      'before-patch': async (_ctx, params) => {
         console.log('before patch called');
         return params;
       },
-      'after-complete': async (_tussle, _ctx, params) => {
+      'after-complete': async (_ctx, params) => {
         console.log('AFTER COMPLETE', JSON.stringify(params, null, 2));
         return params;
       },
     },
-    storage: new TussleStorageB2({
-      applicationKeyId: process.env.TUSSLE_B2_KEY_ID,
-      applicationKey: process.env.TUSSLE_B2_KEY,
-      bucketId: process.env.TUSSLE_B2_BUCKET_ID,
-      stateService: new TussleStateMemory(),
-      requestService: new TussleRequestAxios(),
-    }),
+    core: {
+      storage: new TussleStorageB2({
+        applicationKeyId: process.env.TUSSLE_B2_KEY_ID,
+        applicationKey: process.env.TUSSLE_B2_KEY,
+        bucketId: process.env.TUSSLE_B2_BUCKET_ID,
+        stateService: new TussleStateMemory(),
+        requestService: new TussleRequestAxios(),
+      }),
+    },
   });
 
   router.all(/\/files\/?.*/, tussle.middleware());
