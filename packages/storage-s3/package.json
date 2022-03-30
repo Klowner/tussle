@@ -16,12 +16,12 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.58.0",
     "axios": "^0.21.4",
     "axios-observable": "^1.1.6",
     "rxjs": "^6.6.7"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.0.0",
     "@types/pg": "^7.14.11",
     "jest": "^27.5.1",
     "nock": "^13.2.4",
