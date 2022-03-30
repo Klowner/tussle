@@ -25,7 +25,13 @@ function uploadFile(file) {
       console.log('upload success!');
     },
   });
-  return upload.start();
+  upload.findPreviousUploads().then(function(previousUploads) {
+    if (previousUploads.length) {
+      upload.resumeFromPreviousUpload(previousUploads[0]);
+    }
+    upload.start();
+  });
+
 }
 
 (function setup() {

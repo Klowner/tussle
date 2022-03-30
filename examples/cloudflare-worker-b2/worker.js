@@ -27,14 +27,23 @@ function staticHandler(request) {
 
 const tussleCloudflare = new TussleCloudflareWorker({
   hooks: {
+    'before-patch': async (_ctx, params) => {
+      return params;
+    },
+    'after-complete': async (ctx, params) => {
+      console.log('COMPLETED', ctx.meta);
+      return params;
+    },
   },
-  storage: new TussleStorageB2({
-      applicationKeyId: TUSSLE_B2_KEY_ID,    // <-- set via worker environment
-      applicationKey: TUSSLE_B2_KEY,         // <-- set via worker environment
-      bucketId: TUSSLE_B2_BUCKET_ID,         // <-- set via worker environment
-      stateService: new TussleStateCloudflareWorkersKV(TUSSLE_WORKER_KV, {expirationTtl: 60 * 60}),
-      requestService: new TussleRequestCloudflareWorker(),
-  }),
+  core: {
+    storage: new TussleStorageB2({
+        applicationKeyId: TUSSLE_B2_KEY_ID,    // <-- set via worker environment
+        applicationKey: TUSSLE_B2_KEY,         // <-- set via worker environment
+        bucketId: TUSSLE_B2_BUCKET_ID,         // <-- set via worker environment
+        stateService: new TussleStateCloudflareWorkersKV(TUSSLE_WORKER_KV, {expirationTtl: 60 * 60}),
+        requestService: new TussleRequestCloudflareWorker(),
+    }),
+  }
 });
 
 async function handleRequest(request) {
