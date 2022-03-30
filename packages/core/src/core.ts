@@ -96,7 +96,7 @@ export class Tussle {
         extraHeaders['Tus-Max-Size'] = this.cfg.maxSizeBytes;
       }
       // Include required Tus-Extension
-      const supportedExtensions = 'creation,termination,checksum'; // TODO -- generate this
+      const supportedExtensions = 'creation,checksum'; // TODO -- generate this
       if (supportedExtensions) {
         extraHeaders['Tus-Extension'] = supportedExtensions;
         extraHeaders['Tus-Checksum-Algorithm'] = 'sha1';
