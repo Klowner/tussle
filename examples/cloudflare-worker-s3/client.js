@@ -4,8 +4,8 @@ function uploadFile(file) {
   const upload = new Upload(file, {
     endpoint: '/files', // the cloudflare worker should be running at this URL
     retryDelays: [0, 5000],
-    chunkSize: 5 * 1024, // 1000 * 1000 * 100,
-    parallelUploads: 3,
+    chunkSize: 5 * 1024 * 1024, // 1000 * 1000 * 100,
+    parallelUploads: 1,
     metadata: {
       filename: file.name,
       filetype: file.type,

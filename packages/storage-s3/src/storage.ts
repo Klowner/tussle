@@ -26,7 +26,7 @@ import {
   TussleStoragePatchFileResponse
 } from "@tussle/spec/interface/storage";
 import {concat, defer, EMPTY, from, Observable, of, OperatorFunction, pipe, zip} from "rxjs";
-import {catchError, defaultIfEmpty, filter, map, mergeMap, shareReplay, switchMap, withLatestFrom} from "rxjs/operators";
+import {catchError, concatMap, defaultIfEmpty, filter, map, mapTo, mergeMap, shareReplay, switchMap, withLatestFrom} from "rxjs/operators";
 
 
 interface S3ClientConfig {
@@ -69,6 +69,7 @@ interface S3LocalState {
 }
 
 type S3CombinedStates = [S3LocalState, S3UploadState];
+// type S3CombinedStatesMultiPart = [S3LocalState, S3MultiPartUploadState];
 
 // interface S3CombinedState {
 //   state: S3UploadState;
@@ -117,28 +118,7 @@ export class TussleStorageS3 implements TussleStorageService {
       })),
     );
     return response$;
-/*
-    const command = new CreateMultipartUploadCommand({
-      Key: path,
-      Bucket: this.options.s3bucket,
-    });
-
-    return from(this.s3.send(command)).pipe(
-      map((res) => {
-        console.log(res);
-        return {
-          location: '',
-          success: true,
-        };
-      }),
-      catchError(e => {
-        console.log('ERROR', e);
-        return of(e);
-      }),
-    );
-    */
   }
-
 
   getFileInfo(
     params: TussleStorageFileInfoParams,
@@ -196,7 +176,9 @@ export class TussleStorageS3 implements TussleStorageService {
             return this.patchSmallFile(combinedStates, params);
           case PatchAction.LargeFileFirstPart:
           case PatchAction.LargeFilePart:
+            return this.patchLargeFilePart(combinedStates, params);
           case PatchAction.LargeFileLastPart:
+            return this.patchLargeFileLastPart(combinedStates, params);
         }
         return EMPTY;
       }),
@@ -213,6 +195,63 @@ export class TussleStorageS3 implements TussleStorageService {
     );
   }
 
+  private readonly ensureMultiPartUpload: OperatorFunction<S3UploadState, S3MultiPartUploadState> = pipe(
+    mergeMap((state) => {
+      if (isMultiPart(state)) {
+        return of(state);
+      }
+      const { location } = state;
+      const bucket = this.options.s3bucket;
+      const command = new CreateMultipartUploadCommand({
+        Key: location,
+        Bucket: bucket,
+      });
+      const created$ = from(this.s3.send(command)).pipe(
+        shareReplay(1),
+      );;
+      const uploadId$ = created$.pipe(
+        map((res) => res.UploadId),
+        concatMap((uploadId) => {
+          if (!uploadId) {
+            throw new Error('create multipart failed: missing uploadId');
+          }
+          return of(uploadId);
+        })
+      );
+      const state$: Observable<S3MultiPartUploadState> = uploadId$.pipe(
+        map((uploadId) => ({
+          ...state,
+          multipart: {
+            uploadId,
+            key: location,
+            bucket,
+          }
+        })),
+      );
+      const persisted$ = state$.pipe(
+        mergeMap((state) => this.state.setItem(state.location, state).pipe(
+          mapTo(state),
+        )),
+      );
+      return persisted$;
+    }),
+  );
+
+
+  private uploadPart(
+    [localState, state]: S3CombinedStates,
+    params: TussleStoragePatchFileParams,
+  ): Observable<TussleStoragePatchFileResponse> {
+    const state$ = of(state).pipe(
+      this.ensureMultiPartUpload,
+    );
+    return of({
+      location: state.location,
+      success: true,
+      complete: false,
+    });
+  }
+
   private patchSmallFile(
     [localState, state]: S3CombinedStates,
     params: TussleStoragePatchFileParams,
@@ -222,7 +261,6 @@ export class TussleStorageS3 implements TussleStorageService {
       Bucket: this.options.s3bucket,
       Key: params.location,
     });
-    console.log(command);
     const upload$ = from(this.s3.send(command));
     const response$ = upload$.pipe(
       map((upstreamResponse) => {
@@ -242,6 +280,30 @@ export class TussleStorageS3 implements TussleStorageService {
     return response$;
   }
 
+  private patchLargeFilePart(
+    state: S3CombinedStates,
+    params: TussleStoragePatchFileParams,
+  ): Observable<TussleStoragePatchFileResponse> {
+    const upload$ = this.uploadPart(state, params);
+    return of({
+      location: params.location,
+      complete: false,
+      success: true,
+    });
+  }
+
+  private patchLargeFileLastPart(
+    state: S3CombinedStates,
+    params: TussleStoragePatchFileParams,
+  ): Observable<TussleStoragePatchFileResponse> {
+    const upload$ = this.uploadPart(state, params);
+    return of({
+      location: params.location,
+      complete: true,
+      success: true,
+    });
+  }
+
   private getOrCreateLocalState(
     state: S3UploadState,
   ): Observable<S3LocalState> {
@@ -257,7 +319,7 @@ export class TussleStorageS3 implements TussleStorageService {
   }
 
   private createLocalState(
-    state: S3UploadState
+    _state: S3UploadState
   ): Promise<S3LocalState> {
     // TODO: use the persisted state to re-construct this to the best of our
     // ability in the case that we're operating in a serverless environment and
@@ -279,7 +341,7 @@ export class TussleStorageS3 implements TussleStorageService {
     const { uploadLength } = uploadState;
     const isFirstPart = currentOffset === 0;
     const isLastPart = (currentOffset + params.length) === uploadLength;
-    const isLargeFile = !(isLastPart && isLastPart);
+    const isLargeFile = !(isFirstPart && isLastPart);
     const isValidChunk = (!isLargeFile) || currentOffset === params.offset;
     if (!isValidChunk) {
       return PatchAction.Invalid;
