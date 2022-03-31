@@ -24,9 +24,9 @@ export class TTLCache<T> {
     this.lastGarbageCollection = this.now();
   }
 
-  public onRelease(_key: string, _data: T): void { /* NOOP */ }
+  onRelease(_key: string, _data: T): void { /* NOOP */ }
 
-  public async getOrCreate(key: string, create: () => Promise<T>): Promise<T> {
+  async getOrCreate(key: string, create: () => Promise<T>): Promise<T> {
     const hit = this.cache[key];
     const now = this.now();
     this.asyncGarbageCollect(now);
@@ -38,7 +38,7 @@ export class TTLCache<T> {
     return hit.data;
   }
 
-  public getItem(key: string): T | null {
+  getItem(key: string): T | null {
     const now = this.now();
     const hit = this.cache[key];
     this.asyncGarbageCollect(now);
@@ -49,9 +49,9 @@ export class TTLCache<T> {
     return null;
   }
 
-  public setItem(key: string, data: T): T;
-  public setItem(key: string, data: null): null;
-  public setItem(key: string, data: T | null): T | null {
+  setItem(key: string, data: T): T;
+  setItem(key: string, data: null): null;
+  setItem(key: string, data: T | null): T | null {
     const now = this.now();
     if (data) {
       this.cache[key] = {
@@ -62,6 +62,18 @@ export class TTLCache<T> {
       this.release(key);
     }
     return data;
+  }
+
+  removeItem(key: string): T | null {
+    const hit = this.cache[key];
+    if (hit) {
+      delete this.cache[key];
+    }
+    return hit.data;
+  }
+
+  key(nth: number): string | null {
+    return Object.keys(this.cache)[nth] || null;
   }
 
   private garbageCollect(): void {
