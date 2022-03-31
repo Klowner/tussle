@@ -99,7 +99,6 @@ const toResponse = <T>(
       status: 201, // created
       headers: {
         'Location': createdFile.location,
-        'Tussle-Storage': 'b2',
         ...ctx.response?.headers,
       },
     };
