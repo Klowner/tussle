@@ -2,7 +2,6 @@ import {TussleStateService} from "@tussle/spec/interface/state";
 import {defer, from, Observable} from "rxjs";
 import {map} from "rxjs/operators";
 
-
 class StateRX<U> {
   constructor (private readonly stateService: TussleStateService<U>) {}
 
