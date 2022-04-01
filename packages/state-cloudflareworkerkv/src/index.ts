@@ -9,7 +9,7 @@ export interface KVNamespaceTussle extends Pick<KVNamespace, 'put'|'delete'|'lis
   get(key: string): PromiseLike<string|null>;
 }
 
-class TussleStateCloudflareWorkersKV<T> implements TussleStateService<T> {
+class TussleStateCloudflareWorkerKV<T> implements TussleStateService<T> {
   constructor (
     private readonly ns: KVNamespaceTussle,
     private readonly options?: {
@@ -127,5 +127,5 @@ class TussleStateCloudflareWorkersKV<T> implements TussleStateService<T> {
   }
 }
 
-export default TussleStateCloudflareWorkersKV;
-export { TussleStateCloudflareWorkersKV };
+export default TussleStateCloudflareWorkerKV;
+export { TussleStateCloudflareWorkerKV };
