@@ -1,7 +1,7 @@
 import { StateTestRecord } from '@tussle/spec';
 import type { TussleStateService } from '@tussle/spec/interface/state';
 import { stateServiceTests as stateSpecConformanceTests } from '@tussle/spec';
-import { KVListResult, KVNamespaceTussle, TussleStateCloudflareWorkersKV } from './index';
+import { KVNamespaceTussle, TussleStateCloudflareWorkerKV } from './index';
 
 class KVNamespaceMock implements KVNamespaceTussle {
   private readonly store: Record<string, string> = {};
@@ -31,7 +31,7 @@ class KVNamespaceMock implements KVNamespaceTussle {
       limit?: number;
       cursor?: string;
     }
-  ): Promise<KVListResult> {
+  ) {
     const start = options?.cursor ? parseInt(options.cursor, 10) : 0;
     const limit = options?.limit || 1000;
     const allKeys = Object.keys(this.store);
@@ -57,7 +57,7 @@ function runStateTest<T extends TussleStateService<StateTestRecord>>(
 
 runStateTest(
   '@tussle/state-cloudflareworkerskv',
-  async () => new TussleStateCloudflareWorkersKV<StateTestRecord>(
+  async () => new TussleStateCloudflareWorkerKV<StateTestRecord>(
     new KVNamespaceMock(),
   ),
 );
