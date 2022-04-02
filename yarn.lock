@@ -2191,6 +2191,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@tussle/state-cloudflareworkerkv@link:../../packages/state-cloudflareworkerkv::locator=cloudflare-worker-b2%40workspace%3Aexamples%2Fcloudflare-worker-b2":
+  version: 0.0.0-use.local
+  resolution: "@tussle/state-cloudflareworkerkv@link:../../packages/state-cloudflareworkerkv::locator=cloudflare-worker-b2%40workspace%3Aexamples%2Fcloudflare-worker-b2"
+  languageName: node
+  linkType: soft
+
 "@tussle/state-cloudflareworkerkv@workspace:packages/state-cloudflareworkerkv":
   version: 0.0.0-use.local
   resolution: "@tussle/state-cloudflareworkerkv@workspace:packages/state-cloudflareworkerkv"
@@ -3900,6 +3906,7 @@ __metadata:
     "@cloudflare/wrangler": ^1.19.8
     "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker"
     "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker"
+    "@tussle/state-cloudflareworkerkv": "link:../../packages/state-cloudflareworkerkv"
     "@tussle/storage-b2": "link:../../packages/storage-b2"
     dotenv: ^16.0.0
     jest: ^27.5.1
