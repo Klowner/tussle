@@ -1,6 +1,6 @@
 {
   "name": "@tussle/middleware-cloudflareworker",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "Tussle middleware for Cloudflare Workers",
   "main": "lib/index.js",
   "files": [
