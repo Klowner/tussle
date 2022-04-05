@@ -2,6 +2,5 @@ name = "cloudflare-worker-s3"
 type = "javascript"
 account_id = "<cloudflareAccountId>"
 workers_dev = true
-vars = {}
 compatibility_date = "2022-01-01"
-vars = { TUSSLE_S3_KEY_ID = "<s3KeyId>", TUSSLE_S3_KEY = "<s3Key>", TUSSLE_S3_ENDPOINT = "<s3Endpoint>" }
+vars = { TUSSLE_S3_KEY_ID = "<s3KeyId>", TUSSLE_S3_KEY = "<s3Key>", TUSSLE_S3_ENDPOINT = "<s3Endpoint>", TUSSLE_S3_BUCKET = "<s3Bucket?>" }
