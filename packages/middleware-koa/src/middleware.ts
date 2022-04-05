@@ -1,7 +1,7 @@
 import type { TussleConfig, TussleIncomingRequest } from '@tussle/core';
-import { Tussle, TussleBaseMiddleware } from '@tussle/core';
-import { TussleHooks, TussleMiddlewareService } from '@tussle/spec/interface/middleware';
+import type { TussleHooks, TussleMiddlewareService } from '@tussle/spec/interface/middleware';
 import type { Context, Middleware } from 'koa';
+import { Tussle, TussleBaseMiddleware } from '@tussle/core';
 import { of } from 'rxjs';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';

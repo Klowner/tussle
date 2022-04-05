@@ -20,5 +20,11 @@
   "devDependencies": {
     "@types/koa": "*",
     "jest": "^27.5.1"
+  },
+  "dependencies": {
+    "rxjs": "^6.6.0"
+  },
+  "peerDependencies": {
+    "@tussle/core": "^0.1.0"
   }
 }

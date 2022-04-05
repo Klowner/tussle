@@ -1,7 +1,7 @@
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
+import type {TussleHooks} from '@tussle/spec/interface/middleware';
 import { Tussle, TussleBaseMiddleware, TussleConfig } from '@tussle/core';
 import { of } from 'rxjs';
-import {TussleHooks} from '@tussle/spec/interface/middleware';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 

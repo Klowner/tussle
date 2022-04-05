@@ -3168,11 +3168,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/core@workspace:packages/core"
   dependencies:
+    "@tussle/spec": ^0.1.0
     jest: ^27.5.1
     js-base64: ^3.7.2
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
-    rxjs: ^6.6.7
+    rxjs: ^6.6.0
   languageName: unknown
   linkType: soft
 
@@ -3192,8 +3193,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/middleware-cloudflareworker@workspace:packages/middleware-cloudflareworker"
   dependencies:
+    "@tussle/spec": 0.1.0
     jest: ^27.5.1
+    rxjs: ^6.6.0
     types-cloudflare-worker: ^1.2.0
+  peerDependencies:
+    "@tussle/core": ^0.1.0
   languageName: unknown
   linkType: soft
 
@@ -3203,6 +3208,9 @@ __metadata:
   dependencies:
     "@types/koa": "*"
     jest: ^27.5.1
+    rxjs: ^6.6.0
+  peerDependencies:
+    "@tussle/core": ^0.1.0
   languageName: unknown
   linkType: soft
 
@@ -3241,7 +3249,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@tussle/spec@^0.0.5, @tussle/spec@workspace:packages/spec":
+"@tussle/spec@0.1.0, @tussle/spec@^0.1.0, @tussle/spec@workspace:packages/spec":
   version: 0.0.0-use.local
   resolution: "@tussle/spec@workspace:packages/spec"
   dependencies:
@@ -3263,7 +3271,7 @@ __metadata:
   resolution: "@tussle/state-cloudflareworkerkv@workspace:packages/state-cloudflareworkerkv"
   dependencies:
     "@cloudflare/workers-types": ^3.4.0
-    "@tussle/spec": ^0.0.5
+    "@tussle/spec": ^0.1.0
     jest: ^26.6.3
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
@@ -3274,10 +3282,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-memory@workspace:packages/state-memory"
   dependencies:
-    "@tussle/spec": ^0.0.5
+    "@tussle/spec": ^0.1.0
     jest: ^27.5.1
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
+  peerDependencies:
+    "@tussle/core": ^0.1.0
   languageName: unknown
   linkType: soft
 
@@ -3303,14 +3313,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/storage-b2@workspace:packages/storage-b2"
   dependencies:
-    "@types/pg": ^7.14.11
     axios: ^0.21.4
     axios-observable: ^1.1.6
     jest: ^27.5.1
     nock: ^13.2.4
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
-    rxjs: ^6.6.7
+    rxjs: ^6.6.0
+  peerDependencies:
+    "@tussle/core": ^0.1.0
   languageName: unknown
   linkType: soft
 
@@ -3325,15 +3336,16 @@ __metadata:
   resolution: "@tussle/storage-s3@workspace:packages/storage-s3"
   dependencies:
     "@aws-sdk/client-s3": ^3.58.0
-    "@types/pg": ^7.14.11
     axios: ^0.21.4
     axios-observable: ^1.1.6
     jest: ^27.5.1
     nock: ^13.2.4
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
-    rxjs: ^6.6.7
-    typescript: ^3.9.10
+    rxjs: ^6.6.0
+    typescript: ^4.6.0
+  peerDependencies:
+    "@tussle/core": 0.1.0
   languageName: unknown
   linkType: soft
 

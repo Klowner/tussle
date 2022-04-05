@@ -15,8 +15,15 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "devDependencies": {
+    "@tussle/spec": "0.1.0",
     "jest": "^27.5.1",
     "types-cloudflare-worker": "^1.2.0"
+  },
+  "dependencies": {
+    "rxjs": "^6.6.0"
+  },
+  "peerDependencies": {
+    "@tussle/core": "^0.1.0"
   },
   "publishConfig": {
     "access": "public"
