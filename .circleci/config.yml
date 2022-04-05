@@ -32,12 +32,14 @@ jobs:
             sudo apt-get install postgresql-client
       - checkout
       - restore_cache:
-          key: v1-deps={{ checksum "package.json" }}
+          key: packages-{{ checksum "yarn.lock" }}
       - run: yarn install
       - save_cache:
           paths:
             - node_modules
-          key: v1-deps-{{ checksum "package.json" }}
+            - .yarn/cache
+            - .yarn/unplugged
+          key: packages-{{ checksum "yarn.lock" }}
       - run: yarn run build
       - run: dockerize -wait tcp://localhost:5432 -timeout 1m
       - run:
