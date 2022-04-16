@@ -1,12 +1,11 @@
-import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
+import type { TussleIncomingRequest }  from '@tussle/spec/interface/request';
 import type { TussleStorageService } from '@tussle/spec/interface/storage';
 import type { TusProtocolExtension } from '@tussle/spec/interface/tus';
 import { from, Observable, of, pipe } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { filter, map, mergeMap } from 'rxjs/operators';
 import { defaultHandlers } from './handlers';
 
 export interface TussleConfig {
-  maxSizeBytes?: number;
   storage: TussleStorageService | (<Req>(ctx: TussleIncomingRequest<Req>) => Promise<TussleStorageService>);
   handlers?: Partial<RequestHandler>;
 }
@@ -37,7 +36,7 @@ export class Tussle {
     return null;
   }
 
-  private readonly processRequestHeaders = pipe(
+  private readonly processRequestHeaders =
     map(<T>(ctx: TussleIncomingRequest<T>) => {
       // Verify that the requested Tus protocol version is supported.
       if (ctx.request.method !== 'OPTIONS') {
@@ -50,26 +49,25 @@ export class Tussle {
       }
       // TODO -- check max-size of transmit in POST requests, somewhere
       return ctx;
-    }),
+    },
   );
 
-  private readonly selectStorageService = pipe(
-    mergeMap(<T>(ctx: TussleIncomingRequest<T>) => {
-      if (isStorageService(this.cfg.storage)) {
-        ctx.cfg.storage = this.cfg.storage;
-        return of(ctx);
-      } else {
-        return from(this.cfg.storage(ctx)).pipe(
-          map((storage) => {
-            ctx.cfg.storage = storage;
-            return ctx;
-          }),
-        );
-      }
-    }),
-  );
+  private readonly selectStorageService =
+    mergeMap(<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> => {
+      const storage$ = isStorageService(this.cfg.storage) ? of(this.cfg.storage) : from(this.cfg.storage(ctx));
+      return storage$.pipe(
+        filter((storage) => !!storage),
+        map((storage) => ({
+          ...ctx,
+          cfg: {
+            ...ctx.cfg,
+            storage,
+          }
+        })),
+      );
+    });
 
-  private readonly processRequest = pipe(
+  private readonly processRequest =
     mergeMap(<T>(ctx: TussleIncomingRequest<T>) => {
       // only if no response was already attached by preprocessing and a
       // storage service has been linked to the incoming request.
@@ -80,10 +78,9 @@ export class Tussle {
         }
       }
       return of(ctx); // pass through
-    }),
-  );
+    });
 
-  private readonly postProcessRequest = pipe(
+  private readonly postProcessRequest =
     map(<T>(ctx: TussleIncomingRequest<T>) => {
       // Add any remaining response headers
       const extraHeaders: Record<string, unknown> = {};
@@ -92,8 +89,8 @@ export class Tussle {
         extraHeaders['Tus-Resumable'] = ctx.meta.tusVersion;
       }
       // Include optional Tux-Max-Size
-      if (this.cfg.maxSizeBytes) {
-        extraHeaders['Tus-Max-Size'] = this.cfg.maxSizeBytes;
+      if (ctx.cfg.maxSizeBytes) {
+        extraHeaders['Tus-Max-Size'] = ctx.cfg.maxSizeBytes;
       }
       // Include required Tus-Extension
       const supportedExtensions = 'creation,checksum'; // TODO -- generate this
@@ -108,12 +105,11 @@ export class Tussle {
       // Merge extra headers into the current response
       addResponseHeaders(ctx, extraHeaders);
       return ctx;
-    }),
-  );
+    });
 
   readonly handle = pipe(
-    this.selectStorageService,
     this.processRequestHeaders,
+    this.selectStorageService,
     this.processRequest,
     this.postProcessRequest,
   );
