@@ -24,7 +24,7 @@
     "jest": "^27.5.1"
   },
   "peerDependencies": {
-    "@tussle/core": "^0.1.0"
+    "@tussle/core": "^0.2.0"
   },
   "publishConfig": {
     "access": "public"

@@ -27,7 +27,7 @@
     "rimraf": "^3.0.2"
   },
   "peerDependencies": {
-    "@tussle/core": "^0.1.0"
+    "@tussle/core": "^0.2.0"
   },
   "publishConfig": {
     "access": "public"
