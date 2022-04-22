@@ -1,6 +1,6 @@
 {
   "name": "@tussle/storage-b2",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Tussle storage component backed by Blackblaze B2 cloud storage",
   "main": "lib/index.js",
   "files": [
