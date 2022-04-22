@@ -33,7 +33,7 @@ jobs:
       - checkout
       - restore_cache:
           key: packages-{{ checksum "yarn.lock" }}
-      - run: yarn install
+      - run: yarn install --immutable
       - save_cache:
           paths:
             - node_modules
