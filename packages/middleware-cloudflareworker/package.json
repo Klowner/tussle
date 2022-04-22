@@ -20,7 +20,7 @@
     "types-cloudflare-worker": "^1.2.0"
   },
   "dependencies": {
-    "rxjs": "^6.6.0"
+    "rxjs": "^7.0.0"
   },
   "peerDependencies": {
     "@tussle/core": "^0.1.0"

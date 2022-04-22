@@ -3173,7 +3173,7 @@ __metadata:
     js-base64: ^3.7.2
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
-    rxjs: ^6.6.0
+    rxjs: ^7.0.0
   languageName: unknown
   linkType: soft
 
@@ -3195,7 +3195,7 @@ __metadata:
   dependencies:
     "@tussle/spec": 0.1.0
     jest: ^27.5.1
-    rxjs: ^6.6.0
+    rxjs: ^7.0.0
     types-cloudflare-worker: ^1.2.0
   peerDependencies:
     "@tussle/core": ^0.1.0
@@ -3208,7 +3208,7 @@ __metadata:
   dependencies:
     "@types/koa": "*"
     jest: ^27.5.1
-    rxjs: ^6.6.0
+    rxjs: ^7.0.0
   peerDependencies:
     "@tussle/core": ^0.1.0
   languageName: unknown
@@ -3218,12 +3218,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/request-axios@workspace:packages/request-axios"
   dependencies:
-    axios: ^0.21.4
-    axios-observable: ^1.1.6
+    axios: ^0.26.0
+    axios-observable: ^1.4.0
     jest: ^27.5.1
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
-    rxjs: ^6.6.7
+    rxjs: ^7.0.0
   languageName: unknown
   linkType: soft
 
@@ -3245,7 +3245,7 @@ __metadata:
   dependencies:
     "@cloudflare/workers-types": ^3.4.0
     jest: ^27.5.1
-    rxjs: ^6.6.7
+    rxjs: ^7.0.0
   languageName: unknown
   linkType: soft
 
@@ -3256,7 +3256,7 @@ __metadata:
     jest: ^27.5.1
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
-    rxjs: ^6.6.7
+    rxjs: ^7.0.0
   languageName: unknown
   linkType: soft
 
@@ -3313,13 +3313,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/storage-b2@workspace:packages/storage-b2"
   dependencies:
-    axios: ^0.21.4
-    axios-observable: ^1.1.6
+    axios: ^0.26.0
+    axios-observable: ^1.4.0
     jest: ^27.5.1
     nock: ^13.2.4
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
-    rxjs: ^6.6.0
+    rxjs: ^7.0.0
   peerDependencies:
     "@tussle/core": ^0.1.0
   languageName: unknown
@@ -3336,16 +3336,17 @@ __metadata:
   resolution: "@tussle/storage-s3@workspace:packages/storage-s3"
   dependencies:
     "@aws-sdk/client-s3": ^3.58.0
-    axios: ^0.21.4
-    axios-observable: ^1.1.6
+    "@tussle/spec": ^0.1.0
+    axios-observable: ^1.4.0
     jest: ^27.5.1
     nock: ^13.2.4
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
-    rxjs: ^6.6.0
+    rxjs: ^7.0.0
     typescript: ^4.6.0
   peerDependencies:
-    "@tussle/core": 0.1.0
+    "@tussle/core": ^0.1.0
+    axios: ^0.21.4
   languageName: unknown
   linkType: soft
 
@@ -4309,22 +4310,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios-observable@npm:^1.1.6":
-  version: 1.1.6
-  resolution: "axios-observable@npm:1.1.6"
+"axios-observable@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "axios-observable@npm:1.4.0"
   peerDependencies:
-    axios: ^0.21.1
-    rxjs: ^6.2.2
-  checksum: 0d23b69725ea761f497017400f55a42dc400a26f32ea722805fe91f7dfa308dfa3af34d49bae4ef562e95449b5f99ef068071a060a12841341f757737ebab6b0
+    axios: ^0.26.0
+    rxjs: ^7.0.0
+  checksum: 422860e0fb30f4f35f902597127b3bec28138a1ee3acc444fbbb82707c8a727dac3a0ed6cc3f288ddf85332e95117308fa0d1a48bee8c72c40ecdf13fe3165ca
   languageName: node
   linkType: hard
 
-"axios@npm:^0.21.1, axios@npm:^0.21.4":
+"axios@npm:^0.21.1":
   version: 0.21.4
   resolution: "axios@npm:0.21.4"
   dependencies:
     follow-redirects: ^1.14.0
   checksum: 44245f24ac971e7458f3120c92f9d66d1fc695e8b97019139de5b0cc65d9b8104647db01e5f46917728edfc0cfd88eb30fc4c55e6053eef4ace76768ce95ff3c
+  languageName: node
+  linkType: hard
+
+"axios@npm:^0.26.0":
+  version: 0.26.1
+  resolution: "axios@npm:0.26.1"
+  dependencies:
+    follow-redirects: ^1.14.8
+  checksum: d9eb58ff4bc0b36a04783fc9ff760e9245c829a5a1052ee7ca6013410d427036b1d10d04e7380c02f3508c5eaf3485b1ae67bd2adbfec3683704745c8d7a6e1a
   languageName: node
   linkType: hard
 
@@ -6595,7 +6605,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.14.0":
+"follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.14.8":
   version: 1.14.9
   resolution: "follow-redirects@npm:1.14.9"
   peerDependenciesMeta:
@@ -12096,6 +12106,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rxjs@npm:^7.0.0":
+  version: 7.5.5
+  resolution: "rxjs@npm:7.5.5"
+  dependencies:
+    tslib: ^2.1.0
+  checksum: e034f60805210cce756dd2f49664a8108780b117cf5d0e2281506e9e6387f7b4f1532d974a8c8b09314fa7a16dd2f6cff3462072a5789672b5dcb45c4173f3c6
+  languageName: node
+  linkType: hard
+
 "safe-buffer@npm:5.1.2, safe-buffer@npm:~5.1.0, safe-buffer@npm:~5.1.1":
   version: 5.1.2
   resolution: "safe-buffer@npm:5.1.2"
@@ -13218,10 +13237,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.0, tslib@npm:^2.3.0, tslib@npm:^2.3.1":
-  version: 2.3.1
-  resolution: "tslib@npm:2.3.1"
-  checksum: de17a98d4614481f7fcb5cd53ffc1aaf8654313be0291e1bfaee4b4bb31a20494b7d218ff2e15017883e8ea9626599b3b0e0229c18383ba9dce89da2adf15cb9
+"tslib@npm:^2.0.0, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.3.1":
+  version: 2.4.0
+  resolution: "tslib@npm:2.4.0"
+  checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
   languageName: node
   linkType: hard
 

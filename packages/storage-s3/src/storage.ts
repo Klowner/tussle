@@ -137,7 +137,7 @@ export class TussleStorageS3 implements TussleStorageService {
     const state$ = this.getLocationState(location);
     const response$ = state$.pipe(
       this.stateToFileInfoResponse,
-      defaultIfEmpty<TussleStorageFileInfo>({
+      defaultIfEmpty({
         location,
         info: null,
       })

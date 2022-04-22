@@ -86,8 +86,8 @@ function getBucketName(
         bucketId,
       }).pipe(
         mergeMap(res => from(res.getData())),
-        catchError((err: unknown) => {
-          return throwError(err);
+        catchError((err) => {
+          return throwError(() => new Error(err));
         }),
         map(res => res.buckets[0].bucketName),
       ),
@@ -135,7 +135,7 @@ export class TussleStorageB2 implements TussleStorageService {
     return defer(() => this.uploadURLPool.acquireReleasable()).pipe(
       catchError((err) => {
         console.error('failed to get upload url', err);
-        return throwError(err);
+        return throwError(() => new Error(err));
       }),
     );
   }
