@@ -63,7 +63,7 @@ export interface TussleStorageS3Options {
   }
 }
 
-interface S3UploadState {
+export interface S3UploadState {
   location: string;
   uploadLength: number;
   metadata: Record<string, unknown>;
@@ -78,7 +78,7 @@ interface S3UploadState {
   currentOffset: number;
 }
 
-type S3UploadStateMultiPart = S3UploadState &
+export type S3UploadStateMultiPart = S3UploadState &
   Required<Pick<S3UploadState, "multipart">>;
 
 enum PatchAction {
