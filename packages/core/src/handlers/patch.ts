@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 export default function handlePatch<T>(
-  core: Tussle,
+  _core: Tussle,
   ctx: TussleIncomingRequest<T>
 ): Observable<TussleIncomingRequest<T>>
 {
@@ -14,7 +14,7 @@ export default function handlePatch<T>(
   const store = ctx.cfg.storage;
 
   if (!store) {
-    return throwError(() => Error('no storage service selected'));
+    return throwError(() => new Error('no storage service selected'));
   }
 
   // PATCH requests MUST use Content-Type: application/offset+octet-stream
