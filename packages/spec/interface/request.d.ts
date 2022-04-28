@@ -48,7 +48,7 @@ export interface TussleIncomingRequest<Req> {
     tusVersion?: string;
     storageKey?: string;
     storage?: unknown;
-  };
+  } & Record<string, unknown>;
   cfg: {
     storage?: TussleStorageService;
     maxSizeBytes?: number;

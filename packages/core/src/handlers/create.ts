@@ -35,7 +35,7 @@ export default function handleCreate<R>(
   const store = ctx.cfg.storage;
 
   if (!store) {
-    return throwError('no storage service selected');
+    return throwError(() => new Error('no storage service selected'));
   } else {
     const params$ = ctx.source.hook('before-create', ctx, params).pipe(
       ensureFilePath(originalPath),

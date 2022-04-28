@@ -94,7 +94,7 @@ const bindAction = <O, R>(
               switchMap(() => caught$),
             );
           }
-          return throwError(err);
+          return throwError(() => err);
         }),
       );
     }

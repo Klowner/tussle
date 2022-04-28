@@ -5,14 +5,14 @@ import type { Tussle } from '../core';
 import { switchMap, map } from 'rxjs/operators';
 
 export default function handleHead<Req>(
-  core: Tussle,
+  _core: Tussle,
   ctx: TussleIncomingRequest<Req>
 ): Observable<TussleIncomingRequest<Req>>
 {
   const params = extractParamsFromHeaders(ctx);
   const store = ctx.cfg.storage;
   if (!store) {
-    return throwError('no storage service selected');
+    return throwError(() => new Error('no storage service selected'));
   } else {
     const params$ = ctx.source.hook('before-head', ctx, params);
     return params$.pipe(

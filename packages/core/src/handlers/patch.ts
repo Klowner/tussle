@@ -14,7 +14,7 @@ export default function handlePatch<T>(
   const store = ctx.cfg.storage;
 
   if (!store) {
-    return throwError('no storage service selected');
+    return throwError(() => Error('no storage service selected'));
   }
 
   // PATCH requests MUST use Content-Type: application/offset+octet-stream
