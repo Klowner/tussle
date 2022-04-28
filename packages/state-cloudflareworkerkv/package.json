@@ -1,6 +1,6 @@
 {
   "name": "@tussle/state-cloudflareworkerkv",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Tussle Cloudflare Workers KV state handler component",
   "main": "lib/index.js",
   "files": [
@@ -21,7 +21,7 @@
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
-    "@tussle/spec": "^0.2.0",
+    "@tussle/spec": "^0.2.2",
     "jest": "^26.6.3"
   },
   "publishConfig": {

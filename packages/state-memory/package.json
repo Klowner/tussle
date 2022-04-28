@@ -1,6 +1,6 @@
 {
   "name": "@tussle/state-memory",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Tussle in-memory state handler component",
   "main": "lib/index.js",
   "files": [
@@ -20,7 +20,7 @@
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
-    "@tussle/spec": "^0.2.0",
+    "@tussle/spec": "^0.2.2",
     "jest": "^27.5.1"
   },
   "peerDependencies": {
