@@ -365,7 +365,7 @@ export class TussleStorageS3 implements TussleStorageService {
     const multipartState$ = this.ensureMultiPartUpload(state).pipe(share());
     const transmitted$ = multipartState$.pipe(
       switchMap((state) => this.transmitPart(state, body, length)),
-      shareReplay(1),
+      shareReplay({ bufferSize: 1, refCount: false }),
     );
     const updatedState$ = zip(transmitted$, multipartState$).pipe(
       switchMap(([upload, state]) => {
