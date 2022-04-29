@@ -4,6 +4,7 @@ import {
   CompleteMultipartUploadOutput,
   CreateMultipartUploadCommand,
   PutObjectCommand,
+  PutObjectCommandOutput,
   S3Client,
   UploadPartCommand,
   UploadPartCommandOutput,
@@ -39,8 +40,6 @@ import {
   map,
   mergeMap,
   share,
-  shareReplay,
-  switchMap,
   take,
 } from "rxjs/operators";
 import type {Readable} from "stream";
@@ -93,9 +92,37 @@ function isMultiPart(state: S3UploadState): state is S3UploadStateMultiPart {
   return !!state.multipart;
 }
 
+function isNonNull<T>(value: T): value is NonNullable<T> {
+  return value != null;
+}
+
 function isComplete(state: S3UploadStateMultiPart) {
   return state.currentOffset === state.uploadLength;
 }
+
+const stateToResponse = map((state: S3UploadState): TussleStorageCreateFileResponse => ({
+  ...state,
+  success: true,
+}));
+
+const stateToFileInfoResponse = map(({location, uploadLength, currentOffset}: S3UploadState): TussleStorageFileInfo => ({
+  location,
+  info: {
+    currentOffset,
+    uploadLength,
+  },
+}));
+
+const asPatchResponse = map(({ state, s3response }) => ({
+  location: state.location,
+  success: true,
+  offset: state.currentOffset,
+  complete: state.currentOffset === state.uploadLength,
+  details: {
+    ...s3response,
+    tussleUploadMetadata: state.createParams.uploadMetadata,
+  },
+}));
 
 export class TussleStorageS3 implements TussleStorageService {
   constructor(readonly options: TussleStorageS3Options) {
@@ -113,21 +140,17 @@ export class TussleStorageS3 implements TussleStorageService {
   );
   private readonly state = new TussleCachedState(
     this.options.stateService,
-    new TTLCache()
+    new TTLCache(60 * 60 * 1000)
   );
 
   createFile(
     params: TussleStorageCreateFileParams
   ): Observable<TussleStorageCreateFileResponse> {
-    const initialState = this.createInitialState(params);
-    const commitedState$ = from(this.state.commitState(initialState));
-    const response$ = commitedState$.pipe(
-      map((state) => ({
-        ...state,
-        success: true,
-      }))
+    return of(params).pipe(
+      map((params) => this.createInitialState(params)),
+      mergeMap((state) => this.state.commitState(state)),
+      stateToResponse,
     );
-    return response$;
   }
 
   getFileInfo(
@@ -136,7 +159,7 @@ export class TussleStorageS3 implements TussleStorageService {
     const { location } = params;
     const state$ = this.getLocationState(location);
     const response$ = state$.pipe(
-      this.stateToFileInfoResponse,
+      stateToFileInfoResponse,
       defaultIfEmpty({
         location,
         info: null,
@@ -144,17 +167,6 @@ export class TussleStorageS3 implements TussleStorageService {
     );
     return response$;
   }
-
-  private readonly stateToFileInfoResponse = map<
-    S3UploadState,
-    TussleStorageFileInfo
-  >(({ location, uploadLength, currentOffset }) => ({
-    location,
-    info: {
-      uploadLength,
-      currentOffset,
-    },
-  }));
 
   patchFile(
     params: TussleStoragePatchFileParams
@@ -209,7 +221,7 @@ export class TussleStorageS3 implements TussleStorageService {
   }
 
   private initializeMultiPartUpload(
-    state: S3UploadState
+    state: Readonly<S3UploadState>
   ): Observable<S3UploadStateMultiPart> {
     const { location } = state;
     const command = new CreateMultipartUploadCommand({
@@ -243,42 +255,24 @@ export class TussleStorageS3 implements TussleStorageService {
   private patchSmallFile(
     state: Readonly<S3UploadState>,
     params: Readonly<TussleStoragePatchFileParams>
-  ): Observable<TussleStoragePatchFileResponse> {
-    const command = new PutObjectCommand({
-      Body: params.request.request.getReadable(),
-      Bucket: this.options.s3.bucket,
-      Key: params.location,
-      ContentLength: params.length,
-    });
-    // transmit payload to cloud service
-    const upload$ = from(this.s3.send(command)).pipe(share());
-    const state$: Observable<S3UploadState> = upload$.pipe(
-      // advance the state progress
-      map((_upload) => ({
-        ...state,
-        currentOffset: state.currentOffset + params.length,
-        nextPartNumber: state.nextPartNumber + 1,
-      })),
-      // commit the new state
-      mergeMap((state) => this.state.commitState(state))
+  ) {
+    return this.transmitSmallFile(
+      state,
+      params.request.request.getReadable(),
+      params.length,
+    ).pipe(
+      mergeMap((s3response) => of(state).pipe(
+        map(state => this.advanceStateProgress(state, params.length)),
+        mergeMap((state) => this.state.commitState(state)),
+        map((state) => ({state, s3response})),
+        asPatchResponse,
+      )),
     );
-    // convert to response
-    const response$ = zip(state$, upload$).pipe(
-      map(([state, upload]) => ({
-        location: state.location,
-        success: true,
-        offset: state.currentOffset,
-        complete: state.currentOffset === state.uploadLength,
-        details: {
-          ...upload,
-          tussleUploadMetadata: state.createParams.uploadMetadata,
-        },
-      }))
-    );
-    return response$;
   }
 
-  private advanceStateProgress<T extends S3UploadState>(
+  private advanceStateProgress<T extends S3UploadState>(state: T, length: number, completedPart?: CompletedPart): T;
+  private advanceStateProgress<T extends S3UploadStateMultiPart>(state: T, length: number, completedPart?: CompletedPart): T;
+  private advanceStateProgress<T extends S3UploadStateMultiPart|S3UploadState>(
     state: T,
     length: number,
     completedPart?: CompletedPart
@@ -301,22 +295,19 @@ export class TussleStorageS3 implements TussleStorageService {
     };
   }
 
-  private readonly asPatchResponse: OperatorFunction<
-    {
-      state: S3UploadState;
-      s3response: UploadPartCommandOutput | CompleteMultipartUploadOutput;
-    },
-    TussleStoragePatchFileResponse
-  > = map(({ state, s3response }) => ({
-    location: state.location,
-    success: true,
-    offset: state.currentOffset,
-    complete: state.currentOffset === state.uploadLength,
-    details: {
-      ...s3response,
-      tussleUploadMetadata: state.createParams.uploadMetadata,
-    },
-  }));
+  private transmitSmallFile(
+    state: Readonly<S3UploadState>,
+    body: Readable | ReadableStream<Uint8Array>,
+    length: number, // body length in bytes
+  ): Observable<PutObjectCommandOutput> {
+    const command = new PutObjectCommand({
+      Body: body,
+      Bucket: this.options.s3.bucket,
+      Key: state.location,
+      ContentLength: length,
+    });
+    return from(this.s3.send(command));
+  }
 
   private transmitPart(
     state: Readonly<S3UploadStateMultiPart>,
@@ -358,34 +349,32 @@ export class TussleStorageS3 implements TussleStorageService {
 
   private patchLargeFilePart(
     state: Readonly<S3UploadState>,
-    params: Readonly<TussleStoragePatchFileParams>
+    params: Readonly<TussleStoragePatchFileParams>,
   ): Observable<TussleStoragePatchFileResponse> {
     const { length } = params;
     const body = params.request.request.getReadable();
-    const multipartState$ = this.ensureMultiPartUpload(state).pipe(share());
-    const transmitted$ = multipartState$.pipe(
-      switchMap((state) => this.transmitPart(state, body, length)),
-      shareReplay({ bufferSize: 1, refCount: false }),
+    return of(state).pipe(
+      mergeMap((state) => this.ensureMultiPartUpload(state)),
+      mergeMap((state) => this.transmitPart(state, body, length).pipe(
+        mergeMap((s3response) => of(state).pipe(
+          map((state) => this.advanceStateProgress(state, length, s3response)),
+          mergeMap((state) => this.state.setState(state)),
+          mergeMap((state) =>
+            concat(
+              of(state).pipe(this.finalizeIfCompleted),
+              of(s3response),
+            ).pipe(
+              take(1),
+              map((s3response) => ({
+                s3response,
+                state,
+              })),
+            ),
+          ),
+          asPatchResponse,
+        )),
+      )),
     );
-    const updatedState$ = zip(transmitted$, multipartState$).pipe(
-      switchMap(([upload, state]) => {
-        const updatedState: S3UploadStateMultiPart = this.advanceStateProgress(
-          state,
-          params.length,
-          upload
-        );
-        return this.state.setState(updatedState);
-      }),
-      share(),
-    );
-    const finished$ = updatedState$.pipe(this.finalizeIfCompleted);
-    const result$ = concat(finished$, transmitted$).pipe(take(1));
-    const response$ = zip(result$, updatedState$).pipe(
-      map(([s3response, state]) => ({ s3response, state })),
-      take(1),
-      this.asPatchResponse
-    );
-    return response$;
   }
 
   private inferPatchIntent(
@@ -433,8 +422,4 @@ export class TussleStorageS3 implements TussleStorageService {
       share(),
     );
   }
-}
-
-function isNonNull<T>(value: T): value is NonNullable<T> {
-  return value != null;
 }
