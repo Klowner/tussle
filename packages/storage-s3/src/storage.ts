@@ -138,7 +138,7 @@ export class TussleStorageS3 implements TussleStorageService {
 
   readonly extensionsRequired: TusProtocolExtension[] = [];
   private readonly s3 = (
-    this.options.s3.client instanceof S3Client ?
+    ('send' in this.options.s3.client && typeof this.options.s3.client.send === 'function') ?
     this.options.s3.client :
     new S3Client(this.options.s3.client)
   );
