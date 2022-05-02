@@ -100,6 +100,10 @@ function isComplete(state: S3UploadStateMultiPart) {
   return state.currentOffset === state.uploadLength;
 }
 
+function stripLeadingSlashes(path: string) {
+  return path.replace(/^\/*/, '');
+}
+
 const stateToResponse = map((state: S3UploadState): TussleStorageCreateFileResponse => ({
   ...state,
   success: true,
@@ -142,6 +146,10 @@ export class TussleStorageS3 implements TussleStorageService {
     this.options.stateService,
     new TTLCache(60 * 60 * 1000)
   );
+
+  destroy(): void {
+    this.s3.destroy();
+  }
 
   createFile(
     params: TussleStorageCreateFileParams
@@ -225,7 +233,7 @@ export class TussleStorageS3 implements TussleStorageService {
   ): Observable<S3UploadStateMultiPart> {
     const { location } = state;
     const command = new CreateMultipartUploadCommand({
-      Key: location,
+      Key: stripLeadingSlashes(location),
       Bucket: this.options.s3.bucket,
     });
     const created$ = from(this.s3.send(command));
@@ -303,7 +311,7 @@ export class TussleStorageS3 implements TussleStorageService {
     const command = new PutObjectCommand({
       Body: body,
       Bucket: this.options.s3.bucket,
-      Key: state.location,
+      Key: stripLeadingSlashes(state.location),
       ContentLength: length,
     });
     return from(this.s3.send(command));
@@ -315,7 +323,7 @@ export class TussleStorageS3 implements TussleStorageService {
     length: number // body length in bytes
   ): Observable<UploadPartCommandOutput> {
     const command = new UploadPartCommand({
-      Key: state.multipart.key,
+      Key: stripLeadingSlashes(state.multipart.key),
       Bucket: state.multipart.bucket,
       UploadId: state.multipart.uploadId,
       PartNumber: state.nextPartNumber,
@@ -329,7 +337,7 @@ export class TussleStorageS3 implements TussleStorageService {
     state: Readonly<S3UploadStateMultiPart>
   ): Observable<CompleteMultipartUploadOutput> {
     const command = new CompleteMultipartUploadCommand({
-      Key: state.multipart.key,
+      Key: stripLeadingSlashes(state.multipart.key),
       Bucket: state.multipart.bucket,
       UploadId: state.multipart.uploadId,
       MultipartUpload: {
