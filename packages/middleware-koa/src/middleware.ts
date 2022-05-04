@@ -2,7 +2,7 @@ import type { TussleConfig, TussleIncomingRequest } from '@tussle/core';
 import type { TussleHooks, TussleMiddlewareService } from '@tussle/spec/interface/middleware';
 import type { Context, Middleware } from 'koa';
 import { Tussle, TussleBaseMiddleware } from '@tussle/core';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
@@ -101,11 +101,8 @@ export default class TussleKoaMiddleware extends TussleBaseMiddleware<Context> {
     async (ctx, next) => {
       const req = await prepareRequest(this, ctx);
       if (req) {
-        return of(req).pipe(this.core.handle)
-          .toPromise()
-          .then((response) => {
-            return response ? handleResponse(response) : next();
-          });
+        const response = await firstValueFrom(of(req).pipe(this.core.handle));
+        return response ? handleResponse(response) : next();
       }
     };
 }

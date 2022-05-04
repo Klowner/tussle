@@ -479,8 +479,7 @@ export class TussleStorageB2 implements TussleStorageService {
             fileId: state.state.largeFile.fileId,
           }).pipe(
             catchError((err) => {
-              console.error(err);
-              return throwError(err);
+              return throwError(() => err);
             }),
             map((response) => ({
               response,
@@ -488,7 +487,7 @@ export class TussleStorageB2 implements TussleStorageService {
             })),
           );
         } else {
-          return throwError('attempted to finish invalid large file');
+          return throwError(() => new Error('attempted to finish invalid large file'));
         }
       }),
     );

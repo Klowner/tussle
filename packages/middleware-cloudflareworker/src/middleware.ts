@@ -1,7 +1,7 @@
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type {TussleHooks} from '@tussle/spec/interface/middleware';
 import { Tussle, TussleBaseMiddleware, TussleConfig } from '@tussle/core';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
@@ -32,8 +32,7 @@ export class TussleCloudflareWorker extends TussleBaseMiddleware<Request> {
   public async handleRequest(request: Request): Promise<Response | null> {
     const req = createTussleRequest(this, request);
     if (req) {
-      return of(req).pipe(this.core.handle)
-        .toPromise()
+      return firstValueFrom(of(req).pipe(this.core.handle))
         .then((response) => {
           return response ? handleTussleResponse(response): null;
         });
