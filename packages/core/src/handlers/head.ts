@@ -17,6 +17,7 @@ export default function handleHead<Req>(
     const params$ = ctx.source.hook('before-head', ctx, params);
     return params$.pipe(
       switchMap((params) => store.getFileInfo(params)),
+      switchMap((params) => ctx.source.hook('after-head', ctx, params)),
       map(fileInfo => toResponse(ctx, fileInfo)),
     );
   }

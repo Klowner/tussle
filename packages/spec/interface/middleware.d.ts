@@ -1,4 +1,9 @@
-import type {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResponse} from "@tussle/spec/interface/storage";
+import type {
+  TussleStorageCreateFileResponse,
+  TussleStorageFileInfo,
+  TussleStoragePatchFileCompleteResponse,
+  TussleStoragePatchFileResponse,
+} from "@tussle/spec/interface/storage";
 import type {Observable} from 'rxjs';
 import type {TussleIncomingRequest} from './request';
 
@@ -40,6 +45,8 @@ interface TussleOptionsParams {
 export interface TussleHooks<Req> extends TussleHookDef<Req> {
   'after-create': TussleHookFunc<Req, TussleStorageCreateFileResponse, Observable<TussleStorageCreateFileResponse>>;
   'after-complete': TussleHookFunc<Req, TussleStoragePatchFileCompleteResponse, Observable<TussleStoragePatchFileCompleteResponse>>;
+  'after-patch': TussleHookFunc<Req, TussleStoragePatchFileResponse, Observable<TussleStoragePatchFileResponse>>;
+  'after-head': TussleHookFunc<Req, TussleStorageFileInfo, Observable<TussleStorageFileInfo>>;
   'before-create': TussleHookFunc<Req, TussleCreationParams, Observable<TussleCreationParams>>;
   'before-patch': TussleHookFunc<Req, TusslePatchParams<Req>, Observable<TusslePatchParams<Req>>>;
   'before-head': TussleHookFunc<Req, TussleHeadParams, Observable<TussleHeadParams>>;

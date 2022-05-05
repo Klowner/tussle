@@ -31,6 +31,7 @@ export default function handlePatch<T>(
   return params$.pipe(
     switchMap((params) => store.patchFile(params)),
     switchMap((patchedFile) => callOptionalHooks(ctx, patchedFile)),
+    switchMap((patchedFile) => ctx.source.hook('after-patch', ctx, patchedFile)),
     map((patchedFile) => toResponse(ctx, patchedFile)),
   );
 }

@@ -1,5 +1,5 @@
 import {Observable, of, from} from "rxjs";
-import type {TussleHooks } from "@tussle/spec/interface/middleware";
+import type {TussleHooks} from "@tussle/spec/interface/middleware";
 import type {TussleIncomingRequest} from "@tussle/spec/interface/request";
 
 export class TussleBaseMiddleware<Req> {

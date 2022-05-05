@@ -42,6 +42,7 @@ export interface TussleStoragePatchFileCompleteResponse {
 }
 
 export interface TussleStorageDeleteFileParams {
+  location: string;
 }
 
 export interface TussleStorageFileInfoParams {
