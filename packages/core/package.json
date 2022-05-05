@@ -1,6 +1,6 @@
 {
   "name": "@tussle/core",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "description": "Tussle tus daemon core module",
   "main": "lib/index.js",
   "files": [
@@ -20,7 +20,7 @@
     "rxjs": "^7.0.0"
   },
   "devDependencies": {
-    "@tussle/spec": "^0.2.2",
+    "@tussle/spec": "^0.2.5",
     "jest": "^27.5.1",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2"
