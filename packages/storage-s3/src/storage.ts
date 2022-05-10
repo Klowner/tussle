@@ -59,6 +59,7 @@ export interface TussleStorageS3Options {
   s3: {
     client: S3ClientConfig | S3Client;
     bucket: string;
+    acl?: string;
   }
 }
 
@@ -204,6 +205,11 @@ export class TussleStorageS3 implements TussleStorageService {
     };
   }
 
+  private getDefaultACL(): ({ACL: string}|undefined) {
+    const { acl } = this.options.s3;
+    return acl ? {ACL: acl} : undefined;
+  }
+
   private routePatchRequest(
     state: Readonly<S3UploadState>,
     action: Readonly<PatchAction>,
@@ -235,6 +241,7 @@ export class TussleStorageS3 implements TussleStorageService {
     const command = new CreateMultipartUploadCommand({
       Key: stripLeadingSlashes(location),
       Bucket: this.options.s3.bucket,
+      ...this.getDefaultACL(),
     });
     const created$ = from(this.s3.send(command));
     const state$ = created$.pipe(
@@ -313,6 +320,7 @@ export class TussleStorageS3 implements TussleStorageService {
       Bucket: this.options.s3.bucket,
       Key: stripLeadingSlashes(state.location),
       ContentLength: length,
+      ...this.getDefaultACL(),
     });
     return from(this.s3.send(command));
   }
