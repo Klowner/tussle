@@ -1,6 +1,6 @@
 {
   "name": "@tussle/storage-s3",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Tussle storage component backed by S3 compatible storage",
   "main": "lib/index.js",
   "files": [
