@@ -11,7 +11,7 @@ workflows:
 jobs:
   run-tests:
     docker:
-      - image: cimg/node:current
+      - image: cimg/node:17.6
       - image: cimg/postgres:14.2
         environment:
           POSTGRES_USER: postgres
