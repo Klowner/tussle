@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  coveralls: solven/coveralls@0.0.4
+  coveralls: coveralls/coveralls@1.0.6
 
 workflows:
   workflow:
