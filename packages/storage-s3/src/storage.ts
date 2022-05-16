@@ -262,7 +262,7 @@ export class TussleStorageS3 implements TussleStorageService {
           parts: [],
         };
       }),
-      mergeMap((state: S3UploadStateMultiPart) => this.state.setState(state))
+      mergeMap((state: S3UploadStateMultiPart) => this.state.commitState(state))
     );
     return state$;
   }
@@ -374,7 +374,7 @@ export class TussleStorageS3 implements TussleStorageService {
       mergeMap((state) => this.transmitPart(state, body, length).pipe(
         mergeMap((s3response) => of(state).pipe(
           map((state) => this.advanceStateProgress(state, length, s3response)),
-          mergeMap((state) => this.state.setState(state)),
+          mergeMap((state) => this.state.commitState(state)),
           mergeMap((state) =>
             concat(
               of(state).pipe(this.finalizeIfCompleted),
