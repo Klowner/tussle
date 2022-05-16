@@ -1,12 +1,12 @@
-import type { TussleIncomingRequest }  from '@tussle/spec/interface/request';
-import type { TussleStorageService } from '@tussle/spec/interface/storage';
-import type { TusProtocolExtension } from '@tussle/spec/interface/tus';
-import { from, Observable, of, pipe } from 'rxjs';
-import { filter, map, mergeMap } from 'rxjs/operators';
-import { defaultHandlers } from './handlers';
+import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
+import type {TussleStorageService} from '@tussle/spec/interface/storage';
+import type {TusProtocolExtension} from '@tussle/spec/interface/tus';
+import {from, Observable, of, pipe} from 'rxjs';
+import {map, mergeMap} from 'rxjs/operators';
+import {defaultHandlers} from './handlers';
 
 export interface TussleConfig {
-  storage: TussleStorageService | (<Req>(ctx: TussleIncomingRequest<Req>) => Promise<TussleStorageService>);
+  storage: TussleStorageService | (<Req>(ctx: TussleIncomingRequest<Req>) => Promise<TussleStorageService|undefined>);
   handlers?: Partial<RequestHandler>;
 }
 
@@ -53,10 +53,8 @@ export class Tussle {
   );
 
   private readonly selectStorageService =
-    mergeMap(<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> => {
-      const storage$ = isStorageService(this.cfg.storage) ? of(this.cfg.storage) : from(this.cfg.storage(ctx));
-      return storage$.pipe(
-        filter((storage) => !!storage),
+    mergeMap(<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> =>
+      from(this.getStorage(ctx)).pipe(
         map((storage) => ({
           ...ctx,
           cfg: {
@@ -64,14 +62,13 @@ export class Tussle {
             storage,
           }
         })),
-      );
-    });
+      ));
 
   private readonly processRequest =
     mergeMap(<T>(ctx: TussleIncomingRequest<T>) => {
       // only if no response was already attached by preprocessing and a
       // storage service has been linked to the incoming request.
-      if (!ctx.response && ctx.cfg.storage) {
+      if (!ctx.response) {
         const handler = this.handlers[ctx.request.method];
         if (handler) {
           return handler(this, ctx);
@@ -114,7 +111,7 @@ export class Tussle {
     this.postProcessRequest,
   );
 
-  getStorage<R>(ctx: TussleIncomingRequest<R>): Promise<TussleStorageService> {
+  getStorage<R>(ctx: TussleIncomingRequest<R>): Promise<TussleStorageService|undefined> {
     return isStorageService(this.cfg.storage) ?
       Promise.resolve(this.cfg.storage) :
       this.cfg.storage(ctx);

@@ -1,4 +1,4 @@
-import { Observable, throwError } from "rxjs";
+import { Observable, of } from "rxjs";
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStorageFileInfo } from '@tussle/spec/interface/storage';
 import type { Tussle } from '../core';
@@ -12,7 +12,7 @@ export default function handleHead<Req>(
   const params = extractParamsFromHeaders(ctx);
   const store = ctx.cfg.storage;
   if (!store) {
-    return throwError(() => new Error('no storage service selected'));
+    return of(toResponse(ctx, {location: ctx.request.path, info: null}));
   } else {
     const params$ = ctx.source.hook('before-head', ctx, params);
     return params$.pipe(
