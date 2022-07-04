@@ -5,14 +5,13 @@
     "declarationMap": false,
     "esModuleInterop": true,
     "module": "commonjs",
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "sourceMap": false,
     "strict": true,
     "strictNullChecks": true,
     "target": "es2015"
   },
   "exclude": [
-    "**/*.d.ts",
     "node_modules"
   ]
 }

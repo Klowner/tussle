@@ -1,0 +1,9 @@
+name = "tussle-r2-example"
+compatibility_date = "2022-05-30"
+workers_dev = true
+account_id = "e0ecf4244fa3d5bde46d4c297d9555d1"
+main = "dist/worker.mjs"
+
+r2_buckets = [
+	{ binding = "TUSSLE_BUCKET", bucket_name = "tussledemo" }
+]
