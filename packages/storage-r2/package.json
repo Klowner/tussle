@@ -1,6 +1,6 @@
 {
 	"name": "@tussle/storage-r2",
-	"version": "0.2.7",
+	"version": "0.2.8",
 	"description": "Tussle storage component backed by Cloudflare R2 storage",
 	"main": "lib/index.js",
 	"files": [
