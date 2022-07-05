@@ -16,7 +16,7 @@ other means just as easily.
 Instructions
 ---
 This example must be published to Cloudflare's Worker service, so you'll need
-a Cloudflare account as well as a publically available S3-compatible cloud
+a Cloudflare account as well as a publicly available S3-compatible cloud
 storage service.
 
 1. From the tussle project root run `yarn install` and `yarn build` to build the individual tussle packages.
