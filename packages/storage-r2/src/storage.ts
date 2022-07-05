@@ -1,5 +1,4 @@
 import {
-	TTLCache,
 	TusProtocolExtension,
 	TussleStorageService
 } from "@tussle/core";
@@ -26,7 +25,6 @@ import {
 	switchMap,
 	take,
 } from "rxjs";
-import {TussleCachedState} from "./cachedstate";
 
 interface Part {
 	key: string;
@@ -42,7 +40,7 @@ export interface R2UploadState {
 }
 
 export interface TussleStorageR2Options {
-	stateService?: TussleStateService<R2UploadState>,
+	stateService: TussleStateService<R2UploadState>,
 	bucket: R2Bucket;
 }
 
@@ -59,10 +57,6 @@ export class TussleStorageR2 implements TussleStorageService {
 
 	constructor (readonly options: TussleStorageR2Options) {}
 
-	// private readonly state = new TussleCachedState(
-	// 	this.options.stateService || new R2State(this.options.bucket),
-	// 	new TTLCache(60 * 60 * 1000)
-	// );
 	private readonly state = this.options.stateService;
 
 	private createInitialState(
@@ -81,16 +75,31 @@ export class TussleStorageR2 implements TussleStorageService {
 		}
 	};
 
-	private readonly toCommitedInitialState = pipe(
+	private readonly setState = pipe(
+		mergeMap(async (state: R2UploadState) => {
+			await this.state.setItem(state.location, state);
+			return state;
+		}),
+	);
+
+	private readonly initialStateFromParams = pipe(
 		map((params: TussleStorageCreateFileParams) => this.createInitialState(params)),
-		mergeMap((state) => this.state.setItem(state.location, state)),
+		this.setState,
 	);
 
 	createFile(
 		params: TussleStorageCreateFileParams,
 	): Observable<TussleStorageCreateFileResponse> {
-		return of(params).pipe(
-			this.toCommitedInitialState,
+		return concat(
+			of(params.path).pipe(
+				this.getLocationState,
+				filter(isNonNull),
+			),
+			of(params).pipe(
+				this.initialStateFromParams,
+			),
+		).pipe(
+			take(1),
 			map((state) => ({
 				...state,
 				success: true,
@@ -130,30 +139,21 @@ export class TussleStorageR2 implements TussleStorageService {
 		return state;
 	}
 
-	// private readonly stateFromR2ObjectMetadata = map(
-	//	(({prefix: string, obj: R2Object})): R2UploadState => {
-	//		const state: R2UploadState|null = JSON.parse(
-	//			obj.customMetadata['tussleState'] || 'null'
-	//		);
-	//		return state;
-	//	}
-	// );
-
-
-	private readonly getStateFromR2 = pipe(
-		switchMap((location: string) => this.mostRecentlyUploadedObject(location)),
-		filter(isNonNull),
-		map((state) => this.stateFromR2ObjectMetadata(state)),
-		defaultIfEmpty(null),
-	);
+	private async getStateFromR2(
+		location: string,
+	): Promise<R2UploadState|null> {
+		const obj = await this.mostRecentlyUploadedObject(location);
+		return obj ? this.stateFromR2ObjectMetadata(obj) : obj;
+	}
 
 	private getLocationState = pipe(
 		mergeMap((location: string) => concat(
-			from(this.state.getState(location)),
-			of(location).pipe(
-				this.getStateFromR2,
+			from(this.state.getItem(location)).pipe(
 				filter(isNonNull),
-				mergeMap((state) => this.state.commitState(state)),
+			),
+			from(this.getStateFromR2(location)).pipe(
+				filter(isNonNull),
+				this.setState,
 			),
 		)),
 		take(1),
@@ -171,8 +171,10 @@ export class TussleStorageR2 implements TussleStorageService {
 		};
 	}
 
-	private readonly asPatchResponse = pipe(
-		map((state: R2UploadState) => ({
+	private asPatchResponse(
+		state: R2UploadState,
+	) {
+		return ({
 			location: state.location,
 			success: true,
 			offset: state.currentOffset,
@@ -180,8 +182,8 @@ export class TussleStorageR2 implements TussleStorageService {
 			details: {
 				tussleUploadMetadata: state.metadata,
 			},
-		})),
-	);
+		});
+	}
 
 	private persistFilePart(
 		state: Readonly<R2UploadState>,
@@ -200,8 +202,8 @@ export class TussleStorageR2 implements TussleStorageService {
 		return r2put$.pipe(
 			mergeMap((r2object) => of(state).pipe(
 				map(state => this.advanceStateProgress(state, length, r2object)),
-				mergeMap((state) => this.state.commitState(state)),
-				this.asPatchResponse,
+				this.setState,
+				map((state) => this.asPatchResponse(state)),
 			)),
 		);
 	}
@@ -253,7 +255,6 @@ export class TussleStorageR2 implements TussleStorageService {
 		params: TussleStorageFileInfoParams,
 	): Observable<TussleStorageFileInfo> {
 		const { location } = params;
-		// const state$ = this.getLocationState(location);
 		const response$ = of(location).pipe(
 			this.getLocationState,
 			filter(isNonNull),
@@ -264,34 +265,5 @@ export class TussleStorageR2 implements TussleStorageService {
 			}),
 		);
 		return response$;
-	}
-}
-
-class R2State implements TussleStateService<R2UploadState> {
-	constructor (readonly bucket: R2Bucket) {}
-
-	async getItem(
-		key: string,
-	): Promise<R2UploadState|null> {
-		return null;
-	}
-
-	async setItem(
-		key: string,
-		value: R2UploadState,
-	): Promise<void> {
-	}
-
-	async removeItem(
-		key: string,
-	): Promise<R2UploadState | null> {
-		return null;
-	}
-
-	async key(
-		nth: number,
-		opt?: {prefix: string},
-	): Promise<string | null> {
-		return null;
 	}
 }
