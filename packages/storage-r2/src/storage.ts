@@ -15,6 +15,7 @@ import {
 	concat,
 	defaultIfEmpty,
 	filter,
+	firstValueFrom,
 	from,
 	map,
 	mergeMap,
@@ -23,7 +24,7 @@ import {
 	pipe,
 	share,
 	switchMap,
-	take,
+	take
 } from "rxjs";
 
 interface Part {
@@ -49,7 +50,7 @@ function isNonNull<T>(value: T): value is NonNullable<T> {
 }
 
 function stripLeadingSlashes(path: string) {
-	return path.replace(/^\/*/, '');
+	return path.replace(/^\/+/, '');
 }
 
 export class TussleStorageR2 implements TussleStorageService {
@@ -63,7 +64,7 @@ export class TussleStorageR2 implements TussleStorageService {
 		params: Readonly<TussleStorageCreateFileParams>,
 	) {
 		return {
-			location: params.path,
+			location: stripLeadingSlashes(params.path),
 			metadata: {
 				location: params.path,
 				...params.uploadMetadata,
@@ -72,8 +73,8 @@ export class TussleStorageR2 implements TussleStorageService {
 			createParams: params,
 			currentOffset: 0,
 			parts: [],
-		}
-	};
+		};
+	}
 
 	private readonly setState = pipe(
 		mergeMap(async (state: R2UploadState) => {
@@ -90,8 +91,9 @@ export class TussleStorageR2 implements TussleStorageService {
 	createFile(
 		params: TussleStorageCreateFileParams,
 	): Observable<TussleStorageCreateFileResponse> {
+		const path = stripLeadingSlashes(params.path);
 		return concat(
-			of(params.path).pipe(
+			of(path).pipe(
 				this.getLocationState,
 				filter(isNonNull),
 			),
@@ -122,7 +124,7 @@ export class TussleStorageR2 implements TussleStorageService {
 			more = result.truncated;
 			newest = newest || result.objects[0];
 			for (const obj of result.objects) {
-				if (obj.uploaded < newest.uploaded) {
+				if (obj.uploaded > newest.uploaded) {
 					newest = obj;
 				}
 			}
@@ -194,14 +196,17 @@ export class TussleStorageR2 implements TussleStorageService {
 		const part = numParts.toString(10).padStart(10, '0');
 		const key = stripLeadingSlashes([location, part].join('/'));
 		const readable = params.request.request.getReadable();
+		// Store the resulting "next" state that we will be at after
+		// this part is written. If the write succeeds, then the most
+		// accurate state will be stored within its metadata.
+		const nextState = this.advanceStateProgress(state, length, key);
 		const r2put$ = from(this.options.bucket.put(key, readable, {
 			customMetadata: {
-				tussleState: JSON.stringify(state),
+				tussleState: JSON.stringify(nextState),
 			}
 		}));
 		return r2put$.pipe(
-			mergeMap((r2object) => of(state).pipe(
-				map(state => this.advanceStateProgress(state, length, r2object)),
+			mergeMap(() => of(nextState).pipe(
 				this.setState,
 				map((state) => this.asPatchResponse(state)),
 			)),
@@ -211,13 +216,13 @@ export class TussleStorageR2 implements TussleStorageService {
 	private advanceStateProgress(
 		state: R2UploadState,
 		length: number,
-		r2object: R2Object,
+		key: string,
 	): R2UploadState {
 		const parts = [
 			...(state.parts || []),
 			{
-				key: r2object.key,
-				size: r2object.size,
+				key: key,
+				size: length,
 			},
 		];
 		return {
@@ -231,7 +236,8 @@ export class TussleStorageR2 implements TussleStorageService {
 		params: TussleStoragePatchFileParams,
 	): Observable<TussleStoragePatchFileResponse> {
 		const { location } = params;
-		return of(location).pipe(
+		const path = stripLeadingSlashes(location);
+		return of(path).pipe(
 			this.getLocationState,
 			filter(isNonNull),
 			switchMap((state) => this.persistFilePart(state, params)),
@@ -255,7 +261,8 @@ export class TussleStorageR2 implements TussleStorageService {
 		params: TussleStorageFileInfoParams,
 	): Observable<TussleStorageFileInfo> {
 		const { location } = params;
-		const response$ = of(location).pipe(
+		const path = stripLeadingSlashes(location);
+		const response$ = of(path).pipe(
 			this.getLocationState,
 			filter(isNonNull),
 			map(state => this.stateToFileInfoResponse(state)),
@@ -265,5 +272,61 @@ export class TussleStorageR2 implements TussleStorageService {
 			}),
 		);
 		return response$;
+	}
+
+	async getFile(
+		location: string,
+	): Promise<R2File|null> {
+		const path = stripLeadingSlashes(location);
+		return firstValueFrom(of(path).pipe(
+			this.getLocationState,
+			filter(isNonNull),
+			map(state => new R2File(
+				path,
+				state.uploadLength,
+				(state.parts || []).map(p => p.key),
+				this.options.bucket,
+			)),
+			defaultIfEmpty(null),
+		));
+	}
+}
+
+export class R2File {
+	constructor (
+		readonly key: string,
+		readonly size: number,
+		readonly keys: Readonly<string[]>,
+		private readonly bucket: R2Bucket,
+	) {}
+
+	get body(): ReadableStream {
+		const { readable, writable } = new TransformStream();
+		(async () => {
+			for (const key of this.keys) {
+				const obj = await this.getPart(key);
+				if (!obj) {
+					writable.close();
+					return;
+				}
+				await obj.body.pipeTo(writable, { preventClose: true });
+			}
+			writable.close();
+		})();
+		return readable;
+	}
+
+	async getPart(
+		which: number|string,
+	): Promise<R2ObjectBody|null> {
+		const key = (typeof which === 'number') ? this.keys[which] : which;
+		return await this.bucket.get(key);
+	}
+
+	// Delete all related R2Objects
+	async delete(): Promise<void[]> {
+		return Promise.all(this.keys.map(
+			key => this.bucket.delete(key),
+		));
 	}
 }
