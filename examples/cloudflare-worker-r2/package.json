@@ -1,28 +1,28 @@
 {
-  "name": "cloudflare-worker-r2",
-  "version": "0.2.7",
-  "license": "MIT",
-  "private": true,
-  "type": "module",
-  "main": "dist/worker.mjs",
-  "module": "dist/worker.mjs",
-  "scripts": {
+	"name": "cloudflare-worker-r2",
+	"version": "0.2.7",
+	"license": "MIT",
+	"private": true,
+	"type": "module",
+	"main": "dist/worker.mjs",
+	"module": "dist/worker.mjs",
+	"scripts": {
 		"check:types": "yarn tsc",
-    "build": "node build",
-    "deploy": "wrangler publish",
-    "tail": "wrangler tail",
-    "wrangler": "wrangler"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^3.13.0",
-    "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
-    "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
-    "@tussle/storage-r2": "link:../../packages/storage-r2",
-    "dotenv": "^16.0.0",
-    "esbuild": "^0.14.47",
-    "jest": "^27.5.1",
-    "nanoid": "^4.0.0",
-    "typescript": "^4.7.4",
-    "wrangler": "^2.0.15"
-  }
+		"build": "node build",
+		"deploy": "wrangler publish",
+		"tail": "wrangler tail",
+		"wrangler": "wrangler"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^3.13.0",
+		"@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
+		"@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
+		"@tussle/storage-r2": "link:../../packages/storage-r2",
+		"dotenv": "^16.0.0",
+		"esbuild": "^0.14.47",
+		"jest": "^27.5.1",
+		"nanoid": "^4.0.0",
+		"typescript": "^4.7.4",
+		"wrangler": "^2.0.15"
+	}
 }

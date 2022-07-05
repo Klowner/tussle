@@ -1,12 +1,17 @@
-import {staticHandler} from "./static";
+import {TussleStorageService} from '@tussle/core';
 import {TussleCloudflareWorker} from '@tussle/middleware-cloudflareworker';
+import {TussleStateMemory} from '@tussle/state-memory';
 import {TussleStorageR2} from '@tussle/storage-r2';
-import {of} from 'rxjs';
+import {R2UploadState} from "@tussle/storage-r2/lib/storage";
 import {nanoid} from 'nanoid';
+import {firstValueFrom, of} from 'rxjs';
+import {staticHandler} from "./static";
+
+const stateService = new TussleStateMemory<R2UploadState>();
 
 const getTussleMiddleware = (() => {
 	let instance: TussleCloudflareWorker;
-	return (env: Bindings) => {
+	return (storage: TussleStorageService) => {
 		if (!instance) {
 			instance = new TussleCloudflareWorker({
 				hooks: {
@@ -16,14 +21,9 @@ const getTussleMiddleware = (() => {
 							path: params.path + '/' + nanoid(),
 						});
 					},
-					// "before-patch": (_ctx, params) => {
-					// 	return of(params);
-					// },
 				},
 				core: {
-					storage: new TussleStorageR2({
-						bucket: env.TUSSLE_BUCKET,
-					}),
+					storage,
 				},
 			});
 		}
@@ -35,10 +35,30 @@ async function handleRequest(
 	request: Request,
 	bindings: Bindings,
 ) {
-	const tussle = getTussleMiddleware(bindings);
-	const res = await tussle.handleRequest(request);
+	const storage = new TussleStorageR2({
+		stateService,
+		bucket: bindings.TUSSLE_BUCKET,
+	});
+	const tussle = getTussleMiddleware(storage);
+	let res = await tussle.handleRequest(request);
 	if (res) {
 		return res;
+	}
+	const { pathname } = new URL(request.url);
+	switch (request.method) {
+		case 'GET': {
+			const file = await storage.getFile(pathname);
+			if (file) {
+				return new Response(file.body);
+			}
+			return new Response('', {status: 404});
+		}
+		case 'HEAD': {
+			const info = await firstValueFrom(storage.getFileInfo({location: pathname}));
+			return new Response(JSON.stringify(info), {headers: {
+				'Content-Type': 'application/json',
+			}});
+		}
 	}
 	return staticHandler(request);
 }
