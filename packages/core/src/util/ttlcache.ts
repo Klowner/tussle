@@ -68,8 +68,9 @@ export class TTLCache<T> {
     const hit = this.cache[key];
     if (hit) {
       delete this.cache[key];
+			return hit.data;
     }
-    return hit.data;
+		return null;
   }
 
   key(nth: number): string | null {

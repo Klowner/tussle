@@ -11,6 +11,7 @@
     {"path": "./storage-s3"},
     {"path": "./state-cloudflareworkerkv"},
     {"path": "./state-memory"},
+    {"path": "./state-memory-ttl"},
     {"path": "./state-postgres"},
     {"path": "./request-axios"},
     {"path": "./request-cloudflareworker"}
