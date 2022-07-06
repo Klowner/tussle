@@ -11,7 +11,7 @@ collection of file parts which can be read conveniently as a single
 
 This storage backend is also capable of fully recovering file state from R2,
 therefore it is recommended to use [@tussle/state-memory](../../packages/state-memory),
-or something even less reliable.
+or something even less reliable such as [@tussle/state-memory-ttl](../../packages/state-memory-ttl).
 
 See [Cloudflare Worker + R2](../../examples/cloudflare-worker-r2) for an
 example of this storage backend in use.
