@@ -3362,7 +3362,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tussle/core@workspace:packages/core":
+"@tussle/core@^0.2.8, @tussle/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@tussle/core@workspace:packages/core"
   dependencies:
@@ -3492,12 +3492,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-memory-ttl@workspace:packages/state-memory-ttl"
   dependencies:
+    "@tussle/core": ^0.2.8
     "@tussle/spec": ^0.2.5
     jest: ^27.5.1
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
-  peerDependencies:
-    "@tussle/core": ^0.2.8
   languageName: unknown
   linkType: soft
 

@@ -1,6 +1,6 @@
 {
   "name": "@tussle/state-memory-ttl",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "Tussle TTL cache in-memory state handler component",
   "main": "lib/index.js",
   "files": [
