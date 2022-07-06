@@ -7471,21 +7471,21 @@ __metadata:
   linkType: hard
 
 "git-up@npm:^4.0.0":
-  version: 4.0.2
-  resolution: "git-up@npm:4.0.2"
+  version: 4.0.5
+  resolution: "git-up@npm:4.0.5"
   dependencies:
     is-ssh: ^1.3.0
-    parse-url: ^5.0.0
-  checksum: 852603d6fc292f825845c4c79ea1538e21cf04e78a58d3034ee320b9f2253cfa5f718f88529e5b47b10a4a27bbd4095054b0a765da4bb1dd962bf072a321bccb
+    parse-url: ^6.0.0
+  checksum: dd8f39a115ec0523b7da369cd4c6dc94a9b11fcc652e6fc9d011a93c287e27cc34e1d1c89cff8864f9ab11a1b2bea49786951d8eb3f1e5babd351afcc63f6135
   languageName: node
   linkType: hard
 
 "git-url-parse@npm:^11.4.4":
-  version: 11.4.4
-  resolution: "git-url-parse@npm:11.4.4"
+  version: 11.6.0
+  resolution: "git-url-parse@npm:11.6.0"
   dependencies:
     git-up: ^4.0.0
-  checksum: e70c9b170b7921cc0001c5f8b2a567bcbe0979cba99e1f3b4b4931bc1775f13a1e14b48b4d699ddd3c14d6468624179835a7a6e3b16b031a91d7747eb2b721b2
+  checksum: 18a7d0bbac76c55fe8a501d4bd4c6b5f5528883a4dadcfce1152b4902e3e5831df8e97f36ea3f564de633e9ab44d9ab09bb2f319e41af1b6e4f627af139d35d5
   languageName: node
   linkType: hard
 
@@ -10932,10 +10932,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"normalize-url@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "normalize-url@npm:3.3.0"
-  checksum: f6aa4a1a94c3b799812f3e7fc987fb4599d869bfa8e9a160b6f2c5a2b4e62ada998d64dca30d9e20769d8bd95d3da1da3d4841dba2cc3c4d85364e1eb46219a2
+"normalize-url@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "normalize-url@npm:6.1.0"
+  checksum: 4a4944631173e7d521d6b80e4c85ccaeceb2870f315584fa30121f505a6dfd86439c5e3fdd8cd9e0e291290c41d0c3599f0cb12ab356722ed242584c30348e50
   languageName: node
   linkType: hard
 
@@ -11484,27 +11484,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parse-path@npm:^4.0.0":
-  version: 4.0.3
-  resolution: "parse-path@npm:4.0.3"
+"parse-path@npm:^4.0.4":
+  version: 4.0.4
+  resolution: "parse-path@npm:4.0.4"
   dependencies:
     is-ssh: ^1.3.0
     protocols: ^1.4.0
     qs: ^6.9.4
     query-string: ^6.13.8
-  checksum: d1704c0027489b64838c608c3f075fe3599c18a7413fa92e7074a0157e5bcc1a4ef73e7ae9bd9dbf5fad1809137437310cc69a57e5f5130ea17226165f3e942a
+  checksum: 909e628c35baebeb3bdcaa376e2c5a21632a9094079ac55e04b3311db28219b15e517e10987dd49a13a904f2605b747b6368b0092130e0f2ff9bc5ffc40ceb63
   languageName: node
   linkType: hard
 
-"parse-url@npm:^5.0.0":
-  version: 5.0.2
-  resolution: "parse-url@npm:5.0.2"
+"parse-url@npm:^6.0.0":
+  version: 6.0.2
+  resolution: "parse-url@npm:6.0.2"
   dependencies:
     is-ssh: ^1.3.0
-    normalize-url: ^3.3.0
-    parse-path: ^4.0.0
+    normalize-url: ^6.1.0
+    parse-path: ^4.0.4
     protocols: ^1.4.0
-  checksum: 3792e2ae616cc54a1311aebfcd2d674a768ff8fca16cd8129852e09a8027a9892123044262f190987d7dbb9a977caa8455113509e50ab96d7a74b0099f05ca09
+  checksum: cbd11ad5e5100821aaee8ef2d05df339209e8bc87b2bdccc213bf27b85c0b50c5aee6ab96ad7401f18e0982ba913107c940bab30a8982db08337a056e667d917
   languageName: node
   linkType: hard
 
