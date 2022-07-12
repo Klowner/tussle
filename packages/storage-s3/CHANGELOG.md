@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.11](http://klowner/tussle/compare/v0.2.10...v0.2.11) (2022-07-12)
+
+**Note:** Version bump only for package @tussle/storage-s3
+
+
+
+
+
 ## [0.2.7](https://github.com/Klowner/tussle/compare/v0.2.6...v0.2.7) (2022-05-16)
 
 **Note:** Version bump only for package @tussle/storage-s3

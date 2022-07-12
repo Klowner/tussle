@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.11](http://klowner/tussle/compare/v0.2.10...v0.2.11) (2022-07-12)
+
+**Note:** Version bump only for package @tussle/request-axios
+
+
+
+
+
 # [0.2.0](https://github.com/Klowner/tussle/compare/v0.1.1...v0.2.0) (2022-04-22)
 
 **Note:** Version bump only for package @tussle/request-axios

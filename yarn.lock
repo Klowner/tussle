@@ -3362,7 +3362,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tussle/core@^0.2.0, @tussle/core@^0.2.8, @tussle/core@workspace:packages/core":
+"@tussle/core@^0.2.11, @tussle/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@tussle/core@workspace:packages/core"
   dependencies:
@@ -3422,7 +3422,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/request-axios@workspace:packages/request-axios"
   dependencies:
-    "@tussle/spec": ^0.2.0
+    "@tussle/spec": "*"
     axios: ^0.26.0
     axios-observable: ^1.4.0
     jest: ^27.5.1
@@ -3461,7 +3461,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@tussle/spec@*, @tussle/spec@^0.2.0, @tussle/spec@^0.2.5, @tussle/spec@workspace:packages/spec":
+"@tussle/spec@*, @tussle/spec@^0.2.5, @tussle/spec@workspace:packages/spec":
   version: 0.0.0-use.local
   resolution: "@tussle/spec@workspace:packages/spec"
   dependencies:
@@ -3494,7 +3494,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-memory-ttl@workspace:packages/state-memory-ttl"
   dependencies:
-    "@tussle/core": ^0.2.8
+    "@tussle/core": ^0.2.11
     "@tussle/spec": ^0.2.5
     jest: ^27.5.1
     npm-run-all: ^4.1.5
@@ -3519,7 +3519,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-postgres@workspace:packages/state-postgres"
   dependencies:
-    "@tussle/core": ^0.2.0
+    "@tussle/core": ^0.2.11
     "@tussle/spec": "*"
     "@types/pg": ^7.14.11
     jest: ^27.5.1
@@ -3585,7 +3585,7 @@ __metadata:
   resolution: "@tussle/storage-s3@workspace:packages/storage-s3"
   dependencies:
     "@aws-sdk/client-s3": ^3.58.0
-    "@tussle/core": ^0.2.0
+    "@tussle/core": ^0.2.11
     "@tussle/spec": ^0.2.5
     concurrently: ^7.2.2
     jest: ^27.5.1
