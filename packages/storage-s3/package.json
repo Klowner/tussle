@@ -2,33 +2,36 @@
   "name": "@tussle/storage-s3",
   "version": "0.2.7",
   "description": "Tussle storage component backed by S3 compatible storage",
-  "main": "lib/index.js",
+  "main": "./dist-cjs/index.js",
+  "types": "./dist-types/index.d.ts",
+  "module": "./dist-es/index.js",
   "files": [
     "lib"
   ],
   "scripts": {
-    "build": "run-s clean build:tsc",
-    "build:tsc": "tsc -b",
+    "build": "concurrently 'yarn:build:es' 'yarn:build:types' 'yarn:build:cjs'",
+    "build:es": "tsc -p tsconfig.es.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:types": "tsc -p tsconfig.types.json",
     "watch": "tsc -b --watch",
-    "clean": "rimraf lib coverage tsconfig.tsbuildinfo",
+    "clean": "rimraf dist-cjs dist-es dist-types coverage",
     "test": "jest"
   },
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.58.0",
+    "@tussle/core": "^0.2.0",
     "rxjs": "^7.0.0"
   },
   "devDependencies": {
     "@tussle/spec": "^0.2.5",
+    "concurrently": "^7.2.2",
     "jest": "^27.5.1",
     "nock": "^13.2.4",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "typescript": "^4.6.3"
-  },
-  "peerDependencies": {
-    "@tussle/core": "^0.2.0"
   },
   "publishConfig": {
     "access": "public"

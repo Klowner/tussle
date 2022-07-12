@@ -1,11 +1,9 @@
 {
   "extends": "../tsconfig.settings.json",
-  "compilerOptions": {
-    "resolveJsonModule": true,
-    "outDir": "lib",
-    "rootDir": "src",
-    "baseUrl": "./"
-  },
+	"compilerOptions": {
+		"rootDir": "./src",
+		"declaration": false
+	},
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.*"],
   "references": [

@@ -23,6 +23,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@tussle/spec": "*",
     "jest": "^27.5.1"
   },
   "jest": {

@@ -10,7 +10,7 @@
     "test:unit": "npm run build:lib && jest",
     "coverage": "jest --coverage --ci --runInBand --detectOpenHandles && cat ./coverage/lcov.info | coveralls",
     "build": "run-s clean && run-p build:lib",
-    "build:lib": "tsc -b packages/tsconfig.json",
+    "build:lib": "lerna run build --scope '@tussle/*'",
     "watch": "yarn run build:lib --watch --preserveWatchOutput",
     "bootstrap": "lerna exec yarn install",
     "clean": "lerna run --parallel clean",

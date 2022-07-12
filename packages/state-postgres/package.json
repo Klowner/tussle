@@ -15,10 +15,12 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
+    "@tussle/core": "^0.2.0",
     "@types/pg": "^7.14.11",
     "pg": "^8.7.3"
   },
   "devDependencies": {
+    "@tussle/spec": "*",
     "jest": "^27.5.1",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2"
