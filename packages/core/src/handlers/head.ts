@@ -1,4 +1,4 @@
-import { Observable, of } from "rxjs";
+import { Observable, of, from as observableFrom } from "rxjs";
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStorageFileInfo } from '@tussle/spec/interface/storage';
 import type { Tussle } from '../core';
@@ -14,7 +14,7 @@ export default function handleHead<Req>(
   if (!store) {
     return of(toResponse(ctx, {location: ctx.request.path, info: null}));
   } else {
-    const params$ = ctx.source.hook('before-head', ctx, params);
+    const params$ = observableFrom(ctx.source.hook('before-head', ctx, params));
     return params$.pipe(
       switchMap((params) => store.getFileInfo(params)),
       switchMap((params) => ctx.source.hook('after-head', ctx, params)),

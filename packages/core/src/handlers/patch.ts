@@ -2,7 +2,7 @@ import { Observable, throwError } from 'rxjs';
 import type { Tussle } from '../core';
 import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStoragePatchFileResponse, TussleStoragePatchFileCompleteResponse } from '@tussle/spec/interface/storage';
-import { of } from 'rxjs';
+import { of, from as observableFrom } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 export default function handlePatch<T>(
@@ -26,7 +26,7 @@ export default function handlePatch<T>(
     return of(ctx);
   }
 
-  const params$ = ctx.source.hook('before-patch', ctx, params);
+  const params$ = observableFrom(ctx.source.hook('before-patch', ctx, params));
 
   return params$.pipe(
     switchMap((params) => store.patchFile(params)),
@@ -47,7 +47,7 @@ const callOptionalHooks = <T>(
 ): Observable<TussleStoragePatchFileResponse> => {
   ctx.meta.storage = patchedFile.details;
   if (isComplete(patchedFile)) {
-    return ctx.source.hook('after-complete', ctx, patchedFile);
+    return observableFrom(ctx.source.hook('after-complete', ctx, patchedFile));
   }
   return of(patchedFile);
 };

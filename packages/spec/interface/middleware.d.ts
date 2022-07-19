@@ -42,15 +42,17 @@ interface TussleOptionsParams {
   headers: Record<string, string>;
 }
 
+type HookResult<T> = Observable<T> | Promise<T>;
+
 export interface TussleHooks<Req> extends TussleHookDef<Req> {
-  'after-create': TussleHookFunc<Req, TussleStorageCreateFileResponse, Observable<TussleStorageCreateFileResponse>>;
-  'after-complete': TussleHookFunc<Req, TussleStoragePatchFileCompleteResponse, Observable<TussleStoragePatchFileCompleteResponse>>;
-  'after-patch': TussleHookFunc<Req, TussleStoragePatchFileResponse, Observable<TussleStoragePatchFileResponse>>;
-  'after-head': TussleHookFunc<Req, TussleStorageFileInfo, Observable<TussleStorageFileInfo>>;
-  'before-create': TussleHookFunc<Req, TussleCreationParams, Observable<TussleCreationParams>>;
-  'before-patch': TussleHookFunc<Req, TusslePatchParams<Req>, Observable<TusslePatchParams<Req>>>;
-  'before-head': TussleHookFunc<Req, TussleHeadParams, Observable<TussleHeadParams>>;
-  'before-options': TussleHookFunc<Req, TussleOptionsParams, Observable<TussleOptionsParams>>;
+  'after-create': TussleHookFunc<Req, TussleStorageCreateFileResponse, HookResult<TussleStorageCreateFileResponse>>;
+  'after-complete': TussleHookFunc<Req, TussleStoragePatchFileCompleteResponse, HookResult<TussleStoragePatchFileCompleteResponse>>;
+  'after-patch': TussleHookFunc<Req, TussleStoragePatchFileResponse, HookResult<TussleStoragePatchFileResponse>>;
+  'after-head': TussleHookFunc<Req, TussleStorageFileInfo, HookResult<TussleStorageFileInfo>>;
+  'before-create': TussleHookFunc<Req, TussleCreationParams, HookResult<TussleCreationParams>>;
+  'before-patch': TussleHookFunc<Req, TusslePatchParams<Req>, HookResult<TusslePatchParams<Req>>>;
+  'before-head': TussleHookFunc<Req, TussleHeadParams, HookResult<TussleHeadParams>>;
+  'before-options': TussleHookFunc<Req, TussleOptionsParams, HookResult<TussleOptionsParams>>;
 }
 
 export interface TussleMiddlewareService<Req> {

@@ -1,7 +1,8 @@
-import type { Observable } from 'rxjs';
-import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
-import type { Tussle } from '../core';
-import { map } from 'rxjs/operators';
+import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
+import type {Observable} from 'rxjs';
+import {from as observableFrom} from 'rxjs';
+import {map} from 'rxjs/operators';
+import type {Tussle} from '../core';
 
 const csv = (...items: string[]) => items.join(',');
 
@@ -23,11 +24,11 @@ const defaultResponse = {
 };
 
 export default function handleOptions<Req>(
-  core: Tussle,
+  _core: Tussle,
   ctx: TussleIncomingRequest<Req>
 ): Observable<TussleIncomingRequest<Req>>
 {
-  const response$ = ctx.source.hook('before-options', ctx, {...defaultResponse}).pipe(
+  const response$ = observableFrom(ctx.source.hook('before-options', ctx, {...defaultResponse})).pipe(
     map((response) => ({
       ...ctx,
       response,

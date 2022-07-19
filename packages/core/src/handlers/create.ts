@@ -2,7 +2,7 @@ import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 import type { TussleStorageCreateFileResponse } from '@tussle/spec/interface/storage';
 import type { Tussle } from '../core';
 import { decode } from 'js-base64';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, from as observableFrom } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 export default function handleCreate<R>(
@@ -15,7 +15,7 @@ export default function handleCreate<R>(
   if (!store) {
     return throwError(() => new Error('no storage service selected'));
   } else {
-    const params$ = ctx.source.hook('before-create', ctx, params);
+    const params$ = observableFrom(ctx.source.hook('before-create', ctx, params));
     return params$.pipe(
       switchMap((params) => store.createFile(params)),
       switchMap((createdFile) => ctx.source.hook('after-create', ctx, createdFile)),
