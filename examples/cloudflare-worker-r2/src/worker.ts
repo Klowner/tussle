@@ -4,7 +4,7 @@ import {TussleStateMemory} from '@tussle/state-memory';
 import {TussleStorageR2} from '@tussle/storage-r2';
 import {R2UploadState} from "@tussle/storage-r2/lib/storage";
 import {nanoid} from 'nanoid';
-import {firstValueFrom, of} from 'rxjs';
+import {firstValueFrom} from 'rxjs';
 import {staticHandler} from "./static";
 
 const stateService = new TussleStateMemory<R2UploadState>();
@@ -15,11 +15,11 @@ const getTussleMiddleware = (() => {
 		if (!instance) {
 			instance = new TussleCloudflareWorker({
 				hooks: {
-					"before-create": (_ctx, params) => {
-						return of({
+					"before-create": async (_ctx, params) => {
+						return {
 							...params,
 							path: params.path + '/' + nanoid(),
-						});
+						};
 					},
 				},
 				core: {
