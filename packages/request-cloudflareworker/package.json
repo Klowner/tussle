@@ -2,13 +2,19 @@
   "name": "@tussle/request-cloudflareworker",
   "version": "0.2.13",
   "description": "Tussle request component utilizing Cloudflare Worker fetch/request",
-  "main": "lib/index.js",
+  "main": "./dist-cjs/index.js",
+  "types": "./dist-types/index.d.ts",
+  "module": "./dist-es/index.js",
   "files": [
-    "lib"
+    "dist-cjs",
+    "dist-types",
+    "dist-es"
   ],
   "scripts": {
-    "build": "run-s clean build:tsc",
-    "build:tsc": "tsc -b",
+    "build": "concurrently 'yarn:build:es' 'yarn:build:types' 'yarn:build:cjs'",
+    "build:es": "tsc -p tsconfig.es.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:types": "tsc -p tsconfig.types.json",
     "watch": "tsc -b -w --preserveWatchOutput",
     "clean": "rimraf lib coverage tsconfig.tsbuildinfo",
     "test": "jest"
@@ -24,7 +30,10 @@
   },
   "devDependencies": {
     "@tussle/spec": "^0.2.13",
-    "jest": "^27.5.1"
+    "concurrently": "^7.3.0",
+    "jest": "^27.5.1",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.8.2"
   },
   "jest": {
     "preset": "ts-jest",

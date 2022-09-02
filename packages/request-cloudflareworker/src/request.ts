@@ -38,13 +38,13 @@ export class TussleRequestCloudflareWorker implements TussleRequestService<Cloud
       const newRequestInit = {
         method: request.method,
         headers: request.headers,
-        body: <string | undefined> undefined,
+        body: <string | undefined | ReadableStream> undefined,
       };
 
       newRequestInit.headers = {
-          ...request.headers,
           'Accept': 'application/json, text/plain, */*',
           'User-Agent': 'tussle/cloudflare-worker 0.0.1',
+          ...request.headers,
       };
 
       if (request.auth) {
@@ -59,10 +59,10 @@ export class TussleRequestCloudflareWorker implements TussleRequestService<Cloud
         };
       }
       if (request.body) {
-        newRequestInit.body = JSON.stringify(request.body);
+        newRequestInit.body = typeof request.body === 'string' || request.body instanceof ReadableStream ? request.body : JSON.stringify(request.body);
         newRequestInit.headers = {
-          ...newRequestInit.headers,
           'content-type': 'application/x-www-form-urlencoded',
+          ...newRequestInit.headers,
         };
       }
       request$ = observableFetch(request.url, newRequestInit);
