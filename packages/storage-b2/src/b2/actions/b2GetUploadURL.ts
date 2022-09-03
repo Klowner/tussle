@@ -4,11 +4,11 @@ import { createGenericAction } from "./util";
 const fragment = "/b2_get_upload_url";
 export const requiredCapability: B2Capability = "writeFiles";
 
-export interface B2GetUploadURLParams {
+export type B2GetUploadURLParams = {
   bucketId: string;
 }
 
-export interface B2GetUploadURLResponse {
+export type B2GetUploadURLResponse = {
   bucketId: string;
   uploadUrl: string;
   authorizationToken: string;

@@ -11,7 +11,7 @@
     "coverage": "jest --coverage --ci --runInBand --detectOpenHandles && cat ./coverage/lcov.info | coveralls",
     "build": "run-s clean && run-p build:lib",
     "build:lib": "lerna run build --scope '@tussle/*'",
-    "watch": "yarn run build:lib --watch --preserveWatchOutput",
+    "watch": "lerna run build --scope '@tussle/*' --watch",
     "bootstrap": "lerna exec yarn install",
     "clean": "lerna run --parallel clean",
     "release": "lerna publish",
@@ -34,7 +34,7 @@
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.3",
-    "typescript": "^4.6.3"
+    "typescript": "^4.8.2"
   },
   "resolutions": {
     "trim-newlines": "^4.0.0"

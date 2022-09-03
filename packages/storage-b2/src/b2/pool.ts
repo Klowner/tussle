@@ -6,7 +6,7 @@ export type PoolType<T> = T extends Pool<infer U> ? U : never;
 
 export type Releasable<T> = T & { release: (keep?: boolean) => void };
 
-export class Pool<T> {
+export class Pool<T extends Record<string, unknown>> {
   constructor(
     private readonly alloc: () => Promise<T>,
     private readonly items: T[] = []
