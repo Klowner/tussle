@@ -29,6 +29,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@tussle/core": "^0.2.13",
     "@tussle/spec": "^0.2.13",
     "concurrently": "^7.3.0",
     "jest": "^27.5.1",

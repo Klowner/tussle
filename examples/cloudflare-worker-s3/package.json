@@ -1,29 +1,31 @@
 {
-  "name": "cloudflare-worker-s3",
-  "version": "0.2.13",
-  "main": "index.js",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "start": "run-p start:*",
-    "start:server": "nodemon server.js",
-    "start:client": "rollup -c --watch --preserveWatchOutput",
-    "build": "rollup -c",
-    "deploy": "cd worker && wrangler publish",
-    "tail": "wrangler -c worker/wrangler.toml tail",
-    "wrangler": "wrangler"
-  },
-  "dependencies": {
-    "dotenv": "^16.0.0"
-  },
-  "devDependencies": {
-    "@cloudflare/wrangler": "^1.19.8",
-    "@rollup/plugin-json": "^4.1.0",
-    "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
-    "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
-    "@tussle/storage-s3": "link:../../packages/storage-s3",
-    "jest": "^27.5.1",
-    "rollup": "^2.67.3",
-    "rollup-plugin-string": "^3.0.0"
-  }
+	"name": "cloudflare-worker-s3",
+	"version": "0.2.13",
+	"license": "MIT",
+	"private": true,
+	"type": "module",
+	"main": "dist/worker.mjs",
+	"module": "dist/worker.mjs",
+	"scripts": {
+		"check:types": "yarn tsc",
+		"build": "node build",
+		"deploy": "wrangler publish",
+		"tail": "wrangler tail",
+		"wrangler": "wrangler",
+		"dev": "miniflare --live-reload --debug -m",
+		"debug": "node --experimental-vm-modules --inspect ../../node_modules/miniflare/dist/src/cli.js dist/worker.mjs --watch --debug -m"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^3.13.0",
+		"@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
+		"@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
+		"@tussle/storage-s3": "link:../../packages/storage-s3",
+		"dotenv": "^16.0.0",
+		"esbuild": "^0.14.47",
+		"jest": "^27.5.1",
+		"miniflare": "^2.7.1",
+		"nanoid": "^4.0.0",
+		"typescript": "^4.8.2",
+		"wrangler": "^2.0.15"
+	}
 }
