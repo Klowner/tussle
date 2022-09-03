@@ -195,7 +195,7 @@ export class TussleStorageR2 implements TussleStorageService {
 		const numParts = state.parts && state.parts.length || 0;
 		const part = numParts.toString(10).padStart(10, '0');
 		const key = stripLeadingSlashes([location, part].join('/'));
-		const readable = params.request.request.getReadable();
+		const readable = params.request.request.getReadable() as ReadableStream<Uint8Array>;
 		// Store the resulting "next" state that we will be at after
 		// this part is written. If the write succeeds, then the most
 		// accurate state will be stored within its metadata.
