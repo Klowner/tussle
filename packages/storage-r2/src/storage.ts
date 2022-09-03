@@ -136,7 +136,7 @@ export class TussleStorageR2 implements TussleStorageService {
 		obj: Readonly<R2Object>,
 	): R2UploadState|null {
 		const state: R2UploadState|null = JSON.parse(
-			obj.customMetadata['tussleState'] || 'null'
+			obj.customMetadata && obj.customMetadata['tussleState'] || 'null'
 		);
 		return state;
 	}
