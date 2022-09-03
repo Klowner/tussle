@@ -1,0 +1,11 @@
+name = "tussle-s3-example"
+compatibility_date = "2022-05-30"
+workers_dev = true
+account_id = "e0ecf4244fa3d5bde46d4c297d9555d1"
+main = "dist/worker.mjs"
+
+[vars]
+# TUSSLE_S3_BUCKET = ""
+# TUSSLE_S3_ENDPOINT = "https://us-west-001.backblazeb2.com"
+# TUSSLE_S3_KEY_ID = ""
+# TUSSLE_S3_KEY = ""

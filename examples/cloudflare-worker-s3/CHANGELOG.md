@@ -5,15 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.2.13](http://klowner/tussle/compare/v0.2.12...v0.2.13) (2022-07-19)
 
-**Note:** Version bump only for package cloudflare-worker-s3
-
-
-
-
-
-## [0.2.12](http://klowner/tussle/compare/v0.2.11...v0.2.12) (2022-07-12)
-
-**Note:** Version bump only for package cloudflare-worker-s3
+**Note:** Version bump only for package cloudflare-worker-r2
 
 
 
@@ -21,7 +13,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.2.11](http://klowner/tussle/compare/v0.2.10...v0.2.11) (2022-07-12)
 
-**Note:** Version bump only for package cloudflare-worker-s3
+**Note:** Version bump only for package cloudflare-worker-r2
+
+
+
+
+
+## [0.2.9](https://github.com/Klowner/tussle/compare/v0.2.8...v0.2.9) (2022-07-06)
+
+**Note:** Version bump only for package cloudflare-worker-r2
 
 
 
@@ -29,7 +29,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.2.8](https://github.com/Klowner/tussle/compare/v0.2.7...v0.2.8) (2022-07-05)
 
-**Note:** Version bump only for package cloudflare-worker-s3
+**Note:** Version bump only for package cloudflare-worker-r2
 
 
 
