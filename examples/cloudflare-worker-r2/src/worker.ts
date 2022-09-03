@@ -51,8 +51,7 @@ async function handleRequest(
 			if (file) {
 				return new Response(file.body);
 			}
-			return new Response('', {status: 404});
-		}
+		} break;
 		case 'HEAD': {
 			const info = await firstValueFrom(storage.getFileInfo({location: pathname}));
 			return new Response(JSON.stringify(info), {headers: {
