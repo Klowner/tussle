@@ -22,7 +22,7 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
-    "@cloudflare/workers-types": "^3.4.0",
+    "@cloudflare/workers-types": "^3.16.0",
     "rxjs": "^7.0.0"
   },
   "publishConfig": {

@@ -15,9 +15,8 @@
 		"dev": "miniflare --live-reload --debug -m"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^3.13.0",
+		"@cloudflare/workers-types": "^3.16.0",
 		"@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
-		"@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
 		"@tussle/storage-r2": "link:../../packages/storage-r2",
 		"dotenv": "^16.0.0",
 		"esbuild": "^0.14.47",

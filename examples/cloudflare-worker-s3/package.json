@@ -16,7 +16,7 @@
 		"debug": "node --experimental-vm-modules --inspect ../../node_modules/miniflare/dist/src/cli.js dist/worker.mjs --watch --debug -m"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^3.13.0",
+		"@cloudflare/workers-types": "^3.16.0",
 		"@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker",
 		"@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
 		"@tussle/storage-s3": "link:../../packages/storage-s3",
