@@ -17,6 +17,7 @@ import {
 	filter,
 	firstValueFrom,
 	from,
+	defer,
 	map,
 	mergeMap,
 	Observable,
@@ -24,7 +25,7 @@ import {
 	pipe,
 	share,
 	switchMap,
-	take
+	take,
 } from "rxjs";
 
 interface Part {
@@ -51,6 +52,15 @@ function isNonNull<T>(value: T): value is NonNullable<T> {
 
 function stripLeadingSlashes(path: string) {
 	return path.replace(/^\/+/, '');
+}
+
+// Due to metadata size limitations, any sizable upload would result in a
+// lengthy list of parts which will bloat the metadata to sizes beyond which is
+// permitted, so instead, we essentially just save a reference to the previous
+// part so we can reassemble the array of parts from each part's metadata.
+function getMostRecentPartKey(state: R2UploadState) {
+	const prevPart = (state.parts && state.parts.length) ? state.parts[state.parts.length - 1].key : null;
+	return prevPart || '';
 }
 
 export class TussleStorageR2 implements TussleStorageService {
@@ -109,43 +119,64 @@ export class TussleStorageR2 implements TussleStorageService {
 		);
 	}
 
-	private async mostRecentlyUploadedObject(
+	private async getStateFromR2(
 		location: string,
-	): Promise<R2Object|null> {
+	): Promise<R2UploadState|null> {
+		interface PartInfo {
+			key: string;
+			size: number;
+			prev: string;
+		}
 		const prefix = stripLeadingSlashes(location) + '/';
-		let newest: R2Object|null = null;
+		let tailPart: R2Object|null = null;
 		let more = true;
 		let cursor: string|undefined;
+		const partMap: Record<string, PartInfo> = {};
 		while (more) {
 			const result = await this.options.bucket.list({
 				prefix,
 				cursor,
+				include: ['customMetadata'],
+				limit: 500,
 			});
 			more = result.truncated;
-			newest = newest || result.objects[0];
+			cursor = result.cursor;
 			for (const obj of result.objects) {
-				if (obj.uploaded > newest.uploaded) {
-					newest = obj;
+				if (!obj.customMetadata) {
+					console.error('no customMetadata');
+					throw new Error('fatal error: R2 object missing customMetadata');
 				}
+				const { tusslePrevKey } = obj.customMetadata;
+				partMap[obj.key] = {
+					key: obj.key,
+					size: obj.size,
+					prev: tusslePrevKey,
+				};
+				tailPart = (tailPart && tailPart.uploaded > obj.uploaded) ? tailPart : obj;
 			}
 		}
-		return newest;
-	}
-
-	private stateFromR2ObjectMetadata(
-		obj: Readonly<R2Object>,
-	): R2UploadState|null {
-		const state: R2UploadState|null = JSON.parse(
-			obj.customMetadata && obj.customMetadata['tussleState'] || 'null'
-		);
+		if (!tailPart || !tailPart.customMetadata || !tailPart.customMetadata['tussleState']) {
+			return null;
+		}
+		// Start from the tail part and re-build the parts array
+		const parts: Part[] = [];
+		let iter: PartInfo|undefined = {
+			key: tailPart.key,
+			size: tailPart.size,
+			prev: tailPart.customMetadata['tusslePrevKey'] || '',
+		};
+		while (iter) {
+			parts.unshift({
+				key: iter.key,
+				size: iter.size,
+			});
+			iter = partMap[iter.prev];
+		}
+		const state: R2UploadState = {
+			... JSON.parse(tailPart.customMetadata['tussleState'] || 'null'),
+			parts,
+		};
 		return state;
-	}
-
-	private async getStateFromR2(
-		location: string,
-	): Promise<R2UploadState|null> {
-		const obj = await this.mostRecentlyUploadedObject(location);
-		return obj ? this.stateFromR2ObjectMetadata(obj) : obj;
 	}
 
 	private getLocationState = pipe(
@@ -153,7 +184,7 @@ export class TussleStorageR2 implements TussleStorageService {
 			from(this.state.getItem(location)).pipe(
 				filter(isNonNull),
 			),
-			from(this.getStateFromR2(location)).pipe(
+			defer(() => this.getStateFromR2(location)).pipe(
 				filter(isNonNull),
 				this.setState,
 			),
@@ -199,10 +230,16 @@ export class TussleStorageR2 implements TussleStorageService {
 		// Store the resulting "next" state that we will be at after
 		// this part is written. If the write succeeds, then the most
 		// accurate state will be stored within its metadata.
+		const tusslePrevKey = getMostRecentPartKey(state) || '';
 		const nextState = this.advanceStateProgress(state, length, key);
+
 		const r2put$ = from(this.options.bucket.put(key, readable, {
 			customMetadata: {
-				tussleState: JSON.stringify(nextState),
+				tussleState: JSON.stringify({
+					...nextState,
+					parts: null
+				}),
+				tusslePrevKey, // store full R2 key
 			}
 		}));
 		return r2put$.pipe(
@@ -246,7 +283,7 @@ export class TussleStorageR2 implements TussleStorageService {
 	}
 
 	private stateToFileInfoResponse(
-		{ location, uploadLength, currentOffset }: R2UploadState,
+		{ location, uploadLength, currentOffset, metadata }: R2UploadState,
 	): TussleStorageFileInfo {
 		return {
 			location,
@@ -254,6 +291,9 @@ export class TussleStorageR2 implements TussleStorageService {
 				currentOffset,
 				uploadLength,
 			},
+			details: {
+				metadata,
+			}
 		};
 	}
 
@@ -285,6 +325,7 @@ export class TussleStorageR2 implements TussleStorageService {
 				path,
 				state.uploadLength,
 				(state.parts || []).map(p => p.key),
+				state.metadata,
 				this.options.bucket,
 			)),
 			defaultIfEmpty(null),
@@ -297,6 +338,7 @@ export class R2File {
 		readonly key: string,
 		readonly size: number,
 		readonly keys: Readonly<string[]>,
+		readonly metadata: Record<string, unknown>,
 		private readonly bucket: R2Bucket,
 	) {}
 
