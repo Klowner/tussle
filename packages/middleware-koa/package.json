@@ -25,6 +25,6 @@
     "rxjs": "^7.0.0"
   },
   "peerDependencies": {
-    "@tussle/core": "^0.2.0"
+    "@tussle/core": "^0.3.0"
   }
 }
