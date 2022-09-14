@@ -9,8 +9,12 @@ import {staticHandler} from "./static";
 
 const stateService = new TussleStateMemory<R2UploadState>();
 
+type UserParams = {
+	context: ExecutionContext;
+}
+
 const getTussleMiddleware = (() => {
-	let instance: TussleCloudflareWorker;
+	let instance: TussleCloudflareWorker<UserParams>;
 	return (storage: TussleStorageService) => {
 		if (!instance) {
 			instance = new TussleCloudflareWorker({
@@ -34,13 +38,14 @@ const getTussleMiddleware = (() => {
 async function handleRequest(
 	request: Request,
 	bindings: Bindings,
+	context: ExecutionContext,
 ) {
 	const storage = new TussleStorageR2({
 		stateService,
 		bucket: bindings.TUSSLE_BUCKET,
 	});
 	const tussle = getTussleMiddleware(storage);
-	let res = await tussle.handleRequest(request);
+	let res = await tussle.handleRequest(request, {context});
 	if (res) {
 		return res;
 	}

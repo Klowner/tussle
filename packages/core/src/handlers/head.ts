@@ -4,10 +4,10 @@ import type { TussleStorageFileInfo } from '@tussle/spec/interface/storage';
 import type { Tussle } from '../core';
 import { switchMap, map } from 'rxjs/operators';
 
-export default function handleHead<Req>(
+export default function handleHead<Req, P>(
   _core: Tussle,
-  ctx: TussleIncomingRequest<Req>
-): Observable<TussleIncomingRequest<Req>>
+  ctx: TussleIncomingRequest<Req, P>
+): Observable<TussleIncomingRequest<Req, P>>
 {
   const params = extractParamsFromHeaders(ctx);
   const store = ctx.cfg.storage;
@@ -23,7 +23,7 @@ export default function handleHead<Req>(
   }
 }
 
-const extractParamsFromHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
+const extractParamsFromHeaders = <T, P>(ctx: TussleIncomingRequest<T, P>) => {
   const location = ctx.request.path;
   return {
     location,
@@ -32,10 +32,10 @@ const extractParamsFromHeaders = <T>(ctx: TussleIncomingRequest<T>) => {
 
 export type ExtractedHeadHeaders = ReturnType<typeof extractParamsFromHeaders>;
 
-const toResponse = <T>(
-  ctx: TussleIncomingRequest<T>,
+const toResponse = <T, P>(
+  ctx: TussleIncomingRequest<T, P>,
   fileInfo: TussleStorageFileInfo,
-): TussleIncomingRequest<T> => {
+): TussleIncomingRequest<T, P> => {
   const { info } = fileInfo;
   if (info) {
     const headers: Record<string, string> = {

@@ -13,11 +13,11 @@ export interface TussleStorageCreateFileResponse {
   success: boolean;
 }
 
-export interface TussleStoragePatchFileParams {
+export interface TussleStoragePatchFileParams<Req = unknown, U = unknown> {
   length: number;
   location: string;
   offset: number;
-  request: TussleIncomingRequest<unknown>;
+  request: TussleIncomingRequest<Req, U>;
 }
 
 interface Details {
@@ -65,8 +65,8 @@ export interface TussleStorageService {
     params: TussleStorageCreateFileParams
   ): Observable<TussleStorageCreateFileResponse>;
 
-  patchFile(
-    params: TussleStoragePatchFileParams
+  patchFile<Req, U>(
+    params: TussleStoragePatchFileParams<Req, U>
   ): Observable<TussleStoragePatchFileResponse>;
 
   getFileInfo(

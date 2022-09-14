@@ -32,7 +32,7 @@ export type TussleOutgoingResponse<T, R> = {
   originalResponse: R;
 };
 
-export interface TussleIncomingRequest<Req> {
+export interface TussleIncomingRequest<Req, U> {
   request: {
     method: 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH' | 'DELETE';
     path: string;
@@ -53,8 +53,9 @@ export interface TussleIncomingRequest<Req> {
     storage?: TussleStorageService;
     maxSizeBytes?: number;
   };
-  source: TussleMiddlewareService<Req>;
+  source: TussleMiddlewareService<Req, U>;
   originalRequest: Req;
+  userParams: U;
 }
 
 export interface TussleRequestService<R = unknown> {

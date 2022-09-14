@@ -17,20 +17,20 @@ function allowedMethod(method: string, overrideMethod: string | null): AllowedMe
   return null;
 }
 
-interface TussleCloudflareWorkerMiddlewareConfig {
+interface TussleCloudflareWorkerMiddlewareConfig<U> {
   core: TussleConfig;
-  hooks: Partial<TussleHooks<Request>>;
+  hooks: Partial<TussleHooks<Request, U>>;
 }
 
-export class TussleCloudflareWorker extends TussleBaseMiddleware<Request> {
-  constructor(readonly options: TussleCloudflareWorkerMiddlewareConfig) {
+export class TussleCloudflareWorker<U = void> extends TussleBaseMiddleware<Request, U> {
+  constructor(readonly options: TussleCloudflareWorkerMiddlewareConfig<U>) {
     super(options.hooks);
   }
 
   private readonly core: Tussle = new Tussle(this.options.core);
 
-  public async handleRequest(request: Request): Promise<Response | null> {
-    const req = createTussleRequest(this, request);
+  public async handleRequest(request: Request, params: U extends never ? never : U): Promise<Response | null> {
+    const req = createTussleRequest(this, request, params);
     if (req) {
       return firstValueFrom(of(req).pipe(this.core.handle))
         .then((response) => {
@@ -42,10 +42,11 @@ export class TussleCloudflareWorker extends TussleBaseMiddleware<Request> {
 }
 
 // convert cloudflare worker fetch request to a TussleIncomingRequest
-const createTussleRequest = <T extends Request>(
-  source: TussleCloudflareWorker,
-  originalRequest: T
-): TussleIncomingRequest<T> | null =>
+const createTussleRequest = <T extends Request, U>(
+  source: TussleCloudflareWorker<U>,
+  originalRequest: T,
+  userParams: U,
+): TussleIncomingRequest<T, U> | null =>
 {
   const ctx = originalRequest;
   const overrideMethod = ctx.headers.get('x-http-method-override');
@@ -72,6 +73,7 @@ const createTussleRequest = <T extends Request>(
       cfg: {},
       originalRequest,
       source,
+      userParams,
     };
   }
   return null; // ignore this request
@@ -80,7 +82,7 @@ const createTussleRequest = <T extends Request>(
 // If the request context has a `response` attached then respond to the client
 // request as described by the `response`.  If no `response`, then return null
 // and potentially handle the request elsewhere.
-const handleTussleResponse = async <T extends Request>(ctx: TussleIncomingRequest<T>):
+const handleTussleResponse = async <T extends Request, P>(ctx: TussleIncomingRequest<T, P>):
   Promise<Response | null> =>
 {
   if (ctx.response && ctx.response.status) {

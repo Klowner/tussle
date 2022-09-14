@@ -5,10 +5,10 @@ import type { TussleStoragePatchFileResponse, TussleStoragePatchFileCompleteResp
 import { of, from as observableFrom } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-export default function handlePatch<T>(
+export default function handlePatch<T, P>(
   _core: Tussle,
-  ctx: TussleIncomingRequest<T>
-): Observable<TussleIncomingRequest<T>>
+  ctx: TussleIncomingRequest<T, P>
+): Observable<TussleIncomingRequest<T, P>>
 {
   const params = extractPatchHeaders(ctx);
   const store = ctx.cfg.storage;
@@ -41,8 +41,8 @@ response is TussleStoragePatchFileCompleteResponse {
   return response.complete;
 }
 
-const callOptionalHooks = <T>(
-  ctx: TussleIncomingRequest<T>,
+const callOptionalHooks = <T, P>(
+  ctx: TussleIncomingRequest<T, P>,
   patchedFile: TussleStoragePatchFileResponse
 ): Observable<TussleStoragePatchFileResponse> => {
   ctx.meta.storage = patchedFile.details;
@@ -52,7 +52,7 @@ const callOptionalHooks = <T>(
   return of(patchedFile);
 };
 
-const extractPatchHeaders = <Req>(ctx: TussleIncomingRequest<Req>) => {
+const extractPatchHeaders = <Req, P>(ctx: TussleIncomingRequest<Req, P>) => {
   const location = ctx.request.path;
   const header = ctx.request.getHeader;
   const intHeader = (key: string) => parseInt(header(key) as string || '', 10);
@@ -74,10 +74,10 @@ const extractPatchHeaders = <Req>(ctx: TussleIncomingRequest<Req>) => {
 
 export type ExtractedPatchHeaders = ReturnType<typeof extractPatchHeaders>;
 
-const toResponse = <T>(
-  ctx: TussleIncomingRequest<T>,
+const toResponse = <T, P>(
+  ctx: TussleIncomingRequest<T, P>,
   patchedFile: TussleStoragePatchFileResponse
-): TussleIncomingRequest<T> => {
+): TussleIncomingRequest<T, P> => {
   if (patchedFile.success && patchedFile.offset !== undefined) {
     ctx.response = {
       status: 204, // no content (success),

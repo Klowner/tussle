@@ -5,7 +5,7 @@ import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
 export const requiredCapability: B2Capability = 'writeFiles';
 
 export type B2UploadFileParams = {
-  sourceRequest: TussleIncomingRequest<unknown>;
+  sourceRequest: TussleIncomingRequest<unknown, unknown>;
   uploadUrl: string;
   authorizationToken: string;
 

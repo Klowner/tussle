@@ -6,12 +6,12 @@ import {map, mergeMap} from 'rxjs/operators';
 import {defaultHandlers} from './handlers';
 
 export interface TussleConfig {
-  storage: TussleStorageService | (<Req>(ctx: TussleIncomingRequest<Req>) => Promise<TussleStorageService|undefined>);
+  storage: TussleStorageService | (<Req, P>(ctx: TussleIncomingRequest<Req, P>) => Promise<TussleStorageService|undefined>);
   handlers?: Partial<RequestHandler>;
 }
 
-type IncomingRequestMethod = TussleIncomingRequest<unknown>['request']['method'];
-type IncomingRequestHandler = <T>(core: Tussle, ctx: TussleIncomingRequest<T>) => Observable<TussleIncomingRequest<T>>;
+type IncomingRequestMethod = TussleIncomingRequest<unknown, unknown>['request']['method'];
+type IncomingRequestHandler = <T, P>(core: Tussle, ctx: TussleIncomingRequest<T, P>) => Observable<TussleIncomingRequest<T, P>>;
 type RequestHandler = Record<IncomingRequestMethod, IncomingRequestHandler>;
 
 const supportedVersions = [
@@ -28,7 +28,7 @@ export class Tussle {
 
   readonly extensions: Partial<Record<TusProtocolExtension, boolean>> = {};
 
-  private chooseProtocolVersion(ctx: TussleIncomingRequest<unknown>): string | null {
+  private chooseProtocolVersion(ctx: TussleIncomingRequest<unknown, unknown>): string | null {
     const clientVersion = ctx.request.getHeader('tus-resumable') as string;
     if (supportedVersions.includes(clientVersion)) {
       return clientVersion;
@@ -37,7 +37,7 @@ export class Tussle {
   }
 
   private readonly processRequestHeaders =
-    map(<T>(ctx: TussleIncomingRequest<T>) => {
+    map(<T, P>(ctx: TussleIncomingRequest<T, P>) => {
       // Verify that the requested Tus protocol version is supported.
       if (ctx.request.method !== 'OPTIONS') {
         const version = this.chooseProtocolVersion(ctx);
@@ -53,7 +53,7 @@ export class Tussle {
   );
 
   private readonly selectStorageService =
-    mergeMap(<T>(ctx: TussleIncomingRequest<T>): Observable<TussleIncomingRequest<T>> =>
+    mergeMap(<T, P>(ctx: TussleIncomingRequest<T, P>): Observable<TussleIncomingRequest<T, P>> =>
       from(this.getStorage(ctx)).pipe(
         map((storage) => ({
           ...ctx,
@@ -65,7 +65,7 @@ export class Tussle {
       ));
 
   private readonly processRequest =
-    mergeMap(<T>(ctx: TussleIncomingRequest<T>) => {
+    mergeMap(<T, P>(ctx: TussleIncomingRequest<T, P>) => {
       // only if no response was already attached by preprocessing and a
       // storage service has been linked to the incoming request.
       if (!ctx.response) {
@@ -78,7 +78,7 @@ export class Tussle {
     });
 
   private readonly postProcessRequest =
-    map(<T>(ctx: TussleIncomingRequest<T>) => {
+    map(<T, P>(ctx: TussleIncomingRequest<T, P>) => {
       // Add any remaining response headers
       const extraHeaders: Record<string, unknown> = {};
       // Include required (excl. OPTIONS) Tus-Resumable header
@@ -111,14 +111,14 @@ export class Tussle {
     this.postProcessRequest,
   );
 
-  getStorage<R>(ctx: TussleIncomingRequest<R>): Promise<TussleStorageService|undefined> {
+  getStorage<R, P>(ctx: TussleIncomingRequest<R, P>): Promise<TussleStorageService|undefined> {
     return isStorageService(this.cfg.storage) ?
       Promise.resolve(this.cfg.storage) :
       this.cfg.storage(ctx);
   }
 }
 
-function respondWithUnsupportedProtocolVersion<T>(ctx: TussleIncomingRequest<T>): TussleIncomingRequest<T> {
+function respondWithUnsupportedProtocolVersion<T, P>(ctx: TussleIncomingRequest<T, P>): TussleIncomingRequest<T, P> {
   ctx.response = {
     status: 412, // precondition failed
     headers: {
@@ -131,7 +131,7 @@ function respondWithUnsupportedProtocolVersion<T>(ctx: TussleIncomingRequest<T>)
 const isStorageService = (storage: unknown): storage is TussleStorageService =>
   storage !== undefined && (storage as TussleStorageService).createFile !== undefined;
 
-function addResponseHeaders(ctx: TussleIncomingRequest<unknown>, headers: Record<string, unknown>): void {
+function addResponseHeaders(ctx: TussleIncomingRequest<unknown, unknown>, headers: Record<string, unknown>): void {
   ctx.response = {
     ...ctx.response,
     headers: {

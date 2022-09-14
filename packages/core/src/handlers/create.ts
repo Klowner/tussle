@@ -5,10 +5,10 @@ import { decode } from 'js-base64';
 import { Observable, throwError, from as observableFrom } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-export default function handleCreate<R>(
+export default function handleCreate<T, P>(
   _core: Tussle,
-  ctx: Readonly<TussleIncomingRequest<R>>
-): Observable<TussleIncomingRequest<R>> {
+  ctx: Readonly<TussleIncomingRequest<T, P>>
+): Observable<TussleIncomingRequest<T, P>> {
   const params = extractCreationHeaders(ctx);
   const store = ctx.cfg.storage;
 
@@ -33,8 +33,8 @@ export interface TussleCreationParams {
   uploadConcat: string|null;
 }
 
-const extractCreationHeaders = <T>(
-  ctx: TussleIncomingRequest<T>
+const extractCreationHeaders = <T, P>(
+  ctx: TussleIncomingRequest<T, P>
 ): TussleCreationParams => {
   const id = ctx.request.path;
   const path = ctx.request.path;
@@ -66,10 +66,10 @@ const extractCreationHeaders = <T>(
 
 export type ExtractedCreateHeaders = ReturnType<typeof extractCreationHeaders>;
 
-const toResponse = <T>(
-  ctx: TussleIncomingRequest<T>,
+const toResponse = <T, P>(
+  ctx: TussleIncomingRequest<T, P>,
   createdFile: TussleStorageCreateFileResponse
-): TussleIncomingRequest<T> => {
+): TussleIncomingRequest<T, P> => {
   if (createdFile.location) {
     ctx.response = {
       status: 201, // created

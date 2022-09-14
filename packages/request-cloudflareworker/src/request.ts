@@ -32,7 +32,7 @@ export class TussleRequestCloudflareWorker implements TussleRequestService<Cloud
         method: request.method,
         headers: request.headers,
       };
-      const originalRequest = (sourceRequest as TussleIncomingRequest<Request>).originalRequest;
+      const originalRequest = (sourceRequest as TussleIncomingRequest<Request, unknown>).originalRequest;
       request$ = observableFetch(request.url, new Request(originalRequest, newRequestInit));
     } else {
       const newRequestInit = {

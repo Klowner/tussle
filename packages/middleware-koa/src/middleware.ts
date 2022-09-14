@@ -28,10 +28,11 @@ const firstOrUndefined = (v: string|string[]|undefined) => {
 };
 
 
-const prepareRequest = async <T extends Context>(
-  source: TussleMiddlewareService<T>,
-  originalRequest: T
-): Promise<TussleIncomingRequest<T> | null> =>
+const prepareRequest = async <T extends Context, U>(
+  source: TussleMiddlewareService<T, U>,
+  originalRequest: T,
+  userParams: U,
+): Promise<TussleIncomingRequest<T, U> | null> =>
 {
   const ctx = originalRequest;
   const overrideMethod = firstOrUndefined(ctx.headers['x-http-method-override']);
@@ -52,12 +53,13 @@ const prepareRequest = async <T extends Context>(
       },
       source,
       originalRequest,
+      userParams,
     };
   }
   return null; // ignore this request
 };
 
-const handleResponse = async <T extends Context>(ctx: TussleIncomingRequest<T>): Promise<T> => {
+const handleResponse = async <T extends Context, P>(ctx: TussleIncomingRequest<T, P>): Promise<T> => {
   if (ctx.response && ctx.response.status) {
     // Set response status code
     ctx.originalRequest.status = ctx.response.status;
@@ -81,13 +83,13 @@ const handleResponse = async <T extends Context>(ctx: TussleIncomingRequest<T>):
   return ctx.originalRequest;
 };
 
-interface TussleKoaMiddlewareConfig {
+interface TussleKoaMiddlewareConfig<U> {
   core: TussleConfig | Tussle;
-  hooks: Partial<TussleHooks<Context>>;
+  hooks: Partial<TussleHooks<Context, U>>;
 }
 
-export default class TussleKoaMiddleware extends TussleBaseMiddleware<Context> {
-  constructor (readonly options: TussleKoaMiddlewareConfig) {
+export default class TussleKoaMiddleware<U> extends TussleBaseMiddleware<Context, U> {
+  constructor (readonly options: TussleKoaMiddlewareConfig<U>) {
     super(options.hooks);
   }
 
@@ -99,7 +101,7 @@ export default class TussleKoaMiddleware extends TussleBaseMiddleware<Context> {
 
   public readonly middleware = (): Middleware =>
     async (ctx, next) => {
-      const req = await prepareRequest(this, ctx);
+      const req = await prepareRequest(this, ctx, null);
       if (req) {
         const response = await firstValueFrom(of(req).pipe(this.core.handle));
         return response ? handleResponse(response) : next();
