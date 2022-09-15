@@ -44,6 +44,7 @@ export interface R2UploadState {
 export interface TussleStorageR2Options {
 	stateService: TussleStateService<R2UploadState>,
 	bucket: R2Bucket;
+	r2ListLimit?: number;
 }
 
 function isNonNull<T>(value: T): value is NonNullable<T> {
@@ -137,7 +138,7 @@ export class TussleStorageR2 implements TussleStorageService {
 				prefix,
 				cursor,
 				include: ['customMetadata'],
-				limit: 500,
+				limit: this.options.r2ListLimit,
 			});
 			more = result.truncated;
 			cursor = result.cursor;
