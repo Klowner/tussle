@@ -1,6 +1,6 @@
 {
   "name": "@tussle/request-cloudflareworker",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Tussle request component utilizing Cloudflare Worker fetch/request",
   "main": "./dist-cjs/index.js",
   "types": "./dist-types/index.d.ts",
@@ -29,8 +29,8 @@
     "access": "public"
   },
   "devDependencies": {
-    "@tussle/core": "^0.3.0",
-    "@tussle/spec": "^0.3.0",
+    "@tussle/core": "^0.4.0",
+    "@tussle/spec": "^0.4.0",
     "concurrently": "^7.4.0",
     "jest": "^29.1.2",
     "rimraf": "^3.0.2",
