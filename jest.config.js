@@ -1,15 +1,20 @@
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  collectCoverageFrom: [
-    'packages/*/src/**/*.ts',
-  ],
-  testMatch: [
-    "**/*.spec.ts",
-  ],
-  globals: {
-    'ts-jest': {
-      tsconfig: './packages/tsconfig.json',
-    },
-  },
+	testEnvironment: 'node',
+	collectCoverageFrom: [
+		'packages/*/src/**/*.ts',
+	],
+	testMatch: [
+		"**/*.spec.ts",
+	],
+	transform: {
+		'^.+\\.ts$': [
+			'ts-jest',
+			{
+				diagnostics: {
+					ignoreCodes: ['TS151001'],
+				},
+				tsconfig: './packages/tsconfig.json',
+			},
+		],
+	},
 };

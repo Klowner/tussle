@@ -3,6 +3,8 @@ import type {
   TussleStorageFileInfo,
   TussleStoragePatchFileCompleteResponse,
   TussleStoragePatchFileResponse,
+	UploadConcatFinal,
+	UploadConcatPartial,
 } from "@tussle/spec/interface/storage";
 import type {Observable} from 'rxjs';
 import type {TussleIncomingRequest} from './request';
@@ -22,7 +24,7 @@ interface TussleCreationParams {
   contentLength: number;
   uploadLength: number;
   uploadMetadata: Record<string, string>;
-  uploadConcat: string|null;
+  uploadConcat: UploadConcatPartial|UploadConcatFinal|null;
 }
 
 interface TusslePatchParams<Req, U> {
