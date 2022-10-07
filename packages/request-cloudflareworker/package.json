@@ -35,9 +35,9 @@
     "rimraf": "^3.0.2",
     "typescript": "^4.8.2"
   },
-  "peerDependencies": {
+	"peerDependencies": {
     "@tussle/core": "^0.4.0"
-  },
+	},
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node"

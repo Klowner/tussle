@@ -1,9 +1,8 @@
-import type {Observable} from 'rxjs';
-import type {TussleOutgoingRequest, TussleOutgoingResponse, TussleRequestService} from '@tussle/core';
-import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
-import {map} from 'rxjs/operators';
-import {from, defer} from 'rxjs';
+import type {TussleIncomingRequest, TussleOutgoingRequest, TussleOutgoingResponse, TussleRequestService} from '@tussle/spec/interface/request';
 import {Base64} from 'js-base64';
+import type {Observable} from 'rxjs';
+import {defer, from} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 type CloudflareFetchResponse = Response;
 
