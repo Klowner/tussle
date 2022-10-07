@@ -3,9 +3,12 @@ import type { TussleIncomingRequest } from './request';
 import type { Observable } from 'rxjs';
 
 export interface TussleStorageCreateFileParams {
+  id: string;
   path: string;
+  contentLength: number;
   uploadLength: number;
   uploadMetadata: Record<string, string | number>;
+  uploadConcat: UploadConcatPartial|UploadConcatFinal|null;
 }
 
 export interface TussleStorageCreateFileResponse {
@@ -58,8 +61,17 @@ export interface TussleStorageFileInfo {
   details?: unknown;
 }
 
+export interface UploadConcatPartial {
+	action: 'partial';
+}
+export interface UploadConcatFinal {
+	action: 'final';
+	parts: string[];
+}
+
 export interface TussleStorageService {
   readonly extensionsRequired: TusProtocolExtension[];
+	readonly extensionsSupported?: TusProtocolExtension[];
 
   createFile(
     params: TussleStorageCreateFileParams
@@ -73,3 +85,4 @@ export interface TussleStorageService {
     params: TussleStorageFileInfoParams
   ): Observable<TussleStorageFileInfo>;
 }
+
