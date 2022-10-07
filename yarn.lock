@@ -8642,7 +8642,7 @@ __metadata:
     rollup: ^2.67.3
     rxjs: ^7.5.7
     storage-b2: "link:../../packages/storage-b2"
-    tslib: ^2.3.1
+    tslib: ^2.4.0
     tus-js-client: ^3.0.1
     typescript: ^4.8.2
   languageName: unknown
@@ -12146,7 +12146,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.0, tslib@npm:^2.1.0, tslib@npm:^2.3.1":
+"tslib@npm:^2.0.0, tslib@npm:^2.1.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0":
   version: 2.4.0
   resolution: "tslib@npm:2.4.0"
   checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
