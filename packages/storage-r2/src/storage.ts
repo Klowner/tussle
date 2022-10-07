@@ -9,7 +9,9 @@ import {
 	TussleStorageFileInfo,
 	TussleStorageFileInfoParams,
 	TussleStoragePatchFileParams,
-	TussleStoragePatchFileResponse
+	TussleStoragePatchFileResponse,
+	UploadConcatFinal,
+	UploadConcatPartial,
 } from "@tussle/spec/interface/storage";
 import {nanoid} from "nanoid";
 import {
@@ -62,37 +64,6 @@ function getMostRecentPartKey(state: R2UploadState) {
 	return prevPart || '';
 }
 
-interface UploadConcatPartial {
-	action: 'partial';
-}
-interface UploadConcatFinal {
-	action: 'final';
-	parts: string[];
-}
-
-function parseUploadConcat(
-	uploadConcat: Readonly<string | null>,
-): (
-		UploadConcatPartial | UploadConcatFinal | null
-	) {
-	if (!uploadConcat) {
-		return null;
-	}
-	const [action, parts] = uploadConcat.split(';', 2);
-	switch (action) {
-		case 'final':
-			return {
-				action,
-				parts: parts.split(' '),
-			};
-		case 'partial':
-			return {
-				action,
-			};
-	}
-	return null;
-}
-
 type InitialState = ReturnType<TussleStorageR2['createInitialState']>;
 
 function isPartialConcatState(
@@ -112,10 +83,10 @@ type FinalConcatState = InitialState & {uploadConcat: UploadConcatFinal};
 
 export class TussleStorageR2 implements TussleStorageService {
 	readonly extensionsRequired: TusProtocolExtension[] = [];
-
-	// static readonly extensionsSupported: TusProtocolExtension[] = [
-	// 	'concatenation',
-	// ];
+	static readonly extensionsSupported: TusProtocolExtension[] = [
+		'creation',
+		'concatenation',
+	];
 
 	constructor(readonly options: TussleStorageR2Options) {}
 
@@ -130,8 +101,11 @@ export class TussleStorageR2 implements TussleStorageService {
 				location: params.path,
 				...params.uploadMetadata,
 			},
-			createParams: params,
-			uploadConcat: parseUploadConcat(params.uploadConcat),
+			createParams: {
+				...params,
+				uploadConcat: undefined,
+			},
+			uploadConcat: params.uploadConcat,
 			uploadLength: params.uploadLength,
 			currentOffset: 0,
 			parts: [] as Part[],
