@@ -11,21 +11,18 @@ import {
 	TussleStoragePatchFileParams,
 	TussleStoragePatchFileResponse
 } from "@tussle/spec/interface/storage";
+import {nanoid} from "nanoid";
 import {
-	concat,
-	defaultIfEmpty,
-	filter,
+	concat, concatMap, defaultIfEmpty, defer, EMPTY, filter,
 	firstValueFrom,
-	from,
-	defer,
-	map,
+	from, map,
 	mergeMap,
 	Observable,
 	of,
 	pipe,
 	share,
 	switchMap,
-	take,
+	take, toArray
 } from "rxjs";
 
 interface Part {
@@ -36,6 +33,7 @@ interface Part {
 export interface R2UploadState {
 	location: string;
 	uploadLength: number;
+	uploadConcat: UploadConcatFinal | UploadConcatPartial | null;
 	currentOffset: number;
 	metadata: Record<string, string>;
 	parts?: Part[];
@@ -64,10 +62,62 @@ function getMostRecentPartKey(state: R2UploadState) {
 	return prevPart || '';
 }
 
+interface UploadConcatPartial {
+	action: 'partial';
+}
+interface UploadConcatFinal {
+	action: 'final';
+	parts: string[];
+}
+
+function parseUploadConcat(
+	uploadConcat: Readonly<string | null>,
+): (
+		UploadConcatPartial | UploadConcatFinal | null
+	) {
+	if (!uploadConcat) {
+		return null;
+	}
+	const [action, parts] = uploadConcat.split(';', 2);
+	switch (action) {
+		case 'final':
+			return {
+				action,
+				parts: parts.split(' '),
+			};
+		case 'partial':
+			return {
+				action,
+			};
+	}
+	return null;
+}
+
+type InitialState = ReturnType<TussleStorageR2['createInitialState']>;
+
+function isPartialConcatState(
+	state: Readonly<R2UploadState>,
+): state is PartialConcatState {
+	return state.uploadConcat?.action === 'partial';
+}
+
+function isFinalConcatState(
+	state: Readonly<R2UploadState>,
+): state is FinalConcatState {
+	return state.uploadConcat?.action === 'final';
+}
+
+type PartialConcatState = InitialState & {uploadConcat: UploadConcatPartial};
+type FinalConcatState = InitialState & {uploadConcat: UploadConcatFinal};
+
 export class TussleStorageR2 implements TussleStorageService {
 	readonly extensionsRequired: TusProtocolExtension[] = [];
 
-	constructor (readonly options: TussleStorageR2Options) {}
+	// static readonly extensionsSupported: TusProtocolExtension[] = [
+	// 	'concatenation',
+	// ];
+
+	constructor(readonly options: TussleStorageR2Options) {}
 
 	private readonly state = this.options.stateService;
 
@@ -80,10 +130,11 @@ export class TussleStorageR2 implements TussleStorageService {
 				location: params.path,
 				...params.uploadMetadata,
 			},
-			uploadLength: params.uploadLength,
 			createParams: params,
+			uploadConcat: parseUploadConcat(params.uploadConcat),
+			uploadLength: params.uploadLength,
 			currentOffset: 0,
-			parts: [],
+			parts: [] as Part[],
 		};
 	}
 
@@ -94,44 +145,111 @@ export class TussleStorageR2 implements TussleStorageService {
 		}),
 	);
 
-	private readonly initialStateFromParams = pipe(
-		map((params: TussleStorageCreateFileParams) => this.createInitialState(params)),
-		this.setState,
+	private handlePartialConcatenation(
+		state: PartialConcatState,
+	) {
+		state.location += `/${nanoid()}`;
+		return state;
+	}
+
+	private readonly collectConcatenationStateParts = pipe(
+		concatMap((state: FinalConcatState): Observable<FinalConcatState> =>
+			from(state.uploadConcat.parts).pipe(
+				this.locationToParts,
+				toArray(),
+				map((parts) => ({
+					...state,
+					parts,
+				})),
+			)
+		),
+	);
+
+	private readonly rebuildConcatenationStateIfApplicable = pipe(
+		mergeMap((state: R2UploadState) => of(state).pipe(
+			filter(isFinalConcatState),
+			this.collectConcatenationStateParts,
+			defaultIfEmpty(state),
+			take(1),
+		)),
+	);
+
+	private readonly updateConcatUploadLength = pipe(
+		map((state: FinalConcatState) => {
+			const size = state.parts.reduce((sum, {size}) => sum + size, 0);
+			state.uploadLength = size;
+			state.currentOffset = size;
+			return state;
+		}),
+	);
+
+	// Concatenated files are special cases. We minimize operations by simply
+	// creating a new record in R2 which holds a list of all the R2 base keys
+	// which we will re-assemble into the full file. Also the stored tussleState
+	// will have {parts: 'concat'}.
+	private readonly createConcatenatedR2Record = pipe(
+		mergeMap((state: FinalConcatState) => {
+			const part = (0).toString(10).padStart(10, '0');
+			const key = stripLeadingSlashes([state.location, part].join('/'));
+			const data = JSON.stringify(state.parts);
+			return from(this.options.bucket.put(key, data, {
+				customMetadata: {
+					tussleState: JSON.stringify({
+						...state,
+					}),
+				}
+			})).pipe(
+				map(() => state),
+			);
+		}),
+	);
+
+	private readonly handleFinalConcatenation = pipe(
+		this.collectConcatenationStateParts,
+		this.updateConcatUploadLength,
+		this.createConcatenatedR2Record,
+	);
+
+	private readonly handleConcatenation = pipe(
+		mergeMap((state: InitialState): Observable<InitialState> => {
+			if (state.uploadConcat === null) {
+				return of(state);
+			} else if (isPartialConcatState(state)) {
+				return of(state).pipe(map(state => this.handlePartialConcatenation(state)));
+			} else if (isFinalConcatState(state)) {
+				return of(state).pipe(this.handleFinalConcatenation);
+			}
+			return of(state);
+		}),
 	);
 
 	createFile(
 		params: TussleStorageCreateFileParams,
 	): Observable<TussleStorageCreateFileResponse> {
-		const path = stripLeadingSlashes(params.path);
-		return concat(
-			of(path).pipe(
-				this.getLocationState,
-				filter(isNonNull),
-			),
-			of(params).pipe(
-				this.initialStateFromParams,
-			),
-		).pipe(
-			take(1),
+		return of(params).pipe(
+			map(params => this.createInitialState(params)),
+			this.handleConcatenation,
+			this.setState,
 			map((state) => ({
 				...state,
 				success: true,
 			})),
+			take(1),
 		);
 	}
 
 	private async getStateFromR2(
 		location: string,
-	): Promise<R2UploadState|null> {
+	): Promise<R2UploadState | null> {
 		interface PartInfo {
 			key: string;
 			size: number;
 			prev: string;
 		}
 		const prefix = stripLeadingSlashes(location) + '/';
-		let tailPart: R2Object|null = null;
+		let tailPart: R2Object | null = null;
 		let more = true;
-		let cursor: string|undefined;
+		let cursor: string | undefined;
 		const partMap: Record<string, PartInfo> = {};
 		while (more) {
 			const result = await this.options.bucket.list({
@@ -139,15 +257,16 @@ export class TussleStorageR2 implements TussleStorageService {
 				cursor,
 				include: ['customMetadata'],
 				limit: this.options.r2ListLimit,
+				delimiter: '/',
 			});
 			more = result.truncated;
 			cursor = result.cursor;
+
 			for (const obj of result.objects) {
 				if (!obj.customMetadata) {
-					console.error('no customMetadata');
-					throw new Error('fatal error: R2 object missing customMetadata');
+					continue; // ignore this object
 				}
-				const { tusslePrevKey } = obj.customMetadata;
+				const {tusslePrevKey} = obj.customMetadata;
 				partMap[obj.key] = {
 					key: obj.key,
 					size: obj.size,
@@ -161,7 +280,7 @@ export class TussleStorageR2 implements TussleStorageService {
 		}
 		// Start from the tail part and re-build the parts array
 		const parts: Part[] = [];
-		let iter: PartInfo|undefined = {
+		let iter: PartInfo | undefined = {
 			key: tailPart.key,
 			size: tailPart.size,
 			prev: tailPart.customMetadata['tusslePrevKey'] || '',
@@ -174,25 +293,33 @@ export class TussleStorageR2 implements TussleStorageService {
 			iter = partMap[iter.prev];
 		}
 		const state: R2UploadState = {
-			... JSON.parse(tailPart.customMetadata['tussleState'] || 'null'),
+			...JSON.parse(tailPart.customMetadata['tussleState'] || 'null'),
 			parts,
 		};
 		return state;
 	}
 
-	private getLocationState = pipe(
-		mergeMap((location: string) => concat(
+	private readonly getLocationState = pipe(
+		concatMap((location: string) => concat(
 			from(this.state.getItem(location)).pipe(
 				filter(isNonNull),
 			),
 			defer(() => this.getStateFromR2(location)).pipe(
 				filter(isNonNull),
+				this.rebuildConcatenationStateIfApplicable,
 				this.setState,
 			),
+		).pipe(
+			take(1),
 		)),
-		take(1),
 		defaultIfEmpty(null),
 		share(),
+	);
+
+	private readonly locationToParts = pipe(
+		this.getLocationState,
+		filter(isNonNull),
+		concatMap((state) => state.parts && from(state.parts) || EMPTY),
 	);
 
 	private invalidPatchResponse(
@@ -223,7 +350,7 @@ export class TussleStorageR2 implements TussleStorageService {
 		state: Readonly<R2UploadState>,
 		params: TussleStoragePatchFileParams,
 	): Observable<TussleStoragePatchFileResponse> {
-		const { length, location } = params;
+		const {length, location} = params;
 		const numParts = state.parts && state.parts.length || 0;
 		const part = numParts.toString(10).padStart(10, '0');
 		const key = stripLeadingSlashes([location, part].join('/'));
@@ -273,7 +400,7 @@ export class TussleStorageR2 implements TussleStorageService {
 	patchFile(
 		params: TussleStoragePatchFileParams,
 	): Observable<TussleStoragePatchFileResponse> {
-		const { location } = params;
+		const {location} = params;
 		const path = stripLeadingSlashes(location);
 		return of(path).pipe(
 			this.getLocationState,
@@ -284,7 +411,7 @@ export class TussleStorageR2 implements TussleStorageService {
 	}
 
 	private stateToFileInfoResponse(
-		{ location, uploadLength, currentOffset, metadata }: R2UploadState,
+		{location, uploadLength, currentOffset, metadata}: R2UploadState,
 	): TussleStorageFileInfo {
 		return {
 			location,
@@ -301,7 +428,7 @@ export class TussleStorageR2 implements TussleStorageService {
 	getFileInfo(
 		params: TussleStorageFileInfoParams,
 	): Observable<TussleStorageFileInfo> {
-		const { location } = params;
+		const {location} = params;
 		const path = stripLeadingSlashes(location);
 		const response$ = of(path).pipe(
 			this.getLocationState,
@@ -317,7 +444,7 @@ export class TussleStorageR2 implements TussleStorageService {
 
 	async getFile(
 		location: string,
-	): Promise<R2File|null> {
+	): Promise<R2File | null> {
 		const path = stripLeadingSlashes(location);
 		return firstValueFrom(of(path).pipe(
 			this.getLocationState,
@@ -335,7 +462,7 @@ export class TussleStorageR2 implements TussleStorageService {
 }
 
 export class R2File {
-	constructor (
+	constructor(
 		readonly key: string,
 		readonly size: number,
 		readonly keys: Readonly<string[]>,
@@ -344,7 +471,7 @@ export class R2File {
 	) {}
 
 	get body(): ReadableStream {
-		const { readable, writable } = new TransformStream();
+		const {readable, writable} = new TransformStream();
 		(async () => {
 			for (const key of this.keys) {
 				const obj = await this.getPart(key);
@@ -352,7 +479,7 @@ export class R2File {
 					writable.close();
 					return;
 				}
-				await obj.body.pipeTo(writable, { preventClose: true });
+				await obj.body.pipeTo(writable, {preventClose: true});
 			}
 			writable.close();
 		})();
@@ -360,8 +487,8 @@ export class R2File {
 	}
 
 	async getPart(
-		which: number|string,
-	): Promise<R2ObjectBody|null> {
+		which: number | string,
+	): Promise<R2ObjectBody | null> {
 		const key = (typeof which === 'number') ? this.keys[which] : which;
 		return await this.bucket.get(key);
 	}
