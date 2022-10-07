@@ -86,6 +86,8 @@ const toResponse = <T, P>(
 	return ctx;
 };
 
+const originPartRegExp = /^https?\:\/\/[^\/]*\/?/;
+
 function parseUploadConcat(
 	uploadConcat: Readonly<string | null>,
 ): (
@@ -99,7 +101,9 @@ function parseUploadConcat(
 		case 'final':
 			return {
 				action,
-				parts: parts.split(' '),
+				parts: parts.split(' ').map(
+					part => part.replace(originPartRegExp, '')
+				),
 			};
 		case 'partial':
 			return {
