@@ -20,9 +20,19 @@ const getTussleMiddleware = (() => {
 			instance = new TussleCloudflareWorker({
 				hooks: {
 					"before-create": async (_ctx, params) => {
+						let path: string;
+						switch (params.uploadConcat?.action) {
+							case 'partial': // Creating a file to hold a segment of a parallel upload.
+								path = params.path + '/segments/' + nanoid();
+								break;
+							case 'final': // Finishing a parallel upload (combines multiple 'partials' from above)
+							default:
+								path = params.path + '/' + nanoid();
+								break;
+						}
 						return {
 							...params,
-							path: params.path + '/' + nanoid(),
+							path,
 						};
 					},
 				},

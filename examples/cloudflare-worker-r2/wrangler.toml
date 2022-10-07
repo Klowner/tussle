@@ -7,3 +7,6 @@ main = "dist/worker.mjs"
 r2_buckets = [
 	{ binding = "TUSSLE_BUCKET", bucket_name = "tussledemo" }
 ]
+
+[miniflare]
+r2_persist = "./data/r2"

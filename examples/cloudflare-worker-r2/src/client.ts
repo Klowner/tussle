@@ -1,11 +1,33 @@
 import { Upload } from 'tus-js-client';
 
+function calculateBoundaries(
+	totalSize: number,
+	chunkSize: number,
+	parallelUploads: number,
+): {start: number; end: number}[] {
+	const numChunks = Math.ceil(totalSize / chunkSize);
+	const bytesPerThread = Math.floor(numChunks / parallelUploads) * chunkSize;
+	const ranges = [];
+	for (let i = 0; i < parallelUploads; i++) {
+		ranges[i] = {
+			start: bytesPerThread * i,
+			end: bytesPerThread * (i + 1),
+		};
+	}
+	const remainder = totalSize - (bytesPerThread * parallelUploads);
+	ranges[parallelUploads - 1].end += remainder;
+	return ranges;
+}
+
 function uploadFile(file: File) {
+	const chunkSize = 8 * 1024 * 1024;
+	const parallelUploads = 4;
 	const upload = new Upload(file, {
 		endpoint: '/files', // the Cloudflare worker should be running at this URL
 		retryDelays: [0, 1000, 5000],
-		chunkSize: 5 * 1024 * 1024, // 1000 * 1000 * 100,
-		parallelUploads: 1,
+		chunkSize,
+		parallelUploads,
+		parallelUploadBoundaries: calculateBoundaries(file.size, chunkSize, parallelUploads),
 		metadata: {
 			filename: file.name,
 			filetype: file.type,
