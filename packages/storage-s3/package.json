@@ -1,6 +1,6 @@
 {
 	"name": "@tussle/storage-s3",
-	"version": "0.4.0",
+	"version": "0.4.4",
 	"description": "Tussle storage component backed by S3 compatible storage",
 	"main": "./dist-cjs/index.js",
 	"types": "./dist-types/index.d.ts",
@@ -22,7 +22,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.58.0",
-		"@tussle/core": "^0.4.0",
+		"@tussle/core": "^0.4.4",
 		"rxjs": "^7.0.0"
 	},
 	"devDependencies": {

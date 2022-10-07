@@ -1,6 +1,6 @@
 {
   "name": "@tussle/core",
-  "version": "0.4.0",
+  "version": "0.4.4",
   "description": "Tussle tus daemon core module",
   "main": "lib/index.js",
   "files": [
