@@ -426,7 +426,7 @@ export class TussleStorageR2 implements TussleStorageService {
 			map(state => new R2File(
 				path,
 				state.uploadLength,
-				(state.parts || []).map(p => p.key),
+				state.parts || [],
 				state.metadata,
 				this.options.bucket,
 			)),
@@ -439,7 +439,7 @@ export class R2File {
 	constructor(
 		readonly key: string,
 		readonly size: number,
-		readonly keys: Readonly<string[]>,
+		readonly parts: Readonly<Part[]>,
 		readonly metadata: Record<string, unknown>,
 		private readonly bucket: R2Bucket,
 	) {}
@@ -447,7 +447,7 @@ export class R2File {
 	get body(): ReadableStream {
 		const {readable, writable} = new TransformStream();
 		(async () => {
-			for (const key of this.keys) {
+			for (const {key} of this.parts) {
 				const obj = await this.getPart(key);
 				if (!obj) {
 					writable.close();
@@ -463,14 +463,14 @@ export class R2File {
 	async getPart(
 		which: number | string,
 	): Promise<R2ObjectBody | null> {
-		const key = (typeof which === 'number') ? this.keys[which] : which;
+		const key = (typeof which === 'number') ? this.parts[which].key : which;
 		return await this.bucket.get(key);
 	}
 
 	// Delete all related R2Objects
 	async delete(): Promise<void[]> {
-		return Promise.all(this.keys.map(
-			key => this.bucket.delete(key),
+		return Promise.all(this.parts.map(
+			({ key }) => this.bucket.delete(key),
 		));
 	}
 }
