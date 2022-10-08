@@ -170,6 +170,7 @@ export class TussleStorageR2 implements TussleStorageService {
 				customMetadata: {
 					tussleState: JSON.stringify({
 						...state,
+						parts: null,
 					}),
 				}
 			})).pipe(
@@ -385,13 +386,14 @@ export class TussleStorageR2 implements TussleStorageService {
 	}
 
 	private stateToFileInfoResponse(
-		{location, uploadLength, currentOffset, metadata}: R2UploadState,
+		{location, uploadConcat, uploadLength, currentOffset, metadata}: R2UploadState,
 	): TussleStorageFileInfo {
 		return {
 			location,
 			info: {
 				currentOffset,
 				uploadLength,
+				uploadConcat,
 			},
 			details: {
 				metadata,
