@@ -47,7 +47,7 @@ enum PatchAction {
 interface B2PersistentLocationState {
   location: string;
   createParams: TussleStorageCreateFileParams;
-  metadata: Record<string, unknown>
+  metadata: Record<string, string|number>
   uploadLength: number;
   largeFile?: B2StartLargeFileResponse;
   complete?: boolean;
