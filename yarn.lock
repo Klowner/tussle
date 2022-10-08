@@ -3295,11 +3295,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tussle/core@^0.4.4, @tussle/core@workspace:packages/core":
+"@tussle/core@^0.4.5, @tussle/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@tussle/core@workspace:packages/core"
   dependencies:
-    "@tussle/spec": ^0.4.0
+    "@tussle/spec": ^0.4.5
     jest: ^29.1.2
     js-base64: ^3.7.2
     npm-run-all: ^4.1.5
@@ -3332,7 +3332,7 @@ __metadata:
   resolution: "@tussle/middleware-cloudflareworker@workspace:packages/middleware-cloudflareworker"
   dependencies:
     "@cloudflare/workers-types": ^3.16.0
-    "@tussle/spec": ^0.4.0
+    "@tussle/spec": ^0.4.5
     jest: ^29.1.2
     rxjs: ^7.0.0
     typescript: ^4.8.2
@@ -3357,7 +3357,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/request-axios@workspace:packages/request-axios"
   dependencies:
-    "@tussle/spec": ^0.4.0
+    "@tussle/spec": ^0.4.5
     axios: ^0.27.2
     axios-observable: ^1.5.0
     jest: ^29.1.2
@@ -3384,7 +3384,7 @@ __metadata:
   resolution: "@tussle/request-cloudflareworker@workspace:packages/request-cloudflareworker"
   dependencies:
     "@cloudflare/workers-types": ^3.16.0
-    "@tussle/spec": ^0.4.0
+    "@tussle/spec": ^0.4.5
     concurrently: ^7.4.0
     jest: ^29.1.2
     rimraf: ^3.0.2
@@ -3395,7 +3395,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@tussle/spec@^0.4.0, @tussle/spec@workspace:packages/spec":
+"@tussle/spec@^0.4.5, @tussle/spec@workspace:packages/spec":
   version: 0.0.0-use.local
   resolution: "@tussle/spec@workspace:packages/spec"
   dependencies:
@@ -3418,7 +3418,7 @@ __metadata:
   resolution: "@tussle/state-cloudflareworkerkv@workspace:packages/state-cloudflareworkerkv"
   dependencies:
     "@cloudflare/workers-types": ^3.16.0
-    "@tussle/spec": ^0.4.0
+    "@tussle/spec": ^0.4.5
     jest: ^29.1.2
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
@@ -3429,8 +3429,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-memory-ttl@workspace:packages/state-memory-ttl"
   dependencies:
-    "@tussle/core": ^0.4.4
-    "@tussle/spec": ^0.4.0
+    "@tussle/core": ^0.4.5
+    "@tussle/spec": ^0.4.5
     jest: ^29.1.2
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
@@ -3441,7 +3441,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-memory@workspace:packages/state-memory"
   dependencies:
-    "@tussle/spec": ^0.4.0
+    "@tussle/spec": ^0.4.5
     jest: ^29.1.2
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
@@ -3454,8 +3454,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-postgres@workspace:packages/state-postgres"
   dependencies:
-    "@tussle/core": ^0.4.4
-    "@tussle/spec": ^0.4.0
+    "@tussle/core": ^0.4.5
+    "@tussle/spec": ^0.4.5
     "@types/pg": ^7.14.11
     jest: ^29.1.2
     npm-run-all: ^4.1.5
@@ -3499,7 +3499,7 @@ __metadata:
   resolution: "@tussle/storage-r2@workspace:packages/storage-r2"
   dependencies:
     "@cloudflare/workers-types": ^3.16.0
-    "@tussle/spec": ^0.4.0
+    "@tussle/spec": ^0.4.5
     jest: ^29.1.2
     nanoid: ^4.0.0
     nock: ^13.2.4
@@ -3523,8 +3523,8 @@ __metadata:
   resolution: "@tussle/storage-s3@workspace:packages/storage-s3"
   dependencies:
     "@aws-sdk/client-s3": ^3.58.0
-    "@tussle/core": ^0.4.4
-    "@tussle/spec": ^0.4.0
+    "@tussle/core": ^0.4.5
+    "@tussle/spec": ^0.4.5
     concurrently: ^7.4.0
     jest: ^29.1.2
     nock: ^13.2.4

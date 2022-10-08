@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.5](https://github.com/Klowner/tussle/compare/v0.4.4...v0.4.5) (2022-10-08)
+
+**Note:** Version bump only for package @tussle/core
+
+
+
+
+
 ## [0.4.4](https://github.com/Klowner/tussle/compare/v0.4.3...v0.4.4) (2022-10-07)
 
 **Note:** Version bump only for package @tussle/core
