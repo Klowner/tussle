@@ -1,64 +1,67 @@
-import type { TusProtocolExtension } from './tus';
-import type { TussleIncomingRequest } from './request';
-import type { Observable } from 'rxjs';
+import type {TusProtocolExtension} from './tus';
+import type {TussleIncomingRequest} from './request';
+import type {Observable} from 'rxjs';
 
 export interface TussleStorageCreateFileParams {
-  id: string;
-  path: string;
-  contentLength: number;
-  uploadLength: number;
-  uploadMetadata: Record<string, string | number>;
-  uploadConcat: UploadConcatPartial|UploadConcatFinal|null;
+	id: string;
+	path: string;
+	contentLength: number;
+	uploadLength: number;
+	uploadMetadata: Record<string, string | number>;
+	uploadConcat: UploadConcatPartial | UploadConcatFinal | null;
 }
 
 export interface TussleStorageCreateFileResponse {
-  location: string;
-  success: boolean;
+	location: string;
+	success: boolean;
+	metadata?: Record<string, unknown>;
+	uploadConcat?: UploadConcatPartial | UploadConcatFinal | null;
 }
 
 export interface TussleStoragePatchFileParams<Req = unknown, U = unknown> {
-  length: number;
-  location: string;
-  offset: number;
-  request: TussleIncomingRequest<Req, U>;
+	length: number;
+	location: string;
+	offset: number;
+	request: TussleIncomingRequest<Req, U>;
 }
 
 interface Details {
-  [key: string]: unknown,
-  tussleUploadMetadata: Record<string, string | number>,
+	[key: string]: unknown,
+	tussleUploadMetadata: Record<string, unknown>,
 }
 
 export interface TussleStoragePatchFileResponse {
-  location: string;
-  success: boolean;
-  offset?: number; // only if success
-  complete: boolean; // signifies that upload is complete
-  details?: Details;
+	location: string;
+	success: boolean;
+	offset?: number; // only if success
+	complete: boolean; // signifies that upload is complete
+	details?: Details;
 }
 
 export interface TussleStoragePatchFileCompleteResponse {
-  location: string;
-  success: boolean;
-  offset: number;
-  complete: true;
-  details: Details;
+	location: string;
+	success: boolean;
+	offset: number;
+	complete: true;
+	details: Details;
 }
 
 export interface TussleStorageDeleteFileParams {
-  location: string;
+	location: string;
 }
 
 export interface TussleStorageFileInfoParams {
-  location: string;
+	location: string;
 }
 
 export interface TussleStorageFileInfo {
-  location: string;
-  info: {
-    currentOffset: number;
-    uploadLength?: number;
-  } | null;
-  details?: unknown;
+	location: string;
+	info: {
+		currentOffset: number;
+		uploadLength?: number;
+		uploadConcat?: UploadConcatPartial | UploadConcatFinal | null;
+	} | null;
+	details?: unknown;
 }
 
 export interface UploadConcatPartial {
@@ -70,19 +73,19 @@ export interface UploadConcatFinal {
 }
 
 export interface TussleStorageService {
-  readonly extensionsRequired: TusProtocolExtension[];
+	readonly extensionsRequired: TusProtocolExtension[];
 	readonly extensionsSupported?: TusProtocolExtension[];
 
-  createFile(
-    params: TussleStorageCreateFileParams
-  ): Observable<TussleStorageCreateFileResponse>;
+	createFile(
+		params: TussleStorageCreateFileParams
+	): Observable<TussleStorageCreateFileResponse>;
 
-  patchFile<Req, U>(
-    params: TussleStoragePatchFileParams<Req, U>
-  ): Observable<TussleStoragePatchFileResponse>;
+	patchFile<Req, U>(
+		params: TussleStoragePatchFileParams<Req, U>
+	): Observable<TussleStoragePatchFileResponse>;
 
-  getFileInfo(
-    params: TussleStorageFileInfoParams
-  ): Observable<TussleStorageFileInfo>;
+	getFileInfo(
+		params: TussleStorageFileInfoParams
+	): Observable<TussleStorageFileInfo>;
 }
 
