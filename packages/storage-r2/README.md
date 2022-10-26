@@ -11,7 +11,14 @@ collection of file parts which can be read conveniently as a single
 
 This storage backend is also capable of fully recovering file state from R2,
 therefore it is recommended to use [@tussle/state-memory](../../packages/state-memory),
-or something even less reliable such as [@tussle/state-memory-ttl](../../packages/state-memory-ttl).
+or something even *less* reliable such as [@tussle/state-memory-ttl](../../packages/state-memory-ttl).
 
+### Special options
+
+ - `checkpoint: number` (optional) -- If provided, automatically save every *N* bytes as a chunk even if the client is not using an explicit chunk size. This feature is compatible with clients that *do* use an explicit chunk size, but **it is advisable to set `checkpoint` to a multiple of your chunk size**.
+ - `r2ListLimit: number` (optional) -- Limit the maximum number of records to list while rebuilding state from R2. You probably don't need to use this, as it was primarily added to circumvent a (now resolved) Cloudflare Worker's bug. This may be removed at some point in the future.
+
+
+### Example
 See [Cloudflare Worker + R2](../../examples/cloudflare-worker-r2) for an
 example of this storage backend in use.

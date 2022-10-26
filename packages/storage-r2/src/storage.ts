@@ -11,7 +11,7 @@ import {
 	TussleStoragePatchFileParams,
 	TussleStoragePatchFileResponse,
 	UploadConcatFinal,
-	UploadConcatPartial,
+	UploadConcatPartial
 } from "@tussle/spec/interface/storage";
 import {nanoid} from "nanoid";
 import {
@@ -22,9 +22,8 @@ import {
 	Observable,
 	of,
 	pipe,
-	share,
-	switchMap,
-	take, toArray
+	share, switchMap,
+	take, takeLast, toArray
 } from "rxjs";
 
 interface Part {
@@ -45,6 +44,7 @@ export interface TussleStorageR2Options {
 	stateService: TussleStateService<R2UploadState>,
 	bucket: R2Bucket;
 	r2ListLimit?: number;
+	checkpoint?: number; // Auto-checkpoint uploads every `checkpoint` bytes.
 }
 
 function isNonNull<T>(value: T): value is NonNullable<T> {
@@ -76,6 +76,91 @@ function isFinalConcatState(
 	state: Readonly<R2UploadState>,
 ): state is FinalConcatState {
 	return state.uploadConcat?.action === 'final';
+}
+
+function getNextKey(
+	state: Readonly<R2UploadState>,
+): string {
+	const numParts = state.parts && state.parts.length || 0;
+	const part = numParts.toString(10).padStart(10, '0');
+	const key = stripLeadingSlashes([state.location, part].join('/'));
+	return key;
+}
+
+function sliceStreamBYOB(
+	reader: ReadableStreamBYOBReader,
+	totalLength: number, // Expected length of data which reader will provide.
+	chunkSize: number,
+): Observable<{
+	readable: ReadableStream;
+	length: number;
+}> {
+	return new Observable((subscriber) => {
+		let cancel = false;
+		let bytesRemaining = totalLength;
+
+		const {advance, finish} = (() => {
+			let transform: IdentityTransformStream | null = null;
+			let writer: WritableStreamDefaultWriter;
+			return {
+				advance: async () => {
+					// Finalize the current slice.
+					if (transform) {
+						if (transform.writable.locked) {
+							writer.releaseLock();
+						}
+						await transform.writable.close();
+					}
+					// Unless we're all finished, create a new transform
+					// and next() the readable end.
+					transform = new IdentityTransformStream();
+					subscriber.next({
+						readable: transform.readable,
+						length: Math.min(chunkSize, bytesRemaining), // Readable will be this length (if all goes well).
+					});
+					writer = transform.writable.getWriter();
+					return async (chunk: Uint8Array) => {
+						bytesRemaining = bytesRemaining - chunk.length;
+						const result = await writer.write(chunk);
+						writer.releaseLock();
+						return result;
+					};
+				},
+				finish: async () => {
+					if (transform) {
+						if (transform.writable.locked) {
+							writer.releaseLock();
+						}
+						await transform.writable.close();
+						transform = null;
+					}
+					reader.releaseLock();
+					subscriber.complete();
+				},
+			};
+		})();
+
+		(async () => {
+			let push = await advance();
+			while (bytesRemaining > 0 && !cancel) {
+				const expected = Math.min(bytesRemaining, chunkSize);
+				const {done, value} = await reader.readAtLeast(expected, new Uint8Array(expected));
+				if (!done) {
+					push(value);
+					if (bytesRemaining) {
+						push = await advance();
+					}
+				} else {
+					return finish();
+				}
+			}
+			return finish();
+		})(); // Start!
+
+		return () => {
+			cancel = true;
+		};
+	});
 }
 
 type PartialConcatState = InitialState & {uploadConcat: UploadConcatPartial};
@@ -325,31 +410,49 @@ export class TussleStorageR2 implements TussleStorageService {
 		state: Readonly<R2UploadState>,
 		params: TussleStoragePatchFileParams,
 	): Observable<TussleStoragePatchFileResponse> {
-		const {length, location} = params;
-		const numParts = state.parts && state.parts.length || 0;
-		const part = numParts.toString(10).padStart(10, '0');
-		const key = stripLeadingSlashes([location, part].join('/'));
-		const readable = params.request.request.getReadable() as ReadableStream<Uint8Array>;
-		// Store the resulting "next" state that we will be at after
-		// this part is written. If the write succeeds, then the most
-		// accurate state will be stored within its metadata.
-		const tusslePrevKey = getMostRecentPartKey(state) || '';
-		const nextState = this.advanceStateProgress(state, length, key);
+		const {length} = params;
+		const {checkpoint} = this.options;
+		const readable = params.request.request.getReadable() as ReadableStream;
+		let readable$;
+		if (checkpoint && checkpoint !== length) {
+			const reader = readable.getReader({mode: 'byob'});
+			readable$ = sliceStreamBYOB(reader, length, checkpoint);
+		} else {
+			readable$ = of({readable, length});
+		}
 
-		const r2put$ = from(this.options.bucket.put(key, readable, {
-			customMetadata: {
-				tussleState: JSON.stringify({
-					...nextState,
-					parts: null
-				}),
-				tusslePrevKey, // store full R2 key
-			}
-		}));
-		return r2put$.pipe(
-			mergeMap(() => of(nextState).pipe(
-				this.setState,
-				map((state) => this.asPatchResponse(state)),
-			)),
+		// Clone state so we can potentially repeatedly mutate it (locally).
+		let nextState: R2UploadState = {...state};
+
+		return readable$.pipe(
+			concatMap(({readable, length}) => {
+				// Store the resulting "next" state that we will be at after
+				// this part is written. If the write succeeds, then the most
+				// accurate state will be stored within its metadata.
+				const tusslePrevKey = getMostRecentPartKey(nextState) || '';
+				const key = getNextKey(nextState);
+				nextState = this.advanceStateProgress(nextState, length, key);
+				const put$ = from(this.options.bucket.put(
+					key,
+					readable,
+					{
+						customMetadata: {
+							tussleState: JSON.stringify({
+								...nextState,
+								parts: null,
+							}),
+							tusslePrevKey, // Store full R2 key
+						},
+					},
+				));
+				const response$ = put$.pipe(
+					map(() => nextState),
+					this.setState,
+					map((state) => this.asPatchResponse(state)),
+				);
+				return response$;
+			}),
+			takeLast(1), // Respond with only the final state (assuming we make it that far)
 		);
 	}
 
@@ -472,7 +575,7 @@ export class R2File {
 	// Delete all related R2Objects
 	async delete(): Promise<void[]> {
 		return Promise.all(this.parts.map(
-			({ key }) => this.bucket.delete(key),
+			({key}) => this.bucket.delete(key),
 		));
 	}
 }
