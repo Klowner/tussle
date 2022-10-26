@@ -36,7 +36,7 @@
     "typescript": "^4.8.2"
   },
   "peerDependencies": {
-    "@tussle/core": "^0.4.0"
+    "@tussle/core": "^0.5.0"
   },
   "jest": {
     "preset": "ts-jest",

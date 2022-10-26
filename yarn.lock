@@ -3338,7 +3338,7 @@ __metadata:
     rxjs: ^7.0.0
     typescript: ^4.8.2
   peerDependencies:
-    "@tussle/core": ^0.4.0
+    "@tussle/core": ^0.5.0
   languageName: unknown
   linkType: soft
 
@@ -3350,7 +3350,7 @@ __metadata:
     jest: ^29.1.2
     rxjs: ^7.0.0
   peerDependencies:
-    "@tussle/core": ^0.4.0
+    "@tussle/core": ^0.5.0
   languageName: unknown
   linkType: soft
 
@@ -3392,7 +3392,7 @@ __metadata:
     rxjs: ^7.0.0
     typescript: ^4.8.2
   peerDependencies:
-    "@tussle/core": ^0.4.0
+    "@tussle/core": ^0.5.0
   languageName: unknown
   linkType: soft
 
@@ -3447,7 +3447,7 @@ __metadata:
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
   peerDependencies:
-    "@tussle/core": ^0.4.0
+    "@tussle/core": ^0.5.0
   languageName: unknown
   linkType: soft
 
@@ -3485,7 +3485,7 @@ __metadata:
     rxjs: ^7.0.0
     typescript: ^4.8.2
   peerDependencies:
-    "@tussle/core": ^0.4.0
+    "@tussle/core": ^0.5.0
   languageName: unknown
   linkType: soft
 
@@ -3509,7 +3509,7 @@ __metadata:
     rxjs: ^7.0.0
     typescript: ^4.8.2
   peerDependencies:
-    "@tussle/core": ^0.4.0
+    "@tussle/core": ^0.5.0
   languageName: unknown
   linkType: soft
 
