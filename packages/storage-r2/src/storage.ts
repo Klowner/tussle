@@ -78,6 +78,14 @@ function isFinalConcatState(
 	return state.uploadConcat?.action === 'final';
 }
 
+function firstPartIsCreationPlaceholder(
+	parts?: Readonly<Part[]>,
+): boolean {
+	return !!parts &&
+		parts.length === 1 &&
+		parts[0].size === 0;
+}
+
 function getNextKey(
 	state: Readonly<R2UploadState>,
 ): string {
@@ -113,10 +121,11 @@ function sliceStreamBYOB(
 					}
 					// Unless we're all finished, create a new transform
 					// and next() the readable end.
-					transform = new IdentityTransformStream();
+					const length = Math.min(chunkSize, bytesRemaining); // Readable will be this length (if all goes well).
+					transform = new FixedLengthStream(length);
 					subscriber.next({
 						readable: transform.readable,
-						length: Math.min(chunkSize, bytesRemaining), // Readable will be this length (if all goes well).
+						length,
 					});
 					writer = transform.writable.getWriter();
 					return async (chunk: Uint8Array) => {
@@ -285,6 +294,23 @@ export class TussleStorageR2 implements TussleStorageService {
 		}),
 	);
 
+	private readonly createStatePlaceholderRecord = pipe(
+		mergeMap((state: R2UploadState) => {
+			const key = getNextKey(state);
+			return from(this.options.bucket.put(key, null, {
+				customMetadata: {
+					tussleState: JSON.stringify({
+						...state,
+						parts: null,
+					}),
+					tusslePrevKey: '', // Store full R2 key
+				},
+			})).pipe(
+				map(() => state),
+			);
+		}),
+	);
+
 	createFile(
 		params: TussleStorageCreateFileParams,
 	): Observable<TussleStorageCreateFileResponse> {
@@ -292,6 +318,7 @@ export class TussleStorageR2 implements TussleStorageService {
 			map(params => this.createInitialState(params)),
 			this.handleConcatenation,
 			this.setState,
+			this.createStatePlaceholderRecord,
 			map((state) => ({
 				...state,
 				success: true,
@@ -428,9 +455,17 @@ export class TussleStorageR2 implements TussleStorageService {
 
 		return readable$.pipe(
 			concatMap(({readable, length}) => {
-				// Store the resulting "next" state that we will be at after
-				// this part is written. If the write succeeds, then the most
-				// accurate state will be stored within its metadata.
+				// If this is a freshly created upload, then the first part should be a
+				// zero-sized placeholder containing only metadata for rebuilding
+				// upload state. We can overwrite this part with the first patch
+				// request, so we erase the parts from so the next key will be all
+				// zeros.
+				if (firstPartIsCreationPlaceholder(nextState.parts)) {
+					nextState.parts = [];
+				}
+				// Store the resulting "next" state that we will be at after this part
+				// is written. If the write succeeds, then the most accurate state will
+				// be stored within its metadata.
 				const tusslePrevKey = getMostRecentPartKey(nextState) || '';
 				const key = getNextKey(nextState);
 				nextState = this.advanceStateProgress(nextState, length, key);
