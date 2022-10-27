@@ -80,8 +80,12 @@ export class Tussle {
 	private getSupportedExtensions<T, P>(
 		ctx: TussleIncomingRequest<T, P>,
 	): string {
-		if (ctx.cfg.storage?.extensionsSupported) {
-			return ctx.cfg.storage.extensionsSupported.join(',');
+		const storage = ctx.cfg.storage;
+		if (storage) {
+			const supported = storage.extensionsSupported;
+			if (supported && supported.length) {
+				return supported.join(',');
+			}
 		}
 		return 'creation,checksum';
 	}

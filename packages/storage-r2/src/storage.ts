@@ -166,12 +166,14 @@ function sliceStreamBYOB(
 type PartialConcatState = InitialState & {uploadConcat: UploadConcatPartial};
 type FinalConcatState = InitialState & {uploadConcat: UploadConcatFinal};
 
+const EXTENSIONS_SUPPORTED: TusProtocolExtension[] = [
+	'creation',
+	'concatenation',
+];
+
 export class TussleStorageR2 implements TussleStorageService {
 	readonly extensionsRequired: TusProtocolExtension[] = [];
-	static readonly extensionsSupported: TusProtocolExtension[] = [
-		'creation',
-		'concatenation',
-	];
+	readonly extensionsSupported: TusProtocolExtension[] = EXTENSIONS_SUPPORTED;
 
 	constructor(readonly options: TussleStorageR2Options) {}
 
