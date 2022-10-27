@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.2](https://github.com/Klowner/tussle/compare/v0.5.1...v0.5.2) (2022-10-27)
+
+
+### Bug Fixes
+
+* **storage-r2:** remove static qualifier from supportedExtensions so core can actually pick it up. ([a48626b](https://github.com/Klowner/tussle/commit/a48626bcdaf713ebca3b53f5f9f3afc00e1f5c50))
+
+
+
+
+
 ## [0.5.1](https://github.com/Klowner/tussle/compare/v0.5.0...v0.5.1) (2022-10-26)
 
 **Note:** Version bump only for package @tussle/storage-r2
