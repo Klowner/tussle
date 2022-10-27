@@ -62,6 +62,7 @@ const extractCreationHeaders = <T, P>(
 	const uploadLength = parseInt(header('upload-length') as string || '', 10);
 	const uploadMetadata = (header('upload-metadata') as string || '')
 		.split(',')
+		.map((value) => value.trim())
 		.filter((v) => v.length > 0)
 		.map((value) => value.split(' '))
 		.map(([key, value]) => [key, value ? decode(value) : value])
