@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.3](https://github.com/Klowner/tussle/compare/v0.5.2...v0.5.3) (2022-10-28)
+
+
+### Bug Fixes
+
+* **storage-r2:** Store empty record (with metadata) in R2 upon initial creation. ([ed27a30](https://github.com/Klowner/tussle/commit/ed27a3067374920885af24882d72da6fa054f36e))
+
+
+
+
+
 ## [0.5.2](https://github.com/Klowner/tussle/compare/v0.5.1...v0.5.2) (2022-10-27)
 
 
