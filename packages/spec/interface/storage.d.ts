@@ -16,6 +16,7 @@ export interface TussleStorageCreateFileResponse {
 	success: boolean;
 	metadata?: Record<string, unknown>;
 	uploadConcat?: UploadConcatPartial | UploadConcatFinal | null;
+	offset: number;
 }
 
 export interface TussleStoragePatchFileParams<Req = unknown, U = unknown> {

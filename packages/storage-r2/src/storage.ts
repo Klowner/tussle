@@ -321,6 +321,7 @@ export class TussleStorageR2 implements TussleStorageService {
 			this.createStatePlaceholderRecord,
 			map((state) => ({
 				...state,
+				offset: state.currentOffset,
 				success: true,
 			})),
 			take(1),

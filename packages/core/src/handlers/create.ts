@@ -1,9 +1,9 @@
 import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
-import type {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResponse, TussleStoragePatchFileResponse, UploadConcatFinal, UploadConcatPartial} from '@tussle/spec/interface/storage';
-import type {Tussle} from '../core';
+import type {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResponse, UploadConcatFinal, UploadConcatPartial} from '@tussle/spec/interface/storage';
 import {decode} from 'js-base64';
-import {Observable, throwError, from as observableFrom, of} from 'rxjs';
+import {from as observableFrom, Observable, of, throwError} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
+import type {Tussle} from '../core';
 
 export default function handleCreate<T, P>(
 	_core: Tussle,
@@ -41,7 +41,7 @@ const callOptionalHooks = <T, P>(
 	if (createdFile.uploadConcat?.action === 'final') {
 		const patchedFile: TussleStoragePatchFileCompleteResponse = {
 			...createdFile,
-			offset: -1,
+			offset: createdFile.offset,
 			complete: true,
 			details: {
 				tussleUploadMetadata: createdFile.metadata || {},

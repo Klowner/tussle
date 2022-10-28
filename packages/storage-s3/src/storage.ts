@@ -107,6 +107,7 @@ function stripLeadingSlashes(path: string) {
 
 const stateToResponse = map((state: S3UploadState): TussleStorageCreateFileResponse => ({
   ...state,
+	offset: state.currentOffset,
   success: true,
 }));
 
