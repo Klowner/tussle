@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.4](https://github.com/Klowner/tussle/compare/v0.5.3...v0.5.4) (2022-10-28)
+
+
+### Bug Fixes
+
+* **spec:** add offset requirement to TussleStorageCreateFileResponse interface ([ff8f45b](https://github.com/Klowner/tussle/commit/ff8f45b7d2f0ddae174016052dd3c8e7b3595b52))
+
+
+
+
+
 ## [0.5.3](https://github.com/Klowner/tussle/compare/v0.5.2...v0.5.3) (2022-10-28)
 
 **Note:** Version bump only for package @tussle/storage-s3
