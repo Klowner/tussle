@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "lib": ["esnext", "dom"],
+    "lib": ["esnext"],
     "types": ["@cloudflare/workers-types"],
     "moduleResolution": "node",
     "strict": true,
@@ -14,5 +14,8 @@
   "include": [
     "types/**/*",
     "src/**/*"
-  ]
+  ],
+	"exclude": [
+		"src/**/client.ts"
+	]
 }

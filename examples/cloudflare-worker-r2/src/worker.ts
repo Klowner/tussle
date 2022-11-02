@@ -1,5 +1,6 @@
-import {TussleStorageService} from '@tussle/core';
+import {TussleIncomingRequest, TussleStorageService} from '@tussle/core';
 import {TussleCloudflareWorker} from '@tussle/middleware-cloudflareworker';
+import {TussleStoragePatchFileCompleteResponse} from '@tussle/spec/interface/storage';
 import {TussleStateMemory} from '@tussle/state-memory';
 import {TussleStorageR2} from '@tussle/storage-r2';
 import {R2UploadState} from "@tussle/storage-r2/lib/storage";
@@ -11,6 +12,24 @@ const stateService = new TussleStateMemory<R2UploadState>();
 
 type UserParams = {
 	context: ExecutionContext;
+}
+
+async function cacheCompletedUploadResponse(
+	request: Request,
+	location: string,
+	offset: number,
+) {
+	const url = new URL(request.url);
+	url.pathname = location;
+	console.log('CACHED ' + url.toString());
+	await caches.default.put(url.toString(), new Response(null, {
+		headers: {
+			'Upload-Offset': offset.toString(10),
+			'Upload-Length': offset.toString(10),
+			'Tus-Resumable': '1.0.0',
+			'Cache-Control': 'max-age=604800',
+		},
+	}));
 }
 
 const getTussleMiddleware = (() => {
@@ -35,6 +54,11 @@ const getTussleMiddleware = (() => {
 							path,
 						};
 					},
+					"after-complete": async (ctx, params) => {
+						const { location, offset } = params;
+						await cacheCompletedUploadResponse(ctx.originalRequest, location, offset);
+						return params;
+					},
 				},
 				core: {
 					storage,
@@ -50,6 +74,15 @@ async function handleRequest(
 	bindings: Bindings,
 	context: ExecutionContext,
 ) {
+	if (request.method === 'HEAD') {
+		console.log('looking for cache', request.url);
+		const cache = await caches.default.match(request.url);
+		console.log({cache});
+		if (cache) {
+			return cache;
+		}
+	}
+
 	const storage = new TussleStorageR2({
 		stateService,
 		bucket: bindings.TUSSLE_BUCKET,

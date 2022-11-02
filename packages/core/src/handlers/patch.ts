@@ -1,9 +1,8 @@
-import {Observable, pipe, throwError} from 'rxjs';
-import type {Tussle} from '../core';
 import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
-import type {TussleStoragePatchFileResponse, TussleStoragePatchFileCompleteResponse} from '@tussle/spec/interface/storage';
-import {of, from as observableFrom} from 'rxjs';
+import type {TussleStoragePatchFileCompleteResponse, TussleStoragePatchFileResponse} from '@tussle/spec/interface/storage';
+import {from as observableFrom, Observable, of, throwError} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
+import type {Tussle} from '../core';
 
 export default function handlePatch<T, P>(
 	_core: Tussle,
