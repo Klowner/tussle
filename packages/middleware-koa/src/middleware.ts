@@ -38,7 +38,6 @@ const prepareRequest = async <T extends Context, U>(
   const overrideMethod = firstOrUndefined(ctx.headers['x-http-method-override']);
   const method = allowedMethod(ctx.method, overrideMethod);
   if (method) {
-    ctx.req.pause(); // TODO -- is this necessary?
     return {
       request: {
         getHeader: (key: string) => firstOrUndefined(ctx.headers[key]),

@@ -38,6 +38,7 @@ class TussleMockStorageService implements TussleStorageService {
 		params: TussleStorageFileInfoParams,
 	): Observable<TussleStorageFileInfo> {
 		console.log({params});
+		console.log(params.location);
 		return EMPTY;
 	}
 }
@@ -49,41 +50,36 @@ export interface GenericRequest {
 	body?: Uint8Array;
 }
 
+export interface GenericResponse {
+	status: number;
+	headers: Record<string, string>;
+}
+
+function prepareHeaders(headers: Record<string, string>) {
+	return {
+		...headers,
+		'Tus-Resumable': '1.0.0',
+	};
+}
+
 export function middlewareTests<
-	T extends TussleMiddlewareService<R, U>, R, U
+	T extends TussleMiddlewareService<Req, U>, Req, U
 >(
 	name: string,
 	options: {
 		createMiddleware: <S extends TussleStorageService>(
 			storage: S,
-			hooks: TussleHookDef<R, U>,
+			hooks: TussleHookDef<Req, U>,
 		) => Promise<T>,
-		createRequest: (request: GenericRequest) => R,
-		handleRequest: (instance: T, request: R) => Promise<unknown>,
+		createRequest: (request: GenericRequest) => Req,
+		handleRequest: (instance: T, request: Req) => Promise<GenericResponse|null>,
 	},
 ): void {
 	describe(`${name} - middleware specification tests`, () => {
-		test('instantiation', async () => {
+		test('Instantiation', async () => {
 			const storage = new TussleMockStorageService();
 			const instance = await options.createMiddleware(storage, {});
 			expect(instance).not.toBeUndefined();
-		});
-
-		test('file creation', async () => {
-			const storage = new TussleMockStorageService();
-			const instance = await options.createMiddleware(storage, {
-				'before-create': async (ctx, params) => {
-					console.log('BEFORE CREATE', params);
-					return params;
-				},
-			});
-			const request = options.createRequest({
-				method: 'POST',
-				headers: {},
-				url: 'https://tussle-unit-test/foo',
-			});
-			const result = await options.handleRequest(instance, request);
-			expect(result).toBeNull();
 		});
 	});
 }
