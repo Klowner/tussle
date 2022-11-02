@@ -1,11 +1,13 @@
 import type { StateTestRecord } from './stateTests';
+import { middlewareTests } from './middlewareTests';
 import { requestServiceTests } from './requestTests';
 import { stateServiceTests } from './stateTests';
-import { storageServiceTests  } from './storageTests';
+import { storageServiceTests	} from './storageTests';
 
 export {
-  StateTestRecord,
-  requestServiceTests,
-  stateServiceTests,
-  storageServiceTests,
+	StateTestRecord,
+	middlewareTests,
+	requestServiceTests,
+	stateServiceTests,
+	storageServiceTests,
 };
