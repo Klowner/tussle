@@ -27,6 +27,10 @@ interface TussleCreationParams {
   uploadConcat: UploadConcatPartial|UploadConcatFinal|null;
 }
 
+interface TussleAbortedCreationParams extends TussleCreationParams {
+	path: null|undefined;
+}
+
 interface TusslePatchParams<Req, U> {
   contentType: string;
   length: number;
@@ -51,7 +55,7 @@ export interface TussleHooks<Req, U> extends TussleHookDef<Req, U> {
   'after-complete': TussleHookFunc<Req, U, TussleStoragePatchFileCompleteResponse, HookResult<TussleStoragePatchFileCompleteResponse|undefined>>;
   'after-patch': TussleHookFunc<Req, U, TussleStoragePatchFileResponse, HookResult<TussleStoragePatchFileResponse>>;
   'after-head': TussleHookFunc<Req, U, TussleStorageFileInfo, HookResult<TussleStorageFileInfo>>;
-  'before-create': TussleHookFunc<Req, U, TussleCreationParams, HookResult<TussleCreationParams>>;
+  'before-create': TussleHookFunc<Req, U, TussleCreationParams, HookResult<TussleCreationParams|TussleAbortedCreationParams>>;
   'before-patch': TussleHookFunc<Req, U, TusslePatchParams<Req, U>, HookResult<TusslePatchParams<Req, U>>>;
   'before-head': TussleHookFunc<Req, U, TussleHeadParams, HookResult<TussleHeadParams>>;
   'before-options': TussleHookFunc<Req, U, TussleOptionsParams, HookResult<TussleOptionsParams>>;
