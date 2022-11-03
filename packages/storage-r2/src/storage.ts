@@ -1,19 +1,16 @@
-import {
-	TusProtocolExtension,
-	TussleStorageService
-} from "@tussle/core";
-import {TussleStateService} from "@tussle/spec/interface/state";
-import {
+import type {TussleStateService} from "@tussle/spec/interface/state";
+import type {
 	TussleStorageCreateFileParams,
 	TussleStorageCreateFileResponse,
 	TussleStorageFileInfo,
 	TussleStorageFileInfoParams,
 	TussleStoragePatchFileParams,
 	TussleStoragePatchFileResponse,
+	TussleStorageService,
 	UploadConcatFinal,
 	UploadConcatPartial
 } from "@tussle/spec/interface/storage";
-import {nanoid} from "nanoid";
+import type {TusProtocolExtension} from "@tussle/spec/interface/tus";
 import {
 	concat, concatMap, defaultIfEmpty, defer, EMPTY, filter,
 	firstValueFrom,
@@ -25,6 +22,7 @@ import {
 	share, switchMap,
 	take, takeLast, toArray
 } from "rxjs";
+import {nanoid} from "nanoid";
 
 interface Part {
 	key: string;
