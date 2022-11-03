@@ -21,7 +21,7 @@
     "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker",
     "@tussle/state-cloudflareworkerkv": "link:../../packages/state-cloudflareworkerkv",
     "@tussle/storage-b2": "link:../../packages/storage-b2",
-    "jest": "^29.1.2",
+    "jest": "^29.2.2",
     "rollup": "^2.67.3",
     "rollup-plugin-string": "^3.0.0"
   }

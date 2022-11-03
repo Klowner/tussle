@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.settings.json",
+	"compilerOptions": {
+		"lib": [],
+		"allowJs": true,
+		"types": [
+			"@cloudflare/workers-types"
+		]
+	},
+	"exclude": [],
+	"include": ["node_modules"]
+}

@@ -1,20 +1,18 @@
-const transformTypescript = {
-	'^.+\\.ts$': [
-		'ts-jest',
-		{
-			diagnostics: {
-				ignoreCodes: ['TS151001'],
-			},
-			tsconfig: './packages/tsconfig.json',
-		},
-	],
-};
-
 module.exports = {
 	verbose: true,
 	projects: [
 		{
-			transform: transformTypescript,
+			transform: {
+				'^.+\\.ts$': [
+					'ts-jest',
+					{
+						diagnostics: {
+							ignoreCodes: ['TS151001'],
+						},
+						tsconfig: './packages/tsconfig.json',
+					},
+				]
+			},
 			testEnvironment: 'node',
 			testMatch: [
 				'<rootDir>/packages/core/**/*.spec.ts',
@@ -29,7 +27,21 @@ module.exports = {
 			],
 		},
 		{
-			transform: transformTypescript,
+			transform: {
+				'^.+\\.js$': 'babel-jest',
+				'^.+\\.ts$': [
+					'ts-jest',
+					{
+						diagnostics: {
+							ignoreCodes: ['TS151001'],
+						},
+						tsconfig: './packages/tsconfig.cf.json',
+					},
+				],
+			},
+			transformIgnorePatterns: [
+				'node_modules/(?!nanoid/*)',
+			],
 			testEnvironment: 'miniflare',
 			testMatch: [
 				'<rootDir>/packages/middleware-cloudflareworker/src/**/*.spec.ts',
