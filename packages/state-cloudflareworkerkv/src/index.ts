@@ -1,4 +1,3 @@
-/// <reference types="@cloudflare/workers-types" />
 import type { TussleStateService } from '@tussle/spec/interface/state';
 
 type PromiseType<T> = T extends PromiseLike<infer U> ? U : T;

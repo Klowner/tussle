@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.settings.json",
 	"compilerOptions": {
-		"lib": [],
+		"lib": ["esnext"],
 		"allowJs": true,
 		"types": [
 			"@cloudflare/workers-types"

@@ -1,13 +1,14 @@
 {
-  "extends": "../tsconfig.settings.json",
-  "files": [
-    "src/index.ts"
-  ],
-  "compilerOptions": {
-    "outDir": "lib",
-    "rootDir": "src",
-    "baseUrl": "./",
-    "lib": ["ES2020"],
-    "types": ["@cloudflare/workers-types"]
-  }
+	"extends": "../tsconfig.settings.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "lib",
+		"types": ["@cloudflare/workers-types"],
+		"lib": ["es2017"]
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules"],
+	"references": [
+		{ "path": "../core" }
+	]
 }
