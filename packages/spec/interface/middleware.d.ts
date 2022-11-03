@@ -48,7 +48,7 @@ type HookResult<T> = Observable<T> | Promise<T>;
 
 export interface TussleHooks<Req, U> extends TussleHookDef<Req, U> {
   'after-create': TussleHookFunc<Req, U, TussleStorageCreateFileResponse, HookResult<TussleStorageCreateFileResponse>>;
-  'after-complete': TussleHookFunc<Req, U, TussleStoragePatchFileCompleteResponse, HookResult<TussleStoragePatchFileCompleteResponse>>;
+  'after-complete': TussleHookFunc<Req, U, TussleStoragePatchFileCompleteResponse, HookResult<TussleStoragePatchFileCompleteResponse|undefined>>;
   'after-patch': TussleHookFunc<Req, U, TussleStoragePatchFileResponse, HookResult<TussleStoragePatchFileResponse>>;
   'after-head': TussleHookFunc<Req, U, TussleStorageFileInfo, HookResult<TussleStorageFileInfo>>;
   'before-create': TussleHookFunc<Req, U, TussleCreationParams, HookResult<TussleCreationParams>>;
