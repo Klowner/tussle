@@ -7,11 +7,7 @@ module.exports = {
 		'^.+\\.ts$': ['ts-jest', {
 			tsconfig: '<rootDir>/../tsconfig.json',
 		}],
-		// '^.+\\.js$': ['babel-jest'],
 	},
-	transformIgnorePatterns: [
-		// 'node_modules/(?!nanoid)/'
-	],
 	collectCoverageFrom: [
 		'src/**/*.ts',
 	],
