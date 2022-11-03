@@ -39,5 +39,6 @@ module.exports = {
 	],
 	collectCoverageFrom: [
 		'packages/*/src/**/*.ts',
+		'!**/*.spec.ts',
 	],
 };
