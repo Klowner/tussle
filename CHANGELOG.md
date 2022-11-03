@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/Klowner/tussle/compare/v0.5.4...v0.6.0) (2022-11-03)
+
+
+### Bug Fixes
+
+* **cloudflare-worker-r2:** exclude 'dom' from libs in example client tsconfig ([6d116ad](https://github.com/Klowner/tussle/commit/6d116ad5fffef24865e5f37c90971cf61c45fd9f))
+* **core:** create handler refactor ([aae27a1](https://github.com/Klowner/tussle/commit/aae27a1ab0f0a66902a9443ef0466796ee689f88))
+* **core:** handler throws error if Upload-Length missing ([8d258b5](https://github.com/Klowner/tussle/commit/8d258b51c512322bee4e67065b8c7c0630f6b11f))
+* **storage-r2:** remove @tussle/core type imports in favor of @tussle/spec ([9d9b5d2](https://github.com/Klowner/tussle/commit/9d9b5d2318186fa9c0feede779a653f8a1361c7d))
+
+
+### Features
+
+* **storage-r2:** add split builds ([a4c5975](https://github.com/Klowner/tussle/commit/a4c5975270f2da214cbc1f30f196e3650f71ba73))
+
+
+
+
+
 ## [0.5.4](https://github.com/Klowner/tussle/compare/v0.5.3...v0.5.4) (2022-10-28)
 
 

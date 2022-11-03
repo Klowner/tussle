@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/Klowner/tussle/compare/v0.5.4...v0.6.0) (2022-11-03)
+
+
+### Bug Fixes
+
+* **core:** handler throws error if Upload-Length missing ([8d258b5](https://github.com/Klowner/tussle/commit/8d258b51c512322bee4e67065b8c7c0630f6b11f))
+
+
+
+
+
 ## [0.5.4](https://github.com/Klowner/tussle/compare/v0.5.3...v0.5.4) (2022-10-28)
 
 
