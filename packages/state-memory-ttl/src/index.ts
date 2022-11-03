@@ -39,6 +39,10 @@ class TussleStateMemoryTTL<T> implements TussleStateService<T> {
   }
 
 	onRelease(_key: string, _data: T): void { /* NOOP */ }
+
+	garbageCollect() {
+		return this.cache.garbageCollect();
+	}
 }
 
 export default TussleStateMemoryTTL;

@@ -72,7 +72,7 @@ export class TTLCache<T> {
     return Object.keys(this.cache)[nth] || null;
   }
 
-  private garbageCollect(): void {
+  garbageCollect(): void {
     const now = this.now();
     const { ttl, cache } = this;
     for (const key in cache) {
