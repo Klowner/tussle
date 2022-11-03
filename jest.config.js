@@ -18,12 +18,14 @@ module.exports = {
 			testEnvironment: 'node',
 			testMatch: [
 				'<rootDir>/packages/core/**/*.spec.ts',
-				'<rootDir>/packages/spec/**/*.spec.ts',
 				'<rootDir>/packages/middleware-koa/**/*.spec.ts',
 				'<rootDir>/packages/request-axios/**/*.spec.ts',
-				'<rootDir>/packages/state-memory/**/*.spec.ts',
+				'<rootDir>/packages/spec/**/*.spec.ts',
 				'<rootDir>/packages/state-memory-ttl/**/*.spec.ts',
+				'<rootDir>/packages/state-memory/**/*.spec.ts',
 				'<rootDir>/packages/state-postgres/**/*.spec.ts',
+				'<rootDir>/packages/storage-b2/**/*.spec.ts',
+				'<rootDir>/packages/storage-s3/**/*.spec.ts',
 			],
 		},
 		{
