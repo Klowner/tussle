@@ -8,7 +8,7 @@
   "scripts": {
     "test": "run-s test:unit",
     "test:unit": "npm run build:lib && jest",
-    "coverage": "jest --coverage --ci --runInBand --detectOpenHandles && cat ./coverage/lcov.info | coveralls",
+    "coverage": "jest --coverage --ci --detectOpenHandles && cat ./coverage/lcov.info | coveralls",
     "build": "run-s clean && run-p build:lib",
     "build:lib": "lerna run build --scope '@tussle/*'",
     "watch": "lerna run build --scope '@tussle/*' --watch",

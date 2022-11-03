@@ -1480,10 +1480,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cloudflare/workers-types@npm:^3.16.0":
-  version: 3.16.0
-  resolution: "@cloudflare/workers-types@npm:3.16.0"
-  checksum: 5fad4d7e5b495e299b8b037043ee406a4e6aadc533e90d2a87009934cd82e1072710264451c5fefc3b71502bbf659f9b1f530f2fcceeaa036704da605194f4f6
+"@cloudflare/workers-types@npm:^3.18.0":
+  version: 3.18.0
+  resolution: "@cloudflare/workers-types@npm:3.18.0"
+  checksum: 9a54a4fbd12eed19495cf6774cd48b0e97aaee093d40d2ae8e7a11c58937b8ad5173588efca5e138c373c6d6730faf96f2385eee203dab3fdb91565885efb0cd
   languageName: node
   linkType: hard
 
@@ -3603,7 +3603,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/middleware-cloudflareworker@workspace:packages/middleware-cloudflareworker"
   dependencies:
-    "@cloudflare/workers-types": ^3.16.0
+    "@cloudflare/workers-types": ^3.18.0
     "@tussle/spec": ^0.5.4
     jest: ^29.1.2
     jest-environment-miniflare: ^2.11.0
@@ -3658,7 +3658,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/request-cloudflareworker@workspace:packages/request-cloudflareworker"
   dependencies:
-    "@cloudflare/workers-types": ^3.16.0
+    "@cloudflare/workers-types": ^3.18.0
     "@tussle/spec": ^0.5.4
     concurrently: ^7.4.0
     jest: ^29.1.2
@@ -3692,7 +3692,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-cloudflareworkerkv@workspace:packages/state-cloudflareworkerkv"
   dependencies:
-    "@cloudflare/workers-types": ^3.16.0
+    "@cloudflare/workers-types": ^3.18.0
     "@tussle/spec": ^0.5.4
     jest: ^29.1.2
     npm-run-all: ^4.1.5
@@ -3773,7 +3773,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/storage-r2@workspace:packages/storage-r2"
   dependencies:
-    "@cloudflare/workers-types": ^3.16.0
+    "@cloudflare/workers-types": ^3.18.0
     "@tussle/spec": ^0.5.4
     jest: ^29.1.2
     nanoid: ^4.0.0
@@ -5169,13 +5169,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "cloudflare-worker-r2@workspace:examples/cloudflare-worker-r2"
   dependencies:
-    "@cloudflare/workers-types": ^3.16.0
+    "@cloudflare/workers-types": ^3.18.0
     "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker"
     "@tussle/storage-r2": "link:../../packages/storage-r2"
     dotenv: ^16.0.0
     esbuild: ^0.14.54
     jest: ^29.1.2
-    miniflare: ^2.9.0
+    miniflare: ^2.11.0
     nanoid: ^4.0.0
     typescript: ^4.8.2
     wrangler: ^2.0.15
@@ -5186,14 +5186,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "cloudflare-worker-s3@workspace:examples/cloudflare-worker-s3"
   dependencies:
-    "@cloudflare/workers-types": ^3.16.0
+    "@cloudflare/workers-types": ^3.18.0
     "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker"
     "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker"
     "@tussle/storage-s3": "link:../../packages/storage-s3"
     dotenv: ^16.0.0
     esbuild: ^0.14.54
     jest: ^29.1.2
-    miniflare: ^2.9.0
+    miniflare: ^2.11.0
     nanoid: ^4.0.0
     typescript: ^4.8.2
     wrangler: ^2.0.15
@@ -9614,7 +9614,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"miniflare@npm:^2.7.1, miniflare@npm:^2.9.0":
+"miniflare@npm:^2.7.1":
   version: 2.9.0
   resolution: "miniflare@npm:2.9.0"
   dependencies:
