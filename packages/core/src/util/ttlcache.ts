@@ -1,10 +1,5 @@
 export type TTLCacheType<T> = T extends TTLCache<infer U> ? U : never;
 
-interface TTLCacheItem<T> {
-  atime: number;
-  data: T;
-}
-
 // Initially I just used a setInterval() to periodically perform
 // garbage collection, but some environments such as Cloudflare
 // don't allow certain API calls outside of request contexts.
@@ -18,7 +13,7 @@ export class TTLCache<T> {
   constructor(
     private readonly ttl = 10 * 60 * 1000,
     private readonly garbageCollectionInterval = 5 * 60 * 1000,
-    private readonly cache: Record<string, TTLCacheItem<T>> = {},
+    private readonly cache: Record<string, {atime: number; data: T;}> = {},
     private readonly now: () => number = () => Date.now(),
   ) {
     this.lastGarbageCollection = this.now();
