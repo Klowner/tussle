@@ -1,28 +1,31 @@
 import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import type {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResponse, UploadConcatFinal, UploadConcatPartial} from '@tussle/spec/interface/storage';
 import {decode} from 'js-base64';
-import {from as observableFrom, Observable, of, throwError} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import {from as observableFrom, Observable, of, pipe} from 'rxjs';
+import {defaultIfEmpty, filter, map, switchMap} from 'rxjs/operators';
 import type {Tussle} from '../core';
 
 export default function handleCreate<T, P>(
 	_core: Tussle,
-	ctx: Readonly<TussleIncomingRequest<T, P>>
+	ctx: Readonly<TussleIncomingRequest<T, P>>,
 ): Observable<TussleIncomingRequest<T, P>> {
-	const params = extractCreationHeaders(ctx);
-	const store = ctx.cfg.storage;
-
-	if (!store) {
-		return throwError(() => new Error('no storage service selected'));
-	} else {
-		const params$ = observableFrom(ctx.source.hook('before-create', ctx, params));
-		return params$.pipe(
-			switchMap((params) => store.createFile(params)),
-			switchMap((createdFile) => callOptionalHooks(ctx, createdFile)),
-			switchMap((createdFile) => ctx.source.hook('after-create', ctx, createdFile)),
-			map((createdFile) => toResponse(ctx, createdFile)),
-		);
-	}
+	return of({ctx}).pipe(
+		withParametersFromContext,
+		withConfiguredStorage,
+		withParamsUpdatedByBeforeCreateHook,
+		filterValidStoragePath,
+		switchMap(({ctx, params, store}) => store.createFile(params).pipe(
+			map((created) => ({ctx, created})),
+			postCreateHooks,
+			map((created) => toResponse(ctx, created)),
+		)),
+		defaultIfEmpty({
+			...ctx,
+			response: {
+				status: 403, // Forbidden
+			},
+		}),
+	);
 }
 
 export interface TussleCreationParams {
@@ -34,22 +37,67 @@ export interface TussleCreationParams {
 	uploadConcat: UploadConcatFinal | UploadConcatPartial | null;
 }
 
-const callOptionalHooks = <T, P>(
-	ctx: TussleIncomingRequest<T, P>,
-	createdFile: TussleStorageCreateFileResponse,
-): Observable<TussleStorageCreateFileResponse> => {
-	if (createdFile.uploadConcat?.action === 'final') {
+type TussleRequest = TussleIncomingRequest<unknown, unknown>;
+
+const filterValidStoragePath = filter(
+	<T extends {params: Pick<TussleCreationParams, 'path'>}>(item: T) => !!item.params.path
+);
+
+const withParametersFromContext = pipe(
+	map(<T extends {ctx: TussleRequest}>(item: T) => ({
+		...item,
+		params: extractCreationHeaders(item.ctx),
+	})),
+);
+
+const withConfiguredStorage = pipe(
+	map(<T extends {ctx: TussleRequest}>(item: T) => {
+		const store = item.ctx.cfg.storage;
+		if (!store) {
+			throw new Error('No storage service selected');
+		}
+		return {
+			...item,
+			store,
+		};
+	}),
+);
+
+const withParamsUpdatedByBeforeCreateHook = pipe(
+	switchMap(<T extends {ctx: TussleRequest, params: TussleCreationParams}>(item: T) => {
+		return observableFrom(item.ctx.source.hook('before-create', item.ctx, item.params)).pipe(
+			map((params) => ({
+				...item,
+				params,
+			})),
+		);
+	}),
+);
+
+const postCreateHooks = pipe(
+	switchMap(<T extends {ctx: TussleRequest, created: TussleStorageCreateFileResponse}>(
+		item: T) => callOptionalHooks(item)),
+	switchMap(({ctx, created}) => observableFrom(ctx.source.hook('after-create', ctx, created))),
+);
+
+const callOptionalHooks = <T extends {ctx: TussleRequest, created: TussleStorageCreateFileResponse}>(
+	item: T
+): Observable<T> => {
+	const {created, ctx} = item;
+	if (created.uploadConcat?.action === 'final') {
 		const patchedFile: TussleStoragePatchFileCompleteResponse = {
-			...createdFile,
-			offset: createdFile.offset,
+			...created,
+			offset: created.offset,
 			complete: true,
 			details: {
-				tussleUploadMetadata: createdFile.metadata || {},
+				tussleUploadMetadata: created.metadata || {},
 			},
 		};
-		return observableFrom(ctx.source.hook('after-complete', ctx, patchedFile));
+		return observableFrom(ctx.source.hook('after-complete', ctx, patchedFile)).pipe(
+			map(() => item),
+		);
 	}
-	return of(createdFile);
+	return of(item);
 };
 
 const extractCreationHeaders = <T, P>(
@@ -66,12 +114,12 @@ const extractCreationHeaders = <T, P>(
 		.filter((v) => v.length > 0)
 		.map((value) => value.split(' '))
 		.map(([key, value]) => [key, value ? decode(value) : value])
-		.reduce((acc, [key, value]) => {
+		.reduce((acc: Record<string, string>, [key, value]) => {
 			acc[key] = value;
 			return acc;
-		}, {} as Record<string, string>);
+		}, {});
 
-	// used by 'concatenation' extension
+	// Used by 'concatenation' extension
 	const uploadConcat = parseUploadConcat(header('upload-concat') || null);
 
 	return {
