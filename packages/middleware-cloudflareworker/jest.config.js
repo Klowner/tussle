@@ -1,7 +1,7 @@
 module.exports = {
 	testEnvironment: 'miniflare',
 	testMatch: [
-		'<rootDir>/src/**/*.spec.*'
+		'<rootDir>/src/**/*.spec.ts'
 	],
 	transform: {
 		'^.+\\.ts$': ['ts-jest', {

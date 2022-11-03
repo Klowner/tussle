@@ -1,7 +1,7 @@
 module.exports = {
 	testEnvironment: 'node',
 	testMatch: [
-		'**/*.spec.ts'
+		'<rootDir>/src/**/*.spec.ts'
 	],
 	transform: {
 		'^.+\\.ts$': ['ts-jest', {
@@ -13,6 +13,6 @@ module.exports = {
 		// 'node_modules/(?!nanoid)/'
 	],
 	collectCoverageFrom: [
-		'**/*.ts',
+		'src/**/*.ts',
 	],
 };
