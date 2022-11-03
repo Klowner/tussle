@@ -120,31 +120,76 @@ export function middlewareTests<
 			expect(instance).not.toBeUndefined();
 		});
 
-		describe('Hooks', () => {
-			test('before-create - returning a null storage path should deny upload', async () => {
-				const storage = new TussleMockStorageService();
-				const createFileSpy = jest.spyOn(storage, 'createFile');
-				const beforeCreate = jest.fn(async (_req, params) => ({
-					...params,
-					path: null,
-				}));
-				const afterCreate = jest.fn(async (_req, params) => params);
-				const instance = await createMiddleware(storage, {
-					'before-create': beforeCreate,
-					'after-create': afterCreate,
+		describe('hooks', () => {
+			describe('before-create', () => {
+				test('returning a null storage path should deny upload', async () => {
+					const storage = new TussleMockStorageService();
+					const createFileSpy = jest.spyOn(storage, 'createFile');
+
+					const beforeCreate = jest.fn(async (_req, params) => ({
+						...params,
+						path: null,
+					}));
+
+					const afterCreate = jest.fn(async (_req, params) => params);
+
+					const instance = await createMiddleware(storage, {
+						'before-create': beforeCreate,
+						'after-create': afterCreate,
+					});
+
+					const response = await handleRequest(instance, createRequest({
+						method: 'POST',
+						url: 'https://tussle-middleware-test/files/my-file.bin',
+						headers: prepareHeaders({
+							'Upload-Length': '1000',
+						}),
+					}));
+
+					expect(response).not.toBeUndefined();
+					expect(beforeCreate).toHaveBeenCalledTimes(1);
+					expect(createFileSpy).not.toHaveBeenCalled();
+					expect(afterCreate).not.toHaveBeenCalled();
+					if (response) {
+						expect(response.status).toEqual(403); // Forbidden
+					}
 				});
-				const response = await handleRequest(instance, createRequest({
-					method: 'POST',
-					url: 'https://tussle-middleware-test/files/my-file.bin',
-					headers: prepareHeaders({}),
-				}));
-				expect(response).not.toBeUndefined();
-				expect(createFileSpy).not.toHaveBeenCalled();
-				expect(beforeCreate).toHaveBeenCalledTimes(1);
-				expect(afterCreate).not.toHaveBeenCalled();
-				if (response) {
-					expect(response.status).toEqual(403); // Forbidden
-				}
+
+				test('modified storage path determines storage location', async () => {
+					const storage = new TussleMockStorageService();
+					const createFileSpy = jest.spyOn(storage, 'createFile');
+					const beforeCreate = jest.fn(async (_req, params) => ({
+						...params,
+						path: '/mysubdir' + params.path,
+					}));
+					const afterCreate = jest.fn(async (_req, params) => params);
+					const instance = await createMiddleware(storage, {
+						'before-create': beforeCreate,
+						'after-create': afterCreate,
+					});
+					const response = await handleRequest(instance, createRequest({
+						method: 'POST',
+						url: 'https://tussle-middleware-test/files/my-file.bin',
+						headers: prepareHeaders({
+							'Content-Length': '0',
+							'Upload-Length': '20',
+						}),
+					}));
+					expect(response).not.toBeUndefined();
+					expect(beforeCreate).toHaveBeenCalledTimes(1);
+					expect(createFileSpy).toHaveBeenCalledWith({
+						contentLength: 0,
+						uploadLength: 20,
+						id: '/files/my-file.bin',
+						path: '/mysubdir/files/my-file.bin',
+						uploadConcat: null,
+						uploadMetadata: {},
+					});
+					expect(afterCreate).toHaveBeenCalledTimes(1);
+					if (response) {
+						expect(response.status).toEqual(201); // No Content (success)
+					}
+				});
 			});
 		});
 	});

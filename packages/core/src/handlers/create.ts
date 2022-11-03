@@ -1,7 +1,7 @@
 import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import type {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResponse, UploadConcatFinal, UploadConcatPartial} from '@tussle/spec/interface/storage';
 import {decode} from 'js-base64';
-import {from as observableFrom, Observable, of, pipe} from 'rxjs';
+import {EMPTY, from as observableFrom, Observable, of, pipe} from 'rxjs';
 import {defaultIfEmpty, filter, map, switchMap} from 'rxjs/operators';
 import type {Tussle} from '../core';
 
@@ -44,10 +44,17 @@ const filterValidStoragePath = filter(
 );
 
 const withParametersFromContext = pipe(
-	map(<T extends {ctx: TussleRequest}>(item: T) => ({
-		...item,
-		params: extractCreationHeaders(item.ctx),
-	})),
+	switchMap(<T extends {ctx: TussleRequest}>(item: T) => {
+		const params = extractCreationHeaders(item.ctx);
+		if (isNaN(params.uploadLength)) {
+			console.error('FAILED TO GET UPLOAD LENGTH');
+			return EMPTY;
+		}
+		return of({
+			...item,
+			params,
+		});
+	}),
 );
 
 const withConfiguredStorage = pipe(
