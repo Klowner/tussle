@@ -19,7 +19,7 @@ function allowedMethod(method: string, overrideMethod: string | null): AllowedMe
 
 interface TussleCloudflareWorkerMiddlewareConfig<U> {
   core: TussleConfig;
-  hooks: Partial<TussleHooks<Request, U>>;
+  hooks?: Partial<TussleHooks<Request, U>>;
 }
 
 export class TussleCloudflareWorker<U = void> extends TussleBaseMiddleware<Request, U> {

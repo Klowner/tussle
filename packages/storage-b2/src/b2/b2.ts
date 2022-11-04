@@ -1,7 +1,7 @@
 import { Observable, throwError } from "rxjs";
 import { switchMap, skip, tap, take, catchError }  from "rxjs/operators";
 import type { B2ActionConfig, B2InitOptions, B2Options } from './types';
-import type { TussleRequestService } from '@tussle/core';
+import type { TussleRequestService } from '@tussle/spec/interface/request';
 import { B2Auth } from './b2auth';
 import * as actions from './actions';
 

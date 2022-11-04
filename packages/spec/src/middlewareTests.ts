@@ -105,7 +105,7 @@ export function middlewareTests<
 	options: {
 		createMiddleware: <S extends TussleStorageService>(
 			storage: S,
-			hooks: TussleHookDef<Req, U>,
+			hooks?: TussleHookDef<Req, U>,
 		) => Promise<T>,
 		createRequest: (request: GenericRequest) => Req,
 		handleRequest: (instance: T, request: Req) => Promise<GenericResponse|null>,
@@ -114,16 +114,66 @@ export function middlewareTests<
 	const { createRequest, createMiddleware, handleRequest } = options;
 	describe(`${name} - middleware specification tests`, () => {
 
-		test('Instantiation', async () => {
-			const storage = new TussleMockStorageService();
-			const instance = await createMiddleware(storage, {});
-			expect(instance).not.toBeUndefined();
+		describe('configuration', () => {
+			test('hooks are optional' , async () => {
+				const storage = new TussleMockStorageService();
+				const middleware = await createMiddleware(storage, undefined);
+				expect(middleware).not.toBeNull();
+			});
 		});
 
 		describe('hooks', () => {
+			test('hooks are optional', async () => {
+				const storage = new TussleMockStorageService();
+				const middleware = await createMiddleware(storage);
+				const response = await handleRequest(middleware, createRequest({
+					method: 'POST',
+					url: 'https://tussle-middleware-test/files/my-file.bin',
+					headers: {
+						'Tus-Resumable': '1.0.0',
+						'Upload-Length': '1000',
+						'Content-Length': '0',
+					}
+				}));
+				expect(response).toBeTruthy();
+				if (response) {
+					expect(response.headers).toHaveProperty('location', '/files/my-file.bin');
+					expect(response.status).toEqual(201); // Created
+				}
+			});
+
+			describe('request validation', () => {
+				let storage: TussleMockStorageService;
+				let middleware: T;
+				beforeEach(async () => {
+					storage = new TussleMockStorageService();
+					middleware = await createMiddleware(storage, {});
+				});
+
+				test('invalid tus-version should result in error', async () => {
+					const response = await handleRequest(middleware, createRequest({
+						method: 'POST',
+						url: 'https://tussle-middleware-test/files/my-file.bin',
+						headers: {
+							'Upload-Length': '100',
+							'Tus-Resumable': '0.0.1', // Unsupported protocol version
+						}
+					}));
+					expect(response).not.toBeNull();
+					if (response) {
+						expect(response.headers['tus-version']).toEqual('1.0.0');
+						expect(response.status).toEqual(412); // Precondition Failed
+					}
+				});
+			});
+
 			describe('before-create', () => {
+				let storage: TussleMockStorageService;
+				beforeEach(() => {
+					storage = new TussleMockStorageService();
+				});
+
 				test('returning a null storage path should deny upload', async () => {
-					const storage = new TussleMockStorageService();
 					const createFileSpy = jest.spyOn(storage, 'createFile');
 
 					const beforeCreate = jest.fn(async (_req, params) => ({
@@ -156,7 +206,6 @@ export function middlewareTests<
 				});
 
 				test('modified storage path determines storage location', async () => {
-					const storage = new TussleMockStorageService();
 					const createFileSpy = jest.spyOn(storage, 'createFile');
 					const beforeCreate = jest.fn(async (_req, params) => ({
 						...params,

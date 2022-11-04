@@ -1,46 +1,44 @@
 import {
-  CompletedPart,
-  CompleteMultipartUploadCommand,
-  CompleteMultipartUploadOutput,
-  CreateMultipartUploadCommand,
-  PutObjectCommand,
-  PutObjectCommandOutput,
-  S3Client,
-  UploadPartCommand,
-  UploadPartCommandOutput,
+	CompletedPart,
+	CompleteMultipartUploadCommand,
+	CompleteMultipartUploadOutput,
+	CreateMultipartUploadCommand,
+	PutObjectCommand,
+	PutObjectCommandOutput,
+	S3Client,
+	UploadPartCommand,
+	UploadPartCommandOutput
 } from "@aws-sdk/client-s3";
-import {
-  TTLCache,
-  TusProtocolExtension,
-  TussleStorageService,
-} from "@tussle/core";
+import {TTLCache} from "@tussle/core";
 import {TussleStateService} from "@tussle/spec/interface/state";
 import {
-  TussleStorageCreateFileParams,
-  TussleStorageCreateFileResponse,
-  TussleStorageFileInfo,
-  TussleStorageFileInfoParams,
-  TussleStoragePatchFileParams,
-  TussleStoragePatchFileResponse,
+	TussleStorageCreateFileParams,
+	TussleStorageCreateFileResponse,
+	TussleStorageFileInfo,
+	TussleStorageFileInfoParams,
+	TussleStoragePatchFileParams,
+	TussleStoragePatchFileResponse,
+	TussleStorageService
 } from "@tussle/spec/interface/storage";
+import {TusProtocolExtension} from "@tussle/spec/interface/tus";
 import {
-  concat,
-  defer,
-  EMPTY,
-  from,
-  Observable,
-  of,
-  OperatorFunction,
-  pipe,
-  zip,
+	concat,
+	defer,
+	EMPTY,
+	from,
+	Observable,
+	of,
+	OperatorFunction,
+	pipe,
+	zip
 } from "rxjs";
 import {
-  defaultIfEmpty,
-  filter,
-  map,
-  mergeMap,
-  share,
-  take,
+	defaultIfEmpty,
+	filter,
+	map,
+	mergeMap,
+	share,
+	take
 } from "rxjs/operators";
 import type {Readable} from "stream";
 import {TussleCachedState} from "./cachedstate";

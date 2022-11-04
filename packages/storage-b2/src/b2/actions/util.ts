@@ -1,5 +1,5 @@
 import type { B2ActionConfig, B2ActionObservable } from '../types';
-import type { TussleOutgoingRequest } from '@tussle/core';
+import type { TussleOutgoingRequest } from '@tussle/spec/interface/request';
 
 export function createGenericAction<
   P,

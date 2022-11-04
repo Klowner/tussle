@@ -1,9 +1,8 @@
-import type { AxiosRequestConfig} from 'axios';
-import type { AxiosResponse } from 'axios';
-import type { Observable } from 'rxjs';
-import { Axios as AxiosRx } from 'axios-observable';
-import type { TussleOutgoingRequest, TussleOutgoingResponse, TussleRequestService } from '@tussle/core';
-import { map } from 'rxjs/operators';
+import type {TussleOutgoingRequest, TussleOutgoingResponse, TussleRequestService} from '@tussle/spec/interface/request';
+import type {AxiosRequestConfig, AxiosResponse} from 'axios';
+import {Axios as AxiosRx} from 'axios-observable';
+import type {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 type TussleRequestAxiosOptions = {
   axios?: AxiosRx;

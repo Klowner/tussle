@@ -1,4 +1,4 @@
-import type { TussleRequestService } from '@tussle/core';
+import type { TussleRequestService } from '@tussle/spec/interface/request';
 import { from, Observable, Subject } from 'rxjs';
 import { mergeMap, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 import { b2AuthorizeAccountRequest, B2AuthorizeAccountResponse } from './actions/b2AuthorizeAccount';

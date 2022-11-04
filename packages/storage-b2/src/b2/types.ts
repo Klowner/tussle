@@ -1,4 +1,4 @@
-import type { TussleRequestService, TussleOutgoingResponse } from '@tussle/core';
+import type { TussleRequestService, TussleOutgoingResponse } from '@tussle/spec/interface/request';
 import type { Observable } from 'rxjs';
 
 export type B2ActionObservable<T> = Observable<TussleOutgoingResponse<T, unknown>>;

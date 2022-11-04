@@ -1,4 +1,5 @@
-import type { TussleConfig, TussleIncomingRequest } from '@tussle/core';
+import type { TussleIncomingRequest } from '@tussle/spec/interface/request';
+import type { TussleConfig }  from '@tussle/core';
 import type { TussleHooks, TussleMiddlewareService } from '@tussle/spec/interface/middleware';
 import type { Context, Middleware } from 'koa';
 import { Tussle, TussleBaseMiddleware } from '@tussle/core';
@@ -84,7 +85,7 @@ const handleResponse = async <T extends Context, P>(ctx: TussleIncomingRequest<T
 
 interface TussleKoaMiddlewareConfig<U> {
   core: TussleConfig | Tussle;
-  hooks: Partial<TussleHooks<Context, U>>;
+  hooks?: Partial<TussleHooks<Context, U>>;
 }
 
 export default class TussleKoaMiddleware<U> extends TussleBaseMiddleware<Context, U> {

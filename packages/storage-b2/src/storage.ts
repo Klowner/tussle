@@ -1,30 +1,26 @@
-import {Observable, OperatorFunction, pipe} from "rxjs";
-import {catchError, filter, mergeMap, map, share, switchMap, tap, withLatestFrom, } from 'rxjs/operators';
-import {combineLatest, defer, EMPTY, from, of, throwError} from "rxjs";
-import type {
-	TusProtocolExtension,
-	TussleRequestService,
-	TussleStorageService
-} from "@tussle/core";
-import type {TussleOutgoingResponse} from '@tussle/spec/interface/request';
+import type {TussleOutgoingResponse, TussleRequestService} from '@tussle/spec/interface/request';
 import type {TussleStateService} from '@tussle/spec/interface/state';
 import type {
 	TussleStorageCreateFileParams,
 	TussleStorageCreateFileResponse,
 	TussleStorageDeleteFileParams,
+	TussleStorageFileInfo,
+	TussleStorageFileInfoParams,
 	TussleStoragePatchFileParams,
 	TussleStoragePatchFileResponse,
-	TussleStorageFileInfoParams,
-	TussleStorageFileInfo,
+	TussleStorageService
 } from '@tussle/spec/interface/storage';
+import {combineLatest, defer, EMPTY, from, Observable, of, OperatorFunction, pipe, throwError} from "rxjs";
+import {catchError, filter, map, mergeMap, share, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import type {B2StartLargeFileResponse} from "./b2/actions/b2StartLargeFile";
 import type {B2UploadPartResponse} from './b2/actions/b2UploadPart';
 import type {PoolType, Releasable} from './b2/pool';
 
 import {TTLCache, TussleStateNamespace} from "@tussle/core";
-import {B2UploadPartURLPool, createUploadPartURLPool, createUploadURLPool} from './b2/endpointpool';
+import {TusProtocolExtension} from "@tussle/spec/interface/tus";
 import {B2} from "./b2";
 import {B2AuthorizeAccountResponse} from "./b2/actions/b2AuthorizeAccount";
+import {B2UploadPartURLPool, createUploadPartURLPool, createUploadURLPool} from './b2/endpointpool';
 
 export interface TussleStorageB2Options {
 	applicationKeyId: string;
