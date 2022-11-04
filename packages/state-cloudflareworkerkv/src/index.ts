@@ -31,15 +31,9 @@ class TussleStateCloudflareWorkerKV<T> implements TussleStateService<T> {
 
   async setItem(
     key: string,
-    value: T|string,
+    value: Readonly<T>,
   ): Promise<void> {
-    let val: string;
-    if (typeof value === 'string') {
-      val = value;
-    } else {
-      val = JSON.stringify(value);
-    }
-    await this.ns.put(key, val, this.options);
+    await this.ns.put(key, JSON.stringify(value), this.options);
     this.invalidateCache();
   }
 
