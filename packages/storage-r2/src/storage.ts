@@ -22,6 +22,7 @@ import {
 	share, switchMap,
 	take, takeLast, toArray
 } from "rxjs";
+import{R2File} from './r2file';
 import {nanoid} from "nanoid";
 
 interface Part {
@@ -572,46 +573,6 @@ export class TussleStorageR2 implements TussleStorageService {
 				this.options.bucket,
 			)),
 			defaultIfEmpty(null),
-		));
-	}
-}
-
-export class R2File {
-	constructor(
-		readonly key: string,
-		readonly size: number,
-		readonly parts: Readonly<Part[]>,
-		readonly metadata: Record<string, unknown>,
-		private readonly bucket: R2Bucket,
-	) {}
-
-	get body(): ReadableStream {
-		const {readable, writable} = new TransformStream();
-		(async () => {
-			for (const {key} of this.parts) {
-				const obj = await this.getPart(key);
-				if (!obj) {
-					writable.close();
-					return;
-				}
-				await obj.body.pipeTo(writable, {preventClose: true});
-			}
-			writable.close();
-		})();
-		return readable;
-	}
-
-	async getPart(
-		which: number | string,
-	): Promise<R2ObjectBody | null> {
-		const key = (typeof which === 'number') ? this.parts[which].key : which;
-		return await this.bucket.get(key);
-	}
-
-	// Delete all related R2Objects
-	async delete(): Promise<void[]> {
-		return Promise.all(this.parts.map(
-			({key}) => this.bucket.delete(key),
 		));
 	}
 }
