@@ -21,9 +21,9 @@
 	"author": "Mark Riedesel <mark@klowner.com>",
 	"license": "MIT",
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.58.0",
-		"@tussle/core": "^0.6.0",
-		"rxjs": "^7.0.0"
+		"@aws-sdk/client-s3": "^3",
+		"@tussle/core": "^0.6",
+		"rxjs": "^7"
 	},
 	"devDependencies": {
 		"@tussle/spec": "^0.6.0",
