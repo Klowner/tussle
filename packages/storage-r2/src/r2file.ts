@@ -33,6 +33,7 @@ export class R2File {
 		) {
 			return this.body;
 		}
+		length = Math.min(this.size - offset, length);
 		const parts = selectPartRanges(this.parts, offset, length);
 		const { readable, writable } = new FixedLengthStream(length);
 		try {

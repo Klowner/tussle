@@ -60,5 +60,19 @@ describe('R2File', () => {
 				{ part: parts[7], },
 			]);
 		});
+
+		test('range extending beyond end of file should truncate request length', () => {
+			const selected = selectPartRanges(parts, 0, 1000 * (parts.length + 1));
+			expect(selected).toEqual([
+				{ part: parts[0], },
+				{ part: parts[1], },
+				{ part: parts[2], },
+				{ part: parts[3], },
+				{ part: parts[4], },
+				{ part: parts[5], },
+				{ part: parts[6], },
+				{ part: parts[7], },
+			]);
+		});
 	});
 });
