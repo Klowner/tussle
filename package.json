@@ -11,7 +11,7 @@
     "test": "run-s test:unit",
     "test:unit": "yarn jest",
     "coverage": "jest --coverage --ci --detectOpenHandles --maxWorkers=2",
-    "build": "run-s clean && build:lib",
+    "build": "run-s clean && yarn build:lib",
     "build:lib": "lerna run build --scope '@tussle/*'",
     "watch": "lerna run build --scope '@tussle/*' --watch",
     "bootstrap": "lerna exec yarn install",
