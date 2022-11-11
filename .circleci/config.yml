@@ -17,6 +17,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: tussle_test
+    resource_class: large
     environment:
       POSTGRES_CONNECT_STRING: postgres://postgres:postgres@localhost/tussle_test
     steps:
