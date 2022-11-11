@@ -19,6 +19,7 @@ jobs:
           POSTGRES_DB: tussle_test
     environment:
       POSTGRES_CONNECT_STRING: postgres://postgres:postgres@localhost/tussle_test
+    resource_class: large
     steps:
       - run:
           name: install dockerize
@@ -41,7 +42,7 @@ jobs:
             - .yarn/unplugged
           key: packages-{{ checksum "yarn.lock" }}
       - run: yarn lerna run clean --scope "@tussle/*" --concurrency=1
-      - run: yarn lerna run build --scope "@tussle/*" --concurrency=1
+      - run: yarn lerna-parallelism run build --scope "@tussle/*" --concurrency=1
       - run: dockerize -wait tcp://localhost:5432 -timeout 1m
       - run:
           name: create database tables for @tussle/state-postgres tests
