@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.2](https://klowner/compare/v0.6.1...v0.6.2) (2022-11-11)
+
+
+### Bug Fixes
+
+* **storage-r2:** cap R2File.slice() length to file's total size ([29b33fd](https://klowner/commits/29b33fd22e2ddad066650d6353f873cf0aa75685))
+
+
+
+
+
 ## [0.6.1](https://github.com/Klowner/tussle/compare/v0.6.0...v0.6.1) (2022-11-09)
 
 
