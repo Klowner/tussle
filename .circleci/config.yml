@@ -40,7 +40,8 @@ jobs:
             - .yarn/cache
             - .yarn/unplugged
           key: packages-{{ checksum "yarn.lock" }}
-      - run: yarn run build
+      - run: yarn lerna run clean --scope "@tussle/*" --concurrency=1
+      - run: yarn lerna run build --scope "@tussle/*" --concurrency=1
       - run: dockerize -wait tcp://localhost:5432 -timeout 1m
       - run:
           name: create database tables for @tussle/state-postgres tests
