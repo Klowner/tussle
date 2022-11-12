@@ -78,8 +78,6 @@ const handleResponse = async <T extends ContextWithBody, P>(ctx: TussleIncomingR
 
     // expose info about the tus response
     ctx.originalRequest.state.tussle = ctx.meta;
-  } else {
-    console.log('tussle did not respond to request');
   }
 
   return ctx.originalRequest;
@@ -106,7 +104,7 @@ export default class TussleKoaMiddleware<U> extends TussleBaseMiddleware<Context
       const req = await prepareRequest(this, ctx, null);
       if (req) {
         const response = await firstValueFrom(of(req).pipe(this.core.handle));
-        return response ? handleResponse(response) : next();
+        return response.response ? handleResponse(response) : next();
       }
     };
 }

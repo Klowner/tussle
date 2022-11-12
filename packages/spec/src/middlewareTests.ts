@@ -144,14 +144,15 @@ export function middlewareTests<
 			describe('request validation', () => {
 				let storage: TussleMockStorageService;
 				let middleware: T;
-				const beforeCreate = jest.fn(async (ctx, params) => {
-					return params;
-				});
+				const beforeCreate = jest.fn(async (_ctx, params) => params);
+				const beforePatch = jest.fn(async (_ctx, params) => params);
 				beforeEach(async () => {
 					beforeCreate.mockClear();
+					beforePatch.mockClear();
 					storage = new TussleMockStorageService();
 					middleware = await createMiddleware(storage, {
 						'before-create': beforeCreate,
+						'before-patch': beforePatch,
 					});
 				});
 
@@ -186,7 +187,6 @@ export function middlewareTests<
 					}));
 					expect(beforeCreate).toHaveBeenCalled();
 					const readable = beforeCreate.mock.calls[0][0].request.getReadable();
-					// const data = await readable;
 					if (typeof readable.getReader === 'function') {
 						// ReadableStream-like
 						const reader = await readable.getReader();
@@ -198,6 +198,21 @@ export function middlewareTests<
 					} else {
 						throw new Error('middleware test harness did not recognize readable type');
 					}
+				});
+
+				test('respect HTTP verb as defined by optional X-Http-Method-Override header', async () => {
+					await handleRequest(middleware, createRequest({
+						method: 'PATCH',
+						url: 'https://tussle-middleware-test/files/my-file.bin',
+						headers: {
+							'Content-Type': 'application/offset+octet-stream',
+							'Upload-Length': '32',
+							'Tus-Resumable': '1.0.0',
+							'X-HTTP-Method-Override': 'POST', // Request should be treated as a POST
+						},
+					}));
+					expect(beforeCreate).toHaveBeenCalled();
+					expect(beforePatch).not.toHaveBeenCalled();
 				});
 			});
 
