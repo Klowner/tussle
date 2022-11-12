@@ -16,11 +16,12 @@ middlewareTests<TussleKoaMiddleware<UserParams>, Context, UserParams>(
 				storage,
 			},
 		}),
-		createRequest: ({url, method, headers}): Context => {
+		createRequest: ({url, method, headers, body }): Context => {
 			return createMockContext({
 				url,
 				method,
 				headers,
+				requestBody: body,
 			});
 		},
 		handleRequest: async (instance, ctx) => {

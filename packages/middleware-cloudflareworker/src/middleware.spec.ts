@@ -15,11 +15,10 @@ middlewareTests<TussleCloudflareWorker<UserParams>, Request, UserParams>(
 			},
 		}),
 		createRequest: (request) => {
-			const body = request.body ? new ReadableStream(request.body as UnderlyingSource) : undefined;
 			return new Request(request.url, {
 				method: request.method,
 				headers: request.headers,
-				body,
+				body: request.body,
 			});
 		},
 		handleRequest: async (instance, request) => {

@@ -3,6 +3,8 @@
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "lib",
+		"target": "es2017",
+		"lib": [],
 		"types": ["@cloudflare/workers-types"]
 	},
 	"include": ["src/**/*"],

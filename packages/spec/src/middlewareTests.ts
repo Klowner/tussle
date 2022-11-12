@@ -52,9 +52,8 @@ class TussleMockStorageService implements TussleStorageService {
 	}
 
 	patchFile<Req, MockStorageState>(
-		params: TussleStoragePatchFileParams<Req, MockStorageState>,
+		_params: TussleStoragePatchFileParams<Req, MockStorageState>,
 	): Observable<TussleStoragePatchFileResponse> {
-		console.log({params});
 		return EMPTY;
 	}
 
@@ -145,9 +144,15 @@ export function middlewareTests<
 			describe('request validation', () => {
 				let storage: TussleMockStorageService;
 				let middleware: T;
+				const beforeCreate = jest.fn(async (ctx, params) => {
+					return params;
+				});
 				beforeEach(async () => {
+					beforeCreate.mockClear();
 					storage = new TussleMockStorageService();
-					middleware = await createMiddleware(storage, {});
+					middleware = await createMiddleware(storage, {
+						'before-create': beforeCreate,
+					});
 				});
 
 				test('invalid tus-version should result in error', async () => {
@@ -163,6 +168,35 @@ export function middlewareTests<
 					if (response) {
 						expect(response.headers['tus-version']).toEqual('1.0.0');
 						expect(response.status).toEqual(412); // Precondition Failed
+					}
+				});
+
+				test('getReadable() should return request body', async () => {
+					const enc = new TextEncoder();
+					const body = new Uint8Array(enc.encode('hello'));
+					await handleRequest(middleware, createRequest({
+						method: 'POST',
+						body,
+						url: 'https://tussle-middleware-test/files/my-file.bin',
+						headers: {
+							'Content-Type': 'application/offset+octet-stream',
+							'Upload-Length': '32',
+							'Tus-Resumable': '1.0.0',
+						},
+					}));
+					expect(beforeCreate).toHaveBeenCalled();
+					const readable = beforeCreate.mock.calls[0][0].request.getReadable();
+					// const data = await readable;
+					if (typeof readable.getReader === 'function') {
+						// ReadableStream-like
+						const reader = await readable.getReader();
+						const { value } = await reader.read(body.length);
+						expect(value).toStrictEqual(body);
+					} else if (readable instanceof Uint8Array) {
+						// Uint8Array-like
+						expect(readable).toStrictEqual(body);
+					} else {
+						throw new Error('middleware test harness did not recognize readable type');
 					}
 				});
 			});

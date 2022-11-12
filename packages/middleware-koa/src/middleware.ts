@@ -28,8 +28,13 @@ const firstOrUndefined = (v: string|string[]|undefined) => {
   }
 };
 
+interface ContextWithBody extends Context {
+	request: Context['request'] & {
+		body?: Uint8Array;
+	},
+}
 
-const prepareRequest = async <T extends Context, U>(
+const prepareRequest = async <T extends ContextWithBody, U>(
   source: TussleMiddlewareService<T, U>,
   originalRequest: T,
   userParams: U,
@@ -42,7 +47,7 @@ const prepareRequest = async <T extends Context, U>(
     return {
       request: {
         getHeader: (key: string) => firstOrUndefined(ctx.headers[key]),
-        getReadable: () => ctx.req,
+        getReadable: () => ctx.request.body, //ctx.request.body!, //as unknown as ReadableStream<Uint8Array>,
         method,
         path: ctx.path,
       },
@@ -59,7 +64,7 @@ const prepareRequest = async <T extends Context, U>(
   return null; // ignore this request
 };
 
-const handleResponse = async <T extends Context, P>(ctx: TussleIncomingRequest<T, P>): Promise<T> => {
+const handleResponse = async <T extends ContextWithBody, P>(ctx: TussleIncomingRequest<T, P>): Promise<T> => {
   if (ctx.response && ctx.response.status) {
     // Set response status code
     ctx.originalRequest.status = ctx.response.status;
