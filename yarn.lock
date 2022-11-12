@@ -866,17 +866,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/types@npm:3.201.0":
+"@aws-sdk/types@npm:3.201.0, @aws-sdk/types@npm:^3.1.0":
   version: 3.201.0
   resolution: "@aws-sdk/types@npm:3.201.0"
   checksum: faaf94dddf52f2effd693556473a9d95d7a63b2786e2688480068cc6fcc5f95d8ff85c2c1d7f46cfa6032063522ec41747c08a15c39346566c5649cf861e2b20
-  languageName: node
-  linkType: hard
-
-"@aws-sdk/types@npm:^3.1.0":
-  version: 3.162.0
-  resolution: "@aws-sdk/types@npm:3.162.0"
-  checksum: 32ce742f060556f7f607b50ef4bf3d79d45a26e298b58c54dcca4f3cd4e8da72b521333c6408fcf09208928b158917b73b885438eef4a151f3d193a1cf74878c
   languageName: node
   linkType: hard
 
@@ -1091,21 +1084,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/util-utf8-browser@npm:3.188.0":
+"@aws-sdk/util-utf8-browser@npm:3.188.0, @aws-sdk/util-utf8-browser@npm:^3.0.0":
   version: 3.188.0
   resolution: "@aws-sdk/util-utf8-browser@npm:3.188.0"
   dependencies:
     tslib: ^2.3.1
   checksum: dacd27164aa0835888434e080b67f04510e2281560540ff73496f2d0aa73b0b7f830ec08491b35c3a51bf6214615579182aff8727e151e54a74a97a197a2ac31
-  languageName: node
-  linkType: hard
-
-"@aws-sdk/util-utf8-browser@npm:^3.0.0":
-  version: 3.109.0
-  resolution: "@aws-sdk/util-utf8-browser@npm:3.109.0"
-  dependencies:
-    tslib: ^2.3.1
-  checksum: 8311763b04261dab5995ec67abf31795f41e9c4b1ad635ed305735e14c7e3bc48e9ae349a06aab485390358a6a58e97190144ea51190983cec4ae665887b219b
   languageName: node
   linkType: hard
 
@@ -4568,6 +4552,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@tussle/state-namespace@workspace:packages/state-namespace":
+  version: 0.0.0-use.local
+  resolution: "@tussle/state-namespace@workspace:packages/state-namespace"
+  dependencies:
+    "@tussle/spec": ^0.6.1
+    concurrently: ^7.5.0
+    jest: ^29.2.2
+    npm-run-all: ^4.1.5
+    rimraf: ^3.0.2
+    typescript: ^4.8.4
+  languageName: unknown
+  linkType: soft
+
 "@tussle/state-postgres@workspace:packages/state-postgres":
   version: 0.0.0-use.local
   resolution: "@tussle/state-postgres@workspace:packages/state-postgres"
@@ -4837,17 +4834,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:^29.2.1":
-  version: 29.2.1
-  resolution: "@types/jest@npm:29.2.1"
-  dependencies:
-    expect: ^29.0.0
-    pretty-format: ^29.0.0
-  checksum: 5610c9a44c57f6dc39cf54429ea8d04574ad4c3e3ddf9a2621882aa94a0758a42ca97a0d0aec41a8d0b149fa63bf3d077d1f07c1f1d82e3d89ad7408de211255
-  languageName: node
-  linkType: hard
-
-"@types/jest@npm:^29.2.2":
+"@types/jest@npm:^29.2.1, @types/jest@npm:^29.2.2":
   version: 29.2.2
   resolution: "@types/jest@npm:29.2.2"
   dependencies:
@@ -8886,16 +8873,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-core-module@npm:^2.5.0, is-core-module@npm:^2.9.0":
-  version: 2.10.0
-  resolution: "is-core-module@npm:2.10.0"
-  dependencies:
-    has: ^1.0.3
-  checksum: 0f3f77811f430af3256fa7bbc806f9639534b140f8ee69476f632c3e1eb4e28a38be0b9d1b8ecf596179c841b53576129279df95e7051d694dac4ceb6f967593
-  languageName: node
-  linkType: hard
-
-"is-core-module@npm:^2.8.1":
+"is-core-module@npm:^2.5.0, is-core-module@npm:^2.8.1, is-core-module@npm:^2.9.0":
   version: 2.11.0
   resolution: "is-core-module@npm:2.11.0"
   dependencies:
@@ -10356,17 +10334,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lru-cache@npm:^7.4.4, lru-cache@npm:^7.5.1":
+"lru-cache@npm:^7.4.4, lru-cache@npm:^7.5.1, lru-cache@npm:^7.7.1":
   version: 7.14.1
   resolution: "lru-cache@npm:7.14.1"
   checksum: d72c6713c6a6d86836a7a6523b3f1ac6764768cca47ec99341c3e76db06aacd4764620e5e2cda719a36848785a52a70e531822dc2b33fb071fa709683746c104
-  languageName: node
-  linkType: hard
-
-"lru-cache@npm:^7.7.1":
-  version: 7.14.0
-  resolution: "lru-cache@npm:7.14.0"
-  checksum: efdd329f2c1bb790b71d497c6c59272e6bc2d7dd060ba55fc136becd3dd31fc8346edb446275504d94cb60d3c8385dbf5267b79b23789e409b2bdf302d13f0d7
   languageName: node
   linkType: hard
 
@@ -13466,14 +13437,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.0, tslib@npm:^2.1.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "tslib@npm:2.4.0"
-  checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
-  languageName: node
-  linkType: hard
-
-"tslib@npm:^2.3.0":
+"tslib@npm:^2.0.0, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0":
   version: 2.4.1
   resolution: "tslib@npm:2.4.1"
   checksum: 19480d6e0313292bd6505d4efe096a6b31c70e21cf08b5febf4da62e95c265c8f571f7b36fcc3d1a17e068032f59c269fab3459d6cd3ed6949eafecf64315fca
@@ -14164,7 +14128,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs-parser@npm:21.1.1, yargs-parser@npm:^21.0.0, yargs-parser@npm:^21.0.1, yargs-parser@npm:^21.1.1":
+"yargs-parser@npm:21.1.1, yargs-parser@npm:^21.0.1, yargs-parser@npm:^21.1.1":
   version: 21.1.1
   resolution: "yargs-parser@npm:21.1.1"
   checksum: ed2d96a616a9e3e1cc7d204c62ecc61f7aaab633dcbfab2c6df50f7f87b393993fe6640d017759fe112d0cb1e0119f2b4150a87305cc873fd90831c6a58ccf1c
@@ -14193,22 +14157,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^17.0.0, yargs@npm:^17.3.1":
-  version: 17.5.1
-  resolution: "yargs@npm:17.5.1"
-  dependencies:
-    cliui: ^7.0.2
-    escalade: ^3.1.1
-    get-caller-file: ^2.0.5
-    require-directory: ^2.1.1
-    string-width: ^4.2.3
-    y18n: ^5.0.5
-    yargs-parser: ^21.0.0
-  checksum: 00d58a2c052937fa044834313f07910fd0a115dec5ee35919e857eeee3736b21a4eafa8264535800ba8bac312991ce785ecb8a51f4d2cc8c4676d865af1cfbde
-  languageName: node
-  linkType: hard
-
-"yargs@npm:^17.6.2":
+"yargs@npm:^17.0.0, yargs@npm:^17.3.1, yargs@npm:^17.6.2":
   version: 17.6.2
   resolution: "yargs@npm:17.6.2"
   dependencies:

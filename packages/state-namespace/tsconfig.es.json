@@ -1,0 +1,12 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"moduleResolution": "node",
+		"outDir": "dist-es",
+		"importHelpers": true,
+		"module": "esnext",
+		"noEmitHelpers": true,
+		"target": "es5",
+		"strict": true
+	}
+}

@@ -12,6 +12,7 @@
     {"path": "./state-cloudflareworkerkv"},
     {"path": "./state-memory"},
     {"path": "./state-memory-ttl"},
+    {"path": "./state-namespace"},
     {"path": "./state-postgres"},
     {"path": "./request-axios"},
     {"path": "./request-cloudflareworker"}

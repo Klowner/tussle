@@ -16,7 +16,7 @@ import type {B2StartLargeFileResponse} from "./b2/actions/b2StartLargeFile";
 import type {B2UploadPartResponse} from './b2/actions/b2UploadPart';
 import type {PoolType, Releasable} from './b2/pool';
 
-import {TTLCache, TussleStateNamespace} from "@tussle/core";
+import {TTLCache} from "@tussle/core";
 import {TusProtocolExtension} from "@tussle/spec/interface/tus";
 import {B2} from "./b2";
 import {B2AuthorizeAccountResponse} from "./b2/actions/b2AuthorizeAccount";
@@ -117,7 +117,7 @@ export class TussleStorageB2 implements TussleStorageService {
 
 		this.uploadPartURLPools = new TTLCache(60 * 60 * 1000);
 
-		this.persistentState = new TussleStateNamespace(options.stateService, "b2");
+		this.persistentState = options.stateService;
 		this.transientState = new TTLCache(60 * 60 * 1000);
 
 		this.bucketName$ = this.b2.auth.state$.pipe(
