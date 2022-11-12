@@ -4556,6 +4556,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-namespace@workspace:packages/state-namespace"
   dependencies:
+    "@tussle/core": ^0.6.1
     "@tussle/spec": ^0.6.1
     "@tussle/state-memory": ^0.6.1
     concurrently: ^7.5.0
