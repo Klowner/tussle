@@ -7,7 +7,7 @@ import { firstValueFrom, of } from 'rxjs';
 
 type AllowedMethod = 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH';
 
-function allowedMethod(method: string, overrideMethod?: string): AllowedMethod | null {
+function allowedMethod(method: string, overrideMethod?: string): AllowedMethod {
   method = overrideMethod || method;
   switch(method) {
     case 'POST':
@@ -16,7 +16,7 @@ function allowedMethod(method: string, overrideMethod?: string): AllowedMethod |
     case 'PATCH':
       return method;
   }
-  return null;
+	throw new Error(`Unknown request method: ${method}`);
 }
 
 const firstOrUndefined = (v: string|string[]|undefined) => {
@@ -43,25 +43,22 @@ const prepareRequest = async <T extends ContextWithBody, U>(
   const ctx = originalRequest;
   const overrideMethod = firstOrUndefined(ctx.headers['x-http-method-override']);
   const method = allowedMethod(ctx.method, overrideMethod);
-  if (method) {
-    return {
-      request: {
-        getHeader: (key: string) => firstOrUndefined(ctx.headers[key]),
-        getReadable: () => ctx.request.body, //ctx.request.body!, //as unknown as ReadableStream<Uint8Array>,
-        method,
-        path: ctx.path,
-      },
-      response: null,
-      cfg: {
-      },
-      meta: {
-      },
-      source,
-      originalRequest,
-      userParams,
-    };
-  }
-  return null; // ignore this request
+	return {
+		request: {
+			getHeader: (key: string) => firstOrUndefined(ctx.headers[key]),
+			getReadable: () => ctx.request.body,
+			method,
+			path: ctx.path,
+		},
+		response: null,
+		cfg: {
+		},
+		meta: {
+		},
+		source,
+		originalRequest,
+		userParams,
+	};
 };
 
 const handleResponse = async <T extends ContextWithBody, P>(ctx: TussleIncomingRequest<T, P>): Promise<T> => {
