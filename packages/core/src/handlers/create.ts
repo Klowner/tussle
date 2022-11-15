@@ -46,7 +46,7 @@ const filterValidStoragePath = filter(
 const withParametersFromContext = pipe(
 	switchMap(<T extends {ctx: TussleRequest}>(item: T) => {
 		const params = extractCreationHeaders(item.ctx);
-		if (isNaN(params.uploadLength)) {
+		if (isNaN(params.uploadLength) && !item.ctx.request.getHeader('upload-concat')?.startsWith('final')) {
 			throw new Error('Failed to get upload length from header.');
 		}
 		return of({
