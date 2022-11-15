@@ -4391,11 +4391,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tussle/core@^0.6.3, @tussle/core@workspace:packages/core":
+"@tussle/core@^0.6.4, @tussle/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@tussle/core@workspace:packages/core"
   dependencies:
-    "@tussle/spec": ^0.6.3
+    "@tussle/spec": ^0.6.4
     jest: ^29.2.2
     js-base64: ^3.7.2
     npm-run-all: ^4.1.5
@@ -4428,7 +4428,7 @@ __metadata:
   resolution: "@tussle/middleware-cloudflareworker@workspace:packages/middleware-cloudflareworker"
   dependencies:
     "@cloudflare/workers-types": ^3.18.0
-    "@tussle/spec": ^0.6.3
+    "@tussle/spec": ^0.6.4
     jest: ^29.2.2
     jest-environment-miniflare: ^2.11.0
     miniflare: ^2.11.0
@@ -4456,7 +4456,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/request-axios@workspace:packages/request-axios"
   dependencies:
-    "@tussle/spec": ^0.6.3
+    "@tussle/spec": ^0.6.4
     axios: ^0.27.2
     axios-observable: ^1.5.0
     jest: ^29.2.2
@@ -4483,7 +4483,7 @@ __metadata:
   resolution: "@tussle/request-cloudflareworker@workspace:packages/request-cloudflareworker"
   dependencies:
     "@cloudflare/workers-types": ^3.18.0
-    "@tussle/spec": ^0.6.3
+    "@tussle/spec": ^0.6.4
     concurrently: ^7.4.0
     jest: ^29.2.2
     rimraf: ^3.0.2
@@ -4494,7 +4494,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@tussle/spec@^0.6.3, @tussle/spec@workspace:packages/spec":
+"@tussle/spec@^0.6.4, @tussle/spec@workspace:packages/spec":
   version: 0.0.0-use.local
   resolution: "@tussle/spec@workspace:packages/spec"
   dependencies:
@@ -4517,7 +4517,7 @@ __metadata:
   resolution: "@tussle/state-cloudflareworkerkv@workspace:packages/state-cloudflareworkerkv"
   dependencies:
     "@cloudflare/workers-types": ^3.18.0
-    "@tussle/spec": ^0.6.3
+    "@tussle/spec": ^0.6.4
     jest: ^29.2.2
     jest-environment-miniflare: ^2.11.0
     miniflare: ^2.11.0
@@ -4531,19 +4531,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-memory-ttl@workspace:packages/state-memory-ttl"
   dependencies:
-    "@tussle/core": ^0.6.3
-    "@tussle/spec": ^0.6.3
+    "@tussle/core": ^0.6.4
+    "@tussle/spec": ^0.6.4
     jest: ^29.2.2
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
   languageName: unknown
   linkType: soft
 
-"@tussle/state-memory@^0.6.3, @tussle/state-memory@workspace:packages/state-memory":
+"@tussle/state-memory@^0.6.4, @tussle/state-memory@workspace:packages/state-memory":
   version: 0.0.0-use.local
   resolution: "@tussle/state-memory@workspace:packages/state-memory"
   dependencies:
-    "@tussle/spec": ^0.6.3
+    "@tussle/spec": ^0.6.4
     jest: ^29.2.2
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
@@ -4556,9 +4556,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-namespace@workspace:packages/state-namespace"
   dependencies:
-    "@tussle/core": ^0.6.3
-    "@tussle/spec": ^0.6.3
-    "@tussle/state-memory": ^0.6.3
+    "@tussle/core": ^0.6.4
+    "@tussle/spec": ^0.6.4
+    "@tussle/state-memory": ^0.6.4
     concurrently: ^7.5.0
     jest: ^29.2.2
     npm-run-all: ^4.1.5
@@ -4571,8 +4571,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tussle/state-postgres@workspace:packages/state-postgres"
   dependencies:
-    "@tussle/core": ^0.6.3
-    "@tussle/spec": ^0.6.3
+    "@tussle/core": ^0.6.4
+    "@tussle/spec": ^0.6.4
     "@types/pg": ^7.14.11
     jest: ^29.2.2
     npm-run-all: ^4.1.5
@@ -4616,7 +4616,7 @@ __metadata:
   resolution: "@tussle/storage-r2@workspace:packages/storage-r2"
   dependencies:
     "@cloudflare/workers-types": ^3.18.0
-    "@tussle/spec": ^0.6.3
+    "@tussle/spec": ^0.6.4
     "@types/jest": ^29.2.2
     concurrently: ^7.5.0
     jest: ^29.2.2
@@ -4642,8 +4642,8 @@ __metadata:
   resolution: "@tussle/storage-s3@workspace:packages/storage-s3"
   dependencies:
     "@aws-sdk/client-s3": ^3
-    "@tussle/core": ^0.6.3
-    "@tussle/spec": ^0.6.3
+    "@tussle/core": ^0.6.4
+    "@tussle/spec": ^0.6.4
     concurrently: ^7.4.0
     jest: ^29.2.2
     nock: ^13.2.4

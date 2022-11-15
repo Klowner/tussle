@@ -1,6 +1,6 @@
 {
 	"name": "@tussle/spec",
-	"version": "0.6.3",
+	"version": "0.6.4",
 	"description": "Tussle component interfaces and related interface compliance tests",
 	"main": "lib/index.js",
 	"files": [
