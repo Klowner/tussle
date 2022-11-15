@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.3](https://github.com/Klowner/tussle/compare/v0.6.2...v0.6.3) (2022-11-15)
+
+
+### Features
+
+* **spec:** add x-http-method-override header http verb override to middleware tests ([f08f89d](https://github.com/Klowner/tussle/commit/f08f89d727c10894bfa0cd731879c58b8471c866))
+
+
+
+
+
 ## [0.6.1](https://github.com/Klowner/tussle/compare/v0.6.0...v0.6.1) (2022-11-09)
 
 **Note:** Version bump only for package @tussle/spec

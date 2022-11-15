@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.3](https://github.com/Klowner/tussle/compare/v0.6.2...v0.6.3) (2022-11-15)
+
+
+### Bug Fixes
+
+* **core:** don't require upload-length if request is upload-concat: final ([3f47529](https://github.com/Klowner/tussle/commit/3f47529794d15f8be1d7a3639f8e064faadb6bfe))
+
+
+### Features
+
+* **state-namespace:** extract TussleStateNamespace from core and move to separate @tussle/state-namespace package ([017dbbc](https://github.com/Klowner/tussle/commit/017dbbcb58e6bb4d090abd9c856ddfeb92fdd581))
+
+
+
+
+
 ## [0.6.1](https://github.com/Klowner/tussle/compare/v0.6.0...v0.6.1) (2022-11-09)
 
 **Note:** Version bump only for package @tussle/core
