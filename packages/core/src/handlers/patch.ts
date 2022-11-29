@@ -2,35 +2,41 @@ import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import type {TussleStoragePatchFileCompleteResponse, TussleStoragePatchFileResponse} from '@tussle/spec/interface/storage';
 import {from as observableFrom, Observable, of, throwError} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
-import type {Tussle} from '../core';
 
 export default function handlePatch<T, P>(
-	_core: Tussle,
 	ctx: TussleIncomingRequest<T, P>
 ): Observable<TussleIncomingRequest<T, P>> {
-	const params = extractPatchHeaders(ctx);
+	return processUploadBodyAndCallHooks(ctx).pipe(
+		map(({ctx, patchedFile}) => {
+			if (!patchedFile) {
+				return ctx;
+			}
+			return toResponse(ctx, patchedFile);
+		}),
+	);
+}
+
+export function processUploadBodyAndCallHooks<T,P>(
+	ctx: TussleIncomingRequest<T, P>
+): Observable<{ ctx: TussleIncomingRequest<T, P>, patchedFile: TussleStoragePatchFileResponse|null}> {
 	const store = ctx.cfg.storage;
-
+	const params = extractPatchHeaders(ctx);
 	if (!store) {
-		return throwError(() => new Error('no storage service selected'));
+		return throwError(() => new Error('no storage service sleected'));
 	}
-
-	// PATCH requests MUST use Content-Type: application/offset+octet-stream
+	// Upload requests MUST use Content-Type: application/offset+octet-stream
 	if (params.contentType !== 'application/offset+octet-stream') {
 		ctx.response = {
 			status: 415, // unsupported media type
 			headers: {},
 		};
-		return of(ctx);
+		return of({ctx, patchedFile: null});
 	}
-
-	const params$ = observableFrom(ctx.source.hook('before-patch', ctx, params));
-
-	return params$.pipe(
-		switchMap((params) => store.patchFile(params)),
+	return of(params).pipe(
+		switchMap(params => store.patchFile(params)),
 		switchMap((patchedFile) => callOptionalHooks(ctx, patchedFile)),
 		switchMap((patchedFile) => ctx.source.hook('after-patch', ctx, patchedFile)),
-		map((patchedFile) => toResponse(ctx, patchedFile)),
+		map((patchedFile) => ({ctx, patchedFile})),
 	);
 }
 
@@ -59,7 +65,7 @@ const extractPatchHeaders = <Req, P>(ctx: TussleIncomingRequest<Req, P>) => {
 	const strHeader = (key: string) => header(key) as string;
 	const contentType = strHeader('content-type');
 	const length = intHeader('content-length');
-	const offset = intHeader('upload-offset');
+	const offset = intHeader('upload-offset') || 0;
 	const getReadable = () => ctx.request.getReadable();
 
 	return {

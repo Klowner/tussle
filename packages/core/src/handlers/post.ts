@@ -3,11 +3,10 @@ import type {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResp
 import {decode} from 'js-base64';
 import {from as observableFrom, Observable, of, pipe} from 'rxjs';
 import {defaultIfEmpty, filter, map, switchMap} from 'rxjs/operators';
-import type {Tussle} from '../core';
+import {processUploadBodyAndCallHooks} from './patch';
 
-export default function handleCreate<T, P>(
-	_core: Tussle,
-	ctx: Readonly<TussleIncomingRequest<T, P>>,
+export default function handlePost<T, P>(
+	ctx: TussleIncomingRequest<T, P>,
 ): Observable<TussleIncomingRequest<T, P>> {
 	return of({ctx}).pipe(
 		withParametersFromContext,
@@ -17,7 +16,8 @@ export default function handleCreate<T, P>(
 		switchMap(({ctx, params, store}) => store.createFile(params).pipe(
 			map((created) => ({ctx, created})),
 			postCreateHooks,
-			map((created) => toResponse(ctx, created)),
+			handlePotentialCreationWithUpload,
+			map(({created}) => toResponse(ctx, created)),
 		)),
 		defaultIfEmpty({
 			...ctx,
@@ -37,14 +37,12 @@ export interface TussleCreationParams {
 	uploadConcat: UploadConcatFinal | UploadConcatPartial | null;
 }
 
-type TussleRequest = TussleIncomingRequest<unknown, unknown>;
-
 const filterValidStoragePath = filter(
 	<T extends {params: Pick<TussleCreationParams, 'path'>}>(item: T) => !!item.params.path
 );
 
 const withParametersFromContext = pipe(
-	switchMap(<T extends {ctx: TussleRequest}>(item: T) => {
+	switchMap(<I extends {ctx: TussleIncomingRequest<T,R>},T,R>(item: I) => {
 		const params = extractCreationHeaders(item.ctx);
 		if (isNaN(params.uploadLength) && !item.ctx.request.getHeader('upload-concat')?.startsWith('final')) {
 			throw new Error('Failed to get upload length from header.');
@@ -57,7 +55,7 @@ const withParametersFromContext = pipe(
 );
 
 const withConfiguredStorage = pipe(
-	map(<T extends {ctx: TussleRequest}>(item: T) => {
+	map(<I extends {ctx: TussleIncomingRequest<T,R>},T,R>(item: I) => {
 		const store = item.ctx.cfg.storage;
 		if (!store) {
 			throw new Error('No storage service selected');
@@ -70,7 +68,7 @@ const withConfiguredStorage = pipe(
 );
 
 const withParamsUpdatedByBeforeCreateHook = pipe(
-	switchMap(<T extends {ctx: TussleRequest, params: TussleCreationParams}>(item: T) => {
+	switchMap(<I extends {ctx: TussleIncomingRequest<T,R>, params: TussleCreationParams}, T, R>(item: I) => {
 		return observableFrom(item.ctx.source.hook('before-create', item.ctx, item.params)).pipe(
 			map((params) => ({
 				...item,
@@ -81,14 +79,48 @@ const withParamsUpdatedByBeforeCreateHook = pipe(
 );
 
 const postCreateHooks = pipe(
-	switchMap(<T extends {ctx: TussleRequest, created: TussleStorageCreateFileResponse}>(
-		item: T) => callOptionalHooks(item)),
-	switchMap(({ctx, created}) => observableFrom(ctx.source.hook('after-create', ctx, created))),
+	switchMap(<T, P>(item: { ctx: Readonly<TussleIncomingRequest<T, P>>, created: TussleStorageCreateFileResponse }) =>
+		callOptionalHooks(item)),
+	switchMap(({ctx, created}) => observableFrom(ctx.source.hook('after-create', ctx, created)).pipe(
+		map(created => ({created, ctx})),
+	)),
 );
 
-const callOptionalHooks = <T extends {ctx: TussleRequest, created: TussleStorageCreateFileResponse}>(
-	item: T
-): Observable<T> => {
+const handlePotentialCreationWithUpload = pipe(
+	switchMap(<T, P>(item: {ctx: Readonly<TussleIncomingRequest<T, P>>, created: TussleStorageCreateFileResponse }) => {
+		// If Content-Length is a positive integer, assume this is a creation-with-upload request,
+		// so we divert the request to the patch handler for further processing.
+		const { ctx, created } = item;
+		if (
+			ctx.response !== null &&
+			parseInt(ctx.request.getHeader('content-length') || '0', 10) > 0 &&
+			created.location
+		) {
+			// Rewrite request path to point to the destination path as determined
+			// by create hooks and the current storage service.
+			ctx.request.path = created.location;
+			return processUploadBodyAndCallHooks(ctx).pipe(
+				map(({ctx, patchedFile}) => {
+					if (patchedFile && patchedFile.success && patchedFile.offset !== undefined) {
+						ctx.response = {
+							headers: {
+								'Upload-Offset': patchedFile.offset.toString(10),
+								...ctx.response?.headers,
+							},
+						};
+					}
+					return ({ctx, created});
+				}),
+			);
+		} else {
+			return of({ctx, created});
+		}
+	}),
+);
+
+const callOptionalHooks = <T,R>(
+	item: {ctx: Readonly<TussleIncomingRequest<T, R>>, created: TussleStorageCreateFileResponse},
+) => {
 	const {created, ctx} = item;
 	if (created.uploadConcat?.action === 'final') {
 		const patchedFile: TussleStoragePatchFileCompleteResponse = {

@@ -62,6 +62,7 @@ export interface TussleHooks<Req, U> extends TussleHookDef<Req, U> {
 }
 
 export interface TussleMiddlewareService<Req, U> {
+	core: Readonly<Tussle>;
   // These are called by the core at various points in the request/response life cycle.
   hook<K extends keyof TussleHooks<Req, U>>(
     which: K,

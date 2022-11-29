@@ -11,7 +11,7 @@ export interface TussleConfig {
 }
 
 type IncomingRequestMethod = TussleIncomingRequest<unknown, unknown>['request']['method'];
-type IncomingRequestHandler = <T, P>(core: Tussle, ctx: TussleIncomingRequest<T, P>) => Observable<TussleIncomingRequest<T, P>>;
+type IncomingRequestHandler = <T, P>(ctx: TussleIncomingRequest<T, P>) => Observable<TussleIncomingRequest<T, P>>;
 type RequestHandler = Record<IncomingRequestMethod, IncomingRequestHandler>;
 
 const supportedVersions = [
@@ -71,7 +71,7 @@ export class Tussle {
 			if (!ctx.response) {
 				const handler = this.handlers[ctx.request.method];
 				if (handler) {
-					return handler(this, ctx);
+					return handler(ctx);
 				}
 			}
 			return of(ctx); // pass through

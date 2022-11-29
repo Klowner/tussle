@@ -93,7 +93,7 @@ export default class TussleKoaMiddleware<U> extends TussleBaseMiddleware<Context
     super(options.hooks);
   }
 
-  private readonly core: Tussle = (
+  readonly core: Tussle = (
     this.options.core instanceof Tussle ?
     this.options.core :
     new Tussle(this.options.core)
