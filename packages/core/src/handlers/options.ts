@@ -2,7 +2,6 @@ import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import type {Observable} from 'rxjs';
 import {from as observableFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
-import type {Tussle} from '../core';
 
 const csv = (...items: string[]) => items.join(',');
 
@@ -24,7 +23,6 @@ const defaultResponse = {
 };
 
 export default function handleOptions<Req, P>(
-  _core: Tussle,
   ctx: TussleIncomingRequest<Req, P>
 ): Observable<TussleIncomingRequest<Req, P>>
 {

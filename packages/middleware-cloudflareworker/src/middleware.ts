@@ -27,7 +27,7 @@ export class TussleCloudflareWorker<U = void> extends TussleBaseMiddleware<Reque
     super(options.hooks);
   }
 
-  private readonly core: Tussle = new Tussle(this.options.core);
+  readonly core: Tussle = new Tussle(this.options.core);
 
   public async handleRequest(request: Request, params: U extends never ? never : U): Promise<Response | null> {
     const req = createTussleRequest(this, request, params);

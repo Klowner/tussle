@@ -4,10 +4,10 @@ import type { TussleMiddlewareService } from './middleware';
 import type { TussleStorageService } from './storage';
 
 type RequestBody =
-  | Readable
-  | Record<string, unknown>
-  | null
-  | string
+	| Readable
+	| Record<string, unknown>
+	| null
+	| string
 ;
 
 type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'OPTIONS' | 'DELETE' | 'HEAD';
@@ -29,9 +29,9 @@ export type TussleOutgoingRequest<T = unknown> = {
 }
 
 export type TussleOutgoingResponse<T, R> = {
-  request: TussleOutgoingRequest;
-  getData: () => Promise<T>;
-  originalResponse: R;
+	request: TussleOutgoingRequest;
+	getData: () => Promise<T>;
+	originalResponse: R;
 };
 
 export interface TussleIncomingRequest<Req, U> {
@@ -61,5 +61,5 @@ export interface TussleIncomingRequest<Req, U> {
 }
 
 export interface TussleRequestService<R = unknown> {
-  makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, R>>;
+	makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, R>>;
 }
