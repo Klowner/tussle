@@ -84,7 +84,6 @@ const handlePotentialCreationWithUpload = pipe(
 		// so we divert the request to the patch handler for further processing.
 		const { ctx, created } = item;
 		if (
-			ctx.response !== null &&
 			parseInt(ctx.request.getHeader('content-length') || '0', 10) > 0 &&
 			created.location
 		) {
