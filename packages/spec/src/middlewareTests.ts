@@ -1,7 +1,7 @@
 import type {TussleHookDef, TussleMiddlewareService} from '@tussle/spec/interface/middleware';
 import type {TussleStorageService} from '@tussle/spec/interface/storage';
 import type {TusProtocolExtension} from '@tussle/spec/interface/tus';
-import {EMPTY, Observable, of} from 'rxjs';
+import {EMPTY, Observable, of, from as observableFrom, throwError, map, filter, OperatorFunction} from 'rxjs';
 
 import {
 	TussleStorageCreateFileParams,
@@ -52,9 +52,35 @@ class TussleMockStorageService implements TussleStorageService {
 	}
 
 	patchFile<Req, MockStorageState>(
-		_params: TussleStoragePatchFileParams<Req, MockStorageState>,
+		params: TussleStoragePatchFileParams<Req, MockStorageState>,
 	): Observable<TussleStoragePatchFileResponse> {
-		return EMPTY;
+		const { location } = params;
+		const state = this.state[location];
+		const readable = params.request.request.getReadable();
+		if (!readable) {
+			return throwError(() => new Error('unable to read request body'));
+		}
+		const body$ = observableFrom(collectRequestBody(readable));
+		const persisted$ = body$.pipe(
+			filter(body => !!body) as OperatorFunction<Uint8Array|undefined, Uint8Array>,
+			map((body) => this.state[location] = ({
+				...state,
+				parts: [
+					...state.parts || [],
+					body,
+				],
+				currentOffset: state.currentOffset + body.length,
+			})),
+		);
+		const result$ = persisted$.pipe(
+			map((persisted) => ({
+				location: state.location,
+				success: true,
+				offset: persisted.currentOffset,
+				complete: persisted.currentOffset === persisted.uploadLength,
+			})),
+		);
+		return result$;
 	}
 
 	getFileInfo(
@@ -145,14 +171,68 @@ export function middlewareTests<
 				let storage: TussleMockStorageService;
 				let middleware: T;
 				const beforeCreate = jest.fn(async (_ctx, params) => params);
+				const afterCreate = jest.fn(async (_ctx, params) => params);
 				const beforePatch = jest.fn(async (_ctx, params) => params);
+				const afterPatch = jest.fn(async (_ctx, params) => params);
 				beforeEach(async () => {
 					beforeCreate.mockClear();
 					beforePatch.mockClear();
 					storage = new TussleMockStorageService();
 					middleware = await createMiddleware(storage, {
 						'before-create': beforeCreate,
+						'after-create': afterCreate,
 						'before-patch': beforePatch,
+						'after-patch': afterPatch,
+					});
+				});
+
+				describe('creation extension', () => {
+					test('create a new upload', async () => {
+						beforeCreate.mockImplementation(async (ctx, params) => {
+							params.path = params.path.replace('/files/', '/alt-path/'); // rewrite file storage destination
+							return params;
+						});
+						const response = await handleRequest(middleware, createRequest({
+							method: 'POST',
+							url: 'https://tussle-middleware-test/files/creation.bin',
+							headers: {
+								'Upload-Length': '100',
+								'Tus-Resumable': '1.0.0',
+							},
+						}));
+						expect(response).not.toBeNull();
+						if (response) {
+							expect(response.headers['location']).toEqual('/alt-path/creation.bin');
+							expect(response.status).toEqual(201); // Created
+							expect(response.headers['upload-offset']).toBeUndefined(); // Only creation-with-upload
+						}
+					});
+				});
+
+				describe('creation-with-upload extension', () => {
+					test('create new upload and include file payload in initial request', async () => {
+						beforeCreate.mockImplementation(async (ctx, params) => {
+							params.path = '/new-destination.bin';
+							return params;
+						});
+						const body = new Uint8Array(new TextEncoder().encode('hello'));
+						const response = await handleRequest(middleware, createRequest({
+							method: 'POST',
+							url: 'https://tussle-middleware-test/files/creation-with-upload.bin',
+							body,
+							headers: {
+								'Tus-Resumable': '1.0.0',
+								'Content-Type': 'application/offset+octet-stream',
+								'Upload-Length': body.length.toString(),
+								'Content-Length': body.length.toString(),
+							},
+						}));
+						expect(response).not.toBeNull();
+						if (response) {
+							expect(response.headers['location']).toEqual('/new-destination.bin');
+							expect(response.status).toEqual(201); // Created
+							expect(response.headers['upload-offset']).toEqual(body.length.toString());
+						}
 					});
 				});
 
@@ -186,18 +266,8 @@ export function middlewareTests<
 						},
 					}));
 					expect(beforeCreate).toHaveBeenCalled();
-					const readable = beforeCreate.mock.calls[0][0].request.getReadable();
-					if (typeof readable.getReader === 'function') {
-						// ReadableStream-like
-						const reader = await readable.getReader();
-						const { value } = await reader.read(body.length);
-						expect(value).toStrictEqual(body);
-					} else if (readable instanceof Uint8Array) {
-						// Uint8Array-like
-						expect(readable).toStrictEqual(body);
-					} else {
-						throw new Error('middleware test harness did not recognize readable type');
-					}
+					const value = await collectRequestBody(beforeCreate.mock.calls[0][0].request.getReadable());
+					expect(value).toStrictEqual(body);
 				});
 
 				test('respect HTTP verb as defined by optional X-Http-Method-Override header', async () => {
@@ -291,4 +361,18 @@ export function middlewareTests<
 			});
 		});
 	});
+}
+
+export async function collectRequestBody(readable:{getReader: () => unknown}|Uint8Array): Promise<Uint8Array|undefined> {
+	if (readable instanceof Uint8Array) {
+		// Uint8Array-like
+		return readable;
+	} else if (typeof readable.getReader === 'function') {
+		// ReadableStream-like
+		const reader = (readable as ReadableStream<Uint8Array>).getReader();
+		const { value } = await reader.read();
+		return value;
+	} else {
+		throw new Error('middleware test harness did not recognize readable type');
+	}
 }
