@@ -28,7 +28,9 @@
 		"rxjs": "^7"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^3.18.0",
+		"@cloudflare/workers-types": "^4.20221111.1",
+		"@miniflare/r2": "^2.11.0",
+		"@miniflare/storage-memory": "^2.11.0",
 		"@tussle/spec": "^0.6.4",
 		"@types/jest": "^29.2.2",
 		"concurrently": "^7.5.0",

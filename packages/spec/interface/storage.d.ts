@@ -3,9 +3,7 @@ import type {TussleIncomingRequest} from './request';
 import type {Observable} from 'rxjs';
 
 export interface TussleStorageCreateFileParams {
-	id: string;
 	path: string;
-	contentLength: number;
 	uploadLength: number;
 	uploadMetadata: Record<string, string | number>;
 	uploadConcat: UploadConcatPartial | UploadConcatFinal | null;
