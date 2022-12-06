@@ -1,26 +1,30 @@
 import type { TussleStateService } from '@tussle/spec/interface/state';
 
 class TussleStateMemory<T> implements TussleStateService<T> {
-  private readonly state: Record<string, T> = {};
+	private readonly state = new Map<string, T>();
 
-  public getItem(key: string): Promise<T | null> {
-    return Promise.resolve(this.state[key] || null);
-  }
+	getItem(key: string): Promise<T | null> {
+		return Promise.resolve(this.state.get(key) || null);
+	}
 
-  public setItem(key: string, value: T): Promise<void> {
-    this.state[key] = value;
-    return Promise.resolve();
-  }
+	setItem(key: string, value: T): Promise<void> {
+		this.state.set(key, value);
+		return Promise.resolve();
+	}
 
-  public removeItem(key: string): Promise<T | null> {
-    const item = this.state[key] || null;
-    delete this.state[key];
-    return Promise.resolve(item);
-  }
+	removeItem(key: string): Promise<T | null> {
+		const item = this.state.get(key) || null;
+		this.state.delete(key);
+		return Promise.resolve(item);
+	}
 
-  public key(nth: number): Promise<string | null> {
-    return Promise.resolve(Object.keys(this.state)[nth] || null);
-  }
+	key(nth: number): Promise<string | null> {
+		return Promise.resolve([...this.state.keys()][nth] || null);
+	}
+
+	clear(): void {
+		this.state.clear();
+	}
 }
 
 export default TussleStateMemory;
