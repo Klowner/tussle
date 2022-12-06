@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.5](https://github.com/Klowner/tussle/compare/v0.6.4...v0.6.5) (2022-12-06)
+
+
+### Bug Fixes
+
+* **storage-r2:** add a ton of tests, hopefully fix parallel upload state reconstruction ([585fa9d](https://github.com/Klowner/tussle/commit/585fa9dd19f31c6034b354a800c4d443eb02e278))
+
+
+### Features
+
+* **state-memory:** use Map instead of bare object ([f66d3fa](https://github.com/Klowner/tussle/commit/f66d3fa3dcf86ace7f1c205443f809980f7bec49))
+* **storage-r2:** update R2File.delete() to use single call to bucket.delete() now that it accepts arrays ([1a56397](https://github.com/Klowner/tussle/commit/1a56397f0d6d1c717b018192a4cc22dc3a1639d3))
+
+
+
+
+
 ## [0.6.4](https://github.com/Klowner/tussle/compare/v0.6.3...v0.6.4) (2022-11-15)
 
 **Note:** Version bump only for package @klowner/tussle

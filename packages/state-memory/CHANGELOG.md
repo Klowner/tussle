@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.5](https://github.com/Klowner/tussle/compare/v0.6.4...v0.6.5) (2022-12-06)
+
+
+### Features
+
+* **state-memory:** use Map instead of bare object ([f66d3fa](https://github.com/Klowner/tussle/commit/f66d3fa3dcf86ace7f1c205443f809980f7bec49))
+
+
+
+
+
 ## [0.6.4](https://github.com/Klowner/tussle/compare/v0.6.3...v0.6.4) (2022-11-15)
 
 **Note:** Version bump only for package @tussle/state-memory
