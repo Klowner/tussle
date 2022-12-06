@@ -20,7 +20,7 @@ class TussleOutgoingCloudflareFetchResponse<T> implements TussleOutgoingResponse
 }
 
 const observableFetch = (req: Request | string, init?: RequestInit): Observable<Response> =>
-	defer(() => from(fetch(req, init)));
+	defer(() => from(fetch(init ? new Request(req, init) : req)));
 
 export class TussleRequestCloudflareWorker implements TussleRequestService<CloudflareFetchResponse> {
 	public makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, CloudflareFetchResponse>> {
