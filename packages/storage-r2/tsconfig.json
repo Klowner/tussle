@@ -8,7 +8,7 @@
 		"target": "es2017",
 		"lib": [],
 		"types": [
-			"@cloudflare/workers-types"
+			"@cloudflare/workers-types/2022-08-04"
 		]
 	},
 	"include": ["src/**/*"],

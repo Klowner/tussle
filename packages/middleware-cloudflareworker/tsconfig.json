@@ -5,7 +5,7 @@
 		"outDir": "lib",
 		"target": "es2017",
 		"lib": [],
-		"types": ["@cloudflare/workers-types"]
+		"types": ["@cloudflare/workers-types/2022-08-04"]
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules"],
