@@ -280,6 +280,7 @@ export function middlewareTests<
 						uploadLength: 20,
 						path: '/mysubdir/files/my-file.bin',
 						uploadMetadata: {},
+						uploadConcat: null,
 					});
 					expect(afterCreate).toHaveBeenCalledTimes(1);
 					if (response) {
