@@ -72,10 +72,10 @@ export class R2File {
 	}
 
 	// Delete all related R2Objects
-	async delete(): Promise<void[]> {
-		return Promise.all(this.parts.map(
-			({key}) => this.bucket.delete(key),
-		));
+	async delete(): Promise<string[]> {
+		const keys = this.parts.map(({key}) => key);
+		await this.bucket.delete(keys);
+		return keys;
 	}
 }
 

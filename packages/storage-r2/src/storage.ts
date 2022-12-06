@@ -290,7 +290,7 @@ export class TussleStorageR2 implements TussleStorageService {
 
 	private readonly handleConcatenation = pipe(
 		mergeMap((state: InitialState): Observable<InitialState> => {
-			if (state.uploadConcat === undefined) { //=== null) {
+			if (state.uploadConcat === null) {
 				return of(state);
 			} else if (isPartialConcatState(state)) {
 				return of(state).pipe(map(state => this.handlePartialConcatenation(state)));
