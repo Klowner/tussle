@@ -278,9 +278,7 @@ export function middlewareTests<
 					expect(createFileSpy).toHaveBeenCalledWith({
 						contentLength: 0,
 						uploadLength: 20,
-						id: '/files/my-file.bin',
 						path: '/mysubdir/files/my-file.bin',
-						uploadConcat: null,
 						uploadMetadata: {},
 					});
 					expect(afterCreate).toHaveBeenCalledTimes(1);

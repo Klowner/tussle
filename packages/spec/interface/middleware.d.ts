@@ -19,7 +19,6 @@ export interface TussleHookDef<Req, U> {
 }
 
 interface TussleCreationParams {
-  id: string;
   path: string;
   contentLength: number;
   uploadLength: number;

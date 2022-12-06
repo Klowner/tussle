@@ -4,19 +4,24 @@ export class R2File {
 		readonly size: number,
 		readonly parts: Readonly<Part[]>,
 		readonly metadata: Record<string, unknown>,
-		private readonly bucket: R2Bucket,
+		private readonly bucket: Pick<R2Bucket, 'get'|'delete'>,
 	) {}
 
 	get body(): ReadableStream {
 		const {readable, writable} = new FixedLengthStream(this.size);
 		(async () => {
-			for (const {key} of this.parts) {
+			for (const {key, size} of this.parts) {
+				if (size === 0) {
+					continue; // skip placeholder records
+				}
 				const obj = await this.getPart(key);
 				if (!obj) {
 					writable.abort(`Failed to read R2 key: ${key}`);
 					return;
 				}
-				await obj.body.pipeTo(writable, {preventClose: true});
+				if (obj.body) {
+					await obj.body.pipeTo(writable, {preventClose: true});
+				}
 			}
 			writable.close();
 		})();
@@ -39,6 +44,9 @@ export class R2File {
 		try {
 			(async () => {
 				for (const {part, range} of parts) {
+					if (range?.length === 0) {
+						continue; // skip placeholder records
+					}
 					const record = await this.getPart(part.key, range);
 					if (!record) {
 						writable.abort(`Failed to read R2 key: ${part.key}`);

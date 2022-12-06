@@ -1,3 +1,4 @@
+import type {TussleCreationParams} from '@tussle/spec/interface/middleware';
 import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import type {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResponse, UploadConcatFinal, UploadConcatPartial} from '@tussle/spec/interface/storage';
 import {decode} from 'js-base64';
@@ -26,15 +27,6 @@ export default function handleCreate<T, P>(
 			},
 		}),
 	);
-}
-
-export interface TussleCreationParams {
-	id: string;
-	path: string;
-	contentLength: number;
-	uploadLength: number;
-	uploadMetadata: Record<string, string>;
-	uploadConcat: UploadConcatFinal | UploadConcatPartial | null;
 }
 
 type TussleRequest = TussleIncomingRequest<unknown, unknown>;
@@ -109,7 +101,6 @@ const callOptionalHooks = <T extends {ctx: TussleRequest, created: TussleStorage
 const extractCreationHeaders = <T, P>(
 	ctx: TussleIncomingRequest<T, P>
 ): TussleCreationParams => {
-	const id = ctx.request.path;
 	const path = ctx.request.path;
 	const header = ctx.request.getHeader;
 	const contentLength = parseInt(header('content-length') as string || '', 10);
@@ -129,7 +120,6 @@ const extractCreationHeaders = <T, P>(
 	const uploadConcat = parseUploadConcat(header('upload-concat') || null);
 
 	return {
-		id,
 		path,
 		contentLength,
 		uploadLength,
@@ -164,9 +154,7 @@ const originPartRegExp = /^https?\:\/\/[^\/]*\/?/;
 
 function parseUploadConcat(
 	uploadConcat: Readonly<string | null>,
-): (
-		UploadConcatPartial | UploadConcatFinal | null
-	) {
+): (UploadConcatPartial | UploadConcatFinal | null) {
 	if (!uploadConcat) {
 		return null;
 	}

@@ -10,9 +10,11 @@ type RequestBody =
   | string
 ;
 
+type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'OPTIONS' | 'DELETE' | 'HEAD';
+
 export type TussleOutgoingRequest<T = unknown> = {
   url: string;
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
+  method: HTTPMethod;
   headers?: Record<string, string>;
   body?: RequestBody;
   mode?: 'cors' | 'no-cors' | 'same-origin';
@@ -34,7 +36,7 @@ export type TussleOutgoingResponse<T, R> = {
 
 export interface TussleIncomingRequest<Req, U> {
   request: {
-    method: 'POST' | 'OPTIONS' | 'HEAD' | 'PATCH' | 'DELETE';
+    method: HTTPMethod;
     path: string;
     getReadable: () => Readable | ReadableStream<Uint8Array> | Uint8Array | undefined;
     getHeader: (header: string) => string|undefined;

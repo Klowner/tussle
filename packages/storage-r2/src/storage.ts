@@ -20,7 +20,7 @@ import {
 	of,
 	pipe,
 	share, switchMap,
-	take, takeLast, toArray
+	take, takeLast, toArray, throwError, throwIfEmpty, catchError
 } from "rxjs";
 import{R2File} from './r2file';
 import {nanoid} from "nanoid";
@@ -41,7 +41,7 @@ export interface R2UploadState {
 
 export interface TussleStorageR2Options {
 	stateService: TussleStateService<R2UploadState>,
-	bucket: R2Bucket;
+	bucket: Pick<R2Bucket, 'get'|'delete'|'put'|'list'>;
 	r2ListLimit?: number;
 	checkpoint?: number; // Auto-checkpoint uploads every `checkpoint` bytes.
 }
@@ -85,13 +85,19 @@ function firstPartIsCreationPlaceholder(
 		parts[0].size === 0;
 }
 
+function toPartName(part: number): string {
+	return part.toString(10).padStart(10, '0');
+}
+
 function getNextKey(
 	state: Readonly<R2UploadState>,
 ): string {
 	const numParts = state.parts && state.parts.length || 0;
-	const part = numParts.toString(10).padStart(10, '0');
-	const key = stripLeadingSlashes([state.location, part].join('/'));
-	return key;
+	return toPartKey(state.location, numParts);
+}
+
+function toPartKey(location: string, part: number): string {
+	return stripLeadingSlashes([location, toPartName(part)].join('/'));
 }
 
 function sliceStreamBYOB(
@@ -228,7 +234,7 @@ export class TussleStorageR2 implements TussleStorageService {
 				toArray(),
 				map((parts) => ({
 					...state,
-					parts,
+					parts: [...state.parts, ...parts],
 				})),
 			)
 		),
@@ -244,11 +250,13 @@ export class TussleStorageR2 implements TussleStorageService {
 	);
 
 	private readonly updateConcatUploadLength = pipe(
-		map((state: FinalConcatState) => {
+		mergeMap((state: FinalConcatState) => {
 			const size = state.parts.reduce((sum, {size}) => sum + size, 0);
-			state.uploadLength = size;
 			state.currentOffset = size;
-			return state;
+			if (state.currentOffset !== state.uploadLength) {
+				return throwError(() => new Error("Final concatenated size does not match upload-length"));
+			}
+			return of(state);
 		}),
 	);
 
@@ -282,7 +290,7 @@ export class TussleStorageR2 implements TussleStorageService {
 
 	private readonly handleConcatenation = pipe(
 		mergeMap((state: InitialState): Observable<InitialState> => {
-			if (state.uploadConcat === null) {
+			if (state.uploadConcat === undefined) { //=== null) {
 				return of(state);
 			} else if (isPartialConcatState(state)) {
 				return of(state).pipe(map(state => this.handlePartialConcatenation(state)));
@@ -295,7 +303,7 @@ export class TussleStorageR2 implements TussleStorageService {
 
 	private readonly createStatePlaceholderRecord = pipe(
 		mergeMap((state: R2UploadState) => {
-			const key = getNextKey(state);
+			const key = toPartKey(state.location, 0);
 			return from(this.options.bucket.put(key, null, {
 				customMetadata: {
 					tussleState: JSON.stringify({
@@ -323,6 +331,14 @@ export class TussleStorageR2 implements TussleStorageService {
 				offset: state.currentOffset,
 				success: true,
 			})),
+			catchError(err => {
+				return of({
+					location: params.path,
+					offset: 0,
+					success: false,
+					error: err,
+				});
+			}),
 			take(1),
 		);
 	}
@@ -336,53 +352,64 @@ export class TussleStorageR2 implements TussleStorageService {
 			prev: string;
 		}
 		const prefix = stripLeadingSlashes(location) + '/';
-		let tailPart: R2Object | null = null;
+		let latestPart: R2Object | null = null;
 		let more = true;
 		let cursor: string | undefined;
-		const partMap: Record<string, PartInfo> = {};
+		const partMap = new Map<string, PartInfo>();
+		const unprefixedPartKeys = <string[]>[];
+		const stripPrefix = (key: string) => key.substring(prefix.length);
 		while (more) {
 			const result = await this.options.bucket.list({
 				prefix,
 				cursor,
-				include: ['customMetadata'],
 				limit: this.options.r2ListLimit,
+				// @ts-ignore miniflare/r2 excludes these if not explicitly provided
+				include: ['customMetadata', 'httpMetadata'],
 				delimiter: '/',
 			});
 			more = result.truncated;
 			cursor = result.cursor;
 
 			for (const obj of result.objects) {
-				if (!obj.customMetadata) {
+				const unprefixedKey = stripPrefix(obj.key);
+				if (!Number.isInteger(parseInt(unprefixedKey, 10)) || !obj.customMetadata || !obj.customMetadata['tussleState']) {
 					continue; // ignore this object
 				}
 				const {tusslePrevKey} = obj.customMetadata;
-				partMap[obj.key] = {
+				partMap.set(unprefixedKey, { //.key, {
 					key: obj.key,
 					size: obj.size,
 					prev: tusslePrevKey,
-				};
-				tailPart = (tailPart && tailPart.uploaded > obj.uploaded) ? tailPart : obj;
+				});
+				unprefixedPartKeys.push(unprefixedKey);
+				latestPart = (latestPart && latestPart.uploaded > obj.uploaded) ? latestPart : obj;
 			}
 		}
-		if (!tailPart || !tailPart.customMetadata || !tailPart.customMetadata['tussleState']) {
+		if (latestPart === null || !latestPart.customMetadata || !latestPart.customMetadata['tussleState']) {
+			return null; // No parts were found, can't do much with that.
+		}
+		// Sort the part keys and then reverse them so they're in descending order.
+		unprefixedPartKeys.sort().reverse();
+		// De-prefixed keys should be consecutively numbered with no gaps.
+		if (unprefixedPartKeys.length === 0 || parseInt(unprefixedPartKeys[0], 10) !== (unprefixedPartKeys.length - 1)) {
 			return null;
 		}
-		// Start from the tail part and re-build the parts array
-		const parts: Part[] = [];
+
+		const parts = <Part[]>[];
 		let iter: PartInfo | undefined = {
-			key: tailPart.key,
-			size: tailPart.size,
-			prev: tailPart.customMetadata['tusslePrevKey'] || '',
+			key: latestPart.key,
+			size: latestPart.size,
+			prev: latestPart.customMetadata['tusslePrevKey'] || '',
 		};
 		while (iter) {
 			parts.unshift({
 				key: iter.key,
 				size: iter.size,
 			});
-			iter = partMap[iter.prev];
+			iter = partMap.get(stripPrefix(iter.prev));
 		}
 		const state: R2UploadState = {
-			...JSON.parse(tailPart.customMetadata['tussleState'] || 'null'),
+			...JSON.parse(latestPart.customMetadata['tussleState'] || 'null'),
 			parts,
 		};
 		return state;
@@ -406,9 +433,12 @@ export class TussleStorageR2 implements TussleStorageService {
 	);
 
 	private readonly locationToParts = pipe(
-		this.getLocationState,
-		filter(isNonNull),
-		concatMap((state) => state.parts && from(state.parts) || EMPTY),
+		mergeMap((location: string) => of(location).pipe(
+			this.getLocationState,
+			filter(isNonNull),
+			throwIfEmpty(() => new Error(`Failed to find state for ${location}`)),
+			concatMap(state => state.parts ? from(state.parts) : EMPTY),
+		)),
 	);
 
 	private invalidPatchResponse(
