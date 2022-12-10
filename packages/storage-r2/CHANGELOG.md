@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.6](https://github.com/Klowner/tussle/compare/v0.6.5...v0.6.6) (2022-12-10)
+
+
+### Bug Fixes
+
+* **storage-r2:** only check upload-length during concatenation if it's provided (spec says it's optional) ([5bd7436](https://github.com/Klowner/tussle/commit/5bd74368a6b974cc1336d7086faff2575915b030))
+
+
+
+
+
 ## [0.6.5](https://github.com/Klowner/tussle/compare/v0.6.4...v0.6.5) (2022-12-06)
 
 
