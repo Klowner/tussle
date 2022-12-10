@@ -108,8 +108,11 @@ export function selectPartRanges(
 			partOffset += partSize;
 			i++;
 		}
-		while (i < parts.length && length > 0) {
+		for (;i < parts.length && length > 0; i++) {
 			const partSize = parts[i].size;
+			if (partSize === 0) {
+				continue;
+			}
 			const start = Math.max(0, offset - partOffset);
 			const readable = Math.min(partSize - start, length);
 			const ranged = !((start === 0) && readable === partSize);
@@ -124,7 +127,6 @@ export function selectPartRanges(
 			});
 			length -= readable;
 			partOffset += partSize;
-			i++;
 		}
 		return selected;
 	}

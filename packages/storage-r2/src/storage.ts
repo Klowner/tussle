@@ -253,7 +253,7 @@ export class TussleStorageR2 implements TussleStorageService {
 		mergeMap((state: FinalConcatState) => {
 			const size = state.parts.reduce((sum, {size}) => sum + size, 0);
 			state.currentOffset = size;
-			if (state.currentOffset !== state.uploadLength) {
+			if (!isNaN(state.uploadLength) && state.currentOffset !== state.uploadLength) {
 				return throwError(() => new Error("Final concatenated size does not match upload-length"));
 			}
 			return of(state);
@@ -369,7 +369,6 @@ export class TussleStorageR2 implements TussleStorageService {
 			});
 			more = result.truncated;
 			cursor = result.cursor;
-
 			for (const obj of result.objects) {
 				const unprefixedKey = stripPrefix(obj.key);
 				if (!Number.isInteger(parseInt(unprefixedKey, 10)) || !obj.customMetadata || !obj.customMetadata['tussleState']) {

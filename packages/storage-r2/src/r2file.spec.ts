@@ -3,6 +3,33 @@ import type { Part } from "./r2file";
 
 
 describe('R2File', () => {
+	describe('selectPartRanges with odd sized chunks', () => {
+		const parts: Readonly<Part[]> = [
+			{key: '0001', size: 0 },
+			{key: '0002', size: 1000 },
+			{key: '0003', size: 2000 },
+			{key: '0004', size: 5000 },
+			{key: '0005', size: 1000 },
+			{key: '0006', size: 0 },
+			{key: '0007', size: 10000 },
+		];
+
+		test('first byte begins in second record', () => {
+			const selected = selectPartRanges(parts, 0, 1);
+			expect(selected).toEqual([
+				{ part: parts[1], range: { offset: 0, length: 1 }},
+			]);
+		});
+
+		test('record 6 should be completed skipped because it contains no bytes', () => {
+			const selected = selectPartRanges(parts, 8000, 1200);
+			expect(selected).toEqual([
+				{ part: parts[4] },
+				{ part: parts[6], range: { length: 200, offset: 0 }},
+			]);
+		});
+	});
+
 	describe('selectPartRanges', () => {
 
 		const parts: Readonly<Part[]> = [
