@@ -432,7 +432,7 @@ export class TussleStorageR2 implements TussleStorageService {
 	);
 
 	private readonly locationToParts = pipe(
-		mergeMap((location: string) => of(location).pipe(
+		concatMap((location: string) => of(location).pipe(
 			this.getLocationState,
 			filter(isNonNull),
 			throwIfEmpty(() => new Error(`Failed to find state for ${location}`)),
