@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.7](https://klowner/compare/v0.6.6...v0.6.7) (2022-12-11)
+
+
+### Bug Fixes
+
+* **storage-r2:** fix race-condition causing file reassembly to potentially scramble chunk order ([0137528](https://klowner/commits/01375282333af4a7b7268f19ff30783bb8ab4ad9))
+
+
+
+
+
 ## [0.6.6](https://github.com/Klowner/tussle/compare/v0.6.5...v0.6.6) (2022-12-10)
 
 
