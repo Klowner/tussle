@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.8](https://github.com/Klowner/tussle/compare/v0.6.7...v0.6.8) (2022-12-15)
+
+
+### Bug Fixes
+
+* **storage-r2:** calculate R2File size from sum of chunk sizes ([68d914a](https://github.com/Klowner/tussle/commit/68d914a1af70345855658b1439c059fc054c9661))
+
+
+
+
+
 ## [0.6.7](https://klowner/compare/v0.6.6...v0.6.7) (2022-12-11)
 
 
