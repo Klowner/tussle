@@ -596,7 +596,7 @@ export class TussleStorageR2 implements TussleStorageService {
 			filter(isNonNull),
 			map(state => new R2File(
 				path,
-				state.uploadLength,
+				(state.parts || []).map(part => part.size).reduce((sum, size) => sum + size, 0),
 				state.parts || [],
 				state.metadata,
 				this.options.bucket,
