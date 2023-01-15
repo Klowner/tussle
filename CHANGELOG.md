@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.9](https://github.com/Klowner/tussle/compare/v0.6.8...v0.6.9) (2023-01-15)
+
+
+### Features
+
+* **storage-r2:** remove nanoid in favor of built-in lousyUUID, also provide option for users to provide their own method (or use nanoid) ([651a89e](https://github.com/Klowner/tussle/commit/651a89eddf6b04fa8935d7fcfe9c5b983fa1b0ba))
+
+
+
+
+
 ## [0.6.8](https://github.com/Klowner/tussle/compare/v0.6.7...v0.6.8) (2022-12-15)
 
 

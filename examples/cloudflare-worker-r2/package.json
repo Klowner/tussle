@@ -1,6 +1,6 @@
 {
 	"name": "cloudflare-worker-r2",
-	"version": "0.6.8",
+	"version": "0.6.9",
 	"license": "MIT",
 	"private": true,
 	"type": "module",
