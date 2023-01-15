@@ -17,6 +17,8 @@ or something even *less* reliable such as [@tussle/state-memory-ttl](../../packa
 
  - `checkpoint: number` (optional) -- If provided, automatically save every *N* bytes as a chunk even if the client is not using an explicit chunk size. This feature is compatible with clients that *do* use an explicit chunk size, but **it is advisable to set `checkpoint` to a multiple of your chunk size**.
  - `r2ListLimit: number` (optional) -- Limit the maximum number of records to list while rebuilding state from R2. You probably don't need to use this, as it was primarily added to circumvent a (now resolved) Cloudflare Worker's bug. This may be removed at some point in the future.
+ - `appendUniqueSubdir: (location: string) => string` (optional) -- For partial concatenation requests, override the unique subdirectory for each parallel upload. The built-in implementation should be sufficient
+ for most users. Example using [nanoid](https://www.npmjs.com/package/nanoid): `appendUniqueSubdir: (location) => ${location}/${nanoid()}`
 
 
 ### Example

@@ -10,9 +10,6 @@ module.exports = {
 		}],
 		'^.+\\.js$': ['babel-jest'],
 	},
-	transformIgnorePatterns: [
-		'node_modules/(?!nanoid)/'
-	],
 	collectCoverageFrom: [
 		'src/**/*.ts',
 	],

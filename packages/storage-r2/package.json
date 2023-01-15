@@ -24,7 +24,6 @@
 	"author": "Mark Riedesel <mark@klowner.com>",
 	"license": "MIT",
 	"dependencies": {
-		"nanoid": "^4.0.0",
 		"rxjs": "^7"
 	},
 	"devDependencies": {

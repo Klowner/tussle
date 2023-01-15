@@ -22,8 +22,8 @@ import {
 	share, switchMap,
 	take, takeLast, toArray, throwError, throwIfEmpty, catchError
 } from "rxjs";
-import{R2File} from './r2file';
-import {nanoid} from "nanoid";
+import {R2File} from './r2file';
+import {lousyUUID} from "./lousyuuid";
 
 interface Part {
 	key: string;
@@ -44,6 +44,7 @@ export interface TussleStorageR2Options {
 	bucket: Pick<R2Bucket, 'get'|'delete'|'put'|'list'>;
 	r2ListLimit?: number;
 	checkpoint?: number; // Auto-checkpoint uploads every `checkpoint` bytes.
+	appendUniqueSubdir?: (location: string) => string; // Return a unique sub-path of `location` (including location in returned value)
 }
 
 function isNonNull<T>(value: T): value is NonNullable<T> {
@@ -220,10 +221,13 @@ export class TussleStorageR2 implements TussleStorageService {
 		}),
 	);
 
+	private readonly appendUniqueSubdir = this.options.appendUniqueSubdir
+		|| ((location: string) => `${location}/${lousyUUID(16)}`);
+
 	private handlePartialConcatenation(
 		state: PartialConcatState,
 	) {
-		state.location += `/${nanoid()}`;
+		state.location = this.appendUniqueSubdir(state.location);
 		return state;
 	}
 
