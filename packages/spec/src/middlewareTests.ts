@@ -20,7 +20,7 @@ interface MockStorageState {
 	parts?: Uint8Array[];
 }
 
-class TussleMockStorageService implements TussleStorageService {
+export class TussleMockStorageService implements TussleStorageService {
 	readonly extensionsRequired: TusProtocolExtension[] = [];
 	readonly extensionsSupported?: TusProtocolExtension[] = [
 		'creation',
