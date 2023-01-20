@@ -1,7 +1,7 @@
 import { lousyUUID } from './lousyuuid';
 describe("LousyUUID (terrible UUID generator)", () => {
-	it('should generate unique strings', () => {
-		const result = lousyUUID(32);
+	it('should generate unique strings (32 characters by default)', () => {
+		const result = lousyUUID();
 		expect(result).toHaveLength(32);
 	});
 
