@@ -44,7 +44,6 @@ function createRequest(
 
 
 describe('Patch request handler', () => {
-
 	test('request Content-Type other than "application/offset+octet-stream" responds with 415: Unsupported media type', async () => {
 		const storage = new TussleMockStorageService();
 		const middleware = new MockMiddleware();
@@ -87,7 +86,6 @@ describe('Patch request handler', () => {
 			const storage = new TussleMockStorageService();
 
 			storage.patchFile = jest.fn((params) => {
-				console.log({params});
 				return of({
 					location: params.location,
 					offset: params.length,
