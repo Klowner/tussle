@@ -4483,7 +4483,7 @@ __metadata:
   dependencies:
     "@cloudflare/workers-types": ^4.20221111.1
     "@tussle/spec": ^0.6.5
-    concurrently: ^7.4.0
+    concurrently: ^7.6.0
     jest: ^29.2.2
     rimraf: ^3.0.2
     rxjs: ^7.0.0
@@ -4558,7 +4558,7 @@ __metadata:
     "@tussle/core": ^0.6.5
     "@tussle/spec": ^0.6.5
     "@tussle/state-memory": ^0.6.5
-    concurrently: ^7.5.0
+    concurrently: ^7.6.0
     jest: ^29.2.2
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
@@ -4619,7 +4619,7 @@ __metadata:
     "@miniflare/storage-memory": ^2.11.0
     "@tussle/spec": ^0.6.5
     "@types/jest": ^29.2.2
-    concurrently: ^7.5.0
+    concurrently: ^7.6.0
     jest: ^29.2.2
     nock: ^13.2.4
     npm-run-all: ^4.1.5
@@ -4644,7 +4644,7 @@ __metadata:
     "@aws-sdk/client-s3": ^3
     "@tussle/core": ^0.6.5
     "@tussle/spec": ^0.6.5
-    concurrently: ^7.4.0
+    concurrently: ^7.6.0
     jest: ^29.2.2
     nock: ^13.2.4
     npm-run-all: ^4.1.5
@@ -6293,9 +6293,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"concurrently@npm:^7.4.0, concurrently@npm:^7.5.0":
-  version: 7.5.0
-  resolution: "concurrently@npm:7.5.0"
+"concurrently@npm:^7.6.0":
+  version: 7.6.0
+  resolution: "concurrently@npm:7.6.0"
   dependencies:
     chalk: ^4.1.0
     date-fns: ^2.29.1
@@ -6309,7 +6309,7 @@ __metadata:
   bin:
     conc: dist/bin/concurrently.js
     concurrently: dist/bin/concurrently.js
-  checksum: 7886e1c8559d2699ae1b62be8aca5d56c226966e252a2b9dd6077b3c1fd5397e98ef537c040fffa1de50418bd2616746eb9dd589a31ffb9056d4758b850a865b
+  checksum: f705c9a7960f1b16559ca64958043faeeef6385c0bf30a03d1375e15ab2d96dba4f8166f1bbbb1c85e8da35ca0ce3c353875d71dff2aa132b2357bb533b3332e
   languageName: node
   linkType: hard
 
