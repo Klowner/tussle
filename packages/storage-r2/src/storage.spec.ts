@@ -7,6 +7,10 @@ import {firstValueFrom} from 'rxjs';
 import {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import {GenericRequest} from '@tussle/spec/lib/middlewareTests';
 
+const bucketGetSpy = jest.spyOn(R2Bucket.prototype, 'get');
+const bucketPutSpy = jest.spyOn(R2Bucket.prototype, 'put');
+const bucketListSpy = jest.spyOn(R2Bucket.prototype, 'list');
+
 storageServiceTests(
   '@tussle/storage-r2',
   async () => {
@@ -38,13 +42,20 @@ function mockIncomingRequest(request: GenericRequest): TussleIncomingRequest<Gen
 describe('@tussle/storage-r2', () => {
 	let storage: TussleStorageR2;
 	let state: TussleStateMemory<R2UploadState>;
+	let bucket: Pick<R2Bucket, 'get'|'delete'|'put'|'list'>;
+
 	beforeEach(() => {
+		bucket = new R2Bucket(new MemoryStorage());
 		state = new TussleStateMemory();
 		storage = new TussleStorageR2({
 			stateService: state,
 			// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
-			bucket: new R2Bucket(new MemoryStorage()),
+			bucket,
 		});
+
+		bucketGetSpy.mockClear();
+		bucketPutSpy.mockClear();
+		bucketListSpy.mockClear();
 	});
 
 	describe('upload state management', () => {
@@ -89,7 +100,6 @@ describe('@tussle/storage-r2', () => {
 
 			const result = await firstValueFrom(storage.createFile({
 				path: 'soft-cat.jpg',
-				// contentLength: 0,
 				uploadLength: 4,
 				uploadMetadata: {},
 				uploadConcat: null,
@@ -104,7 +114,6 @@ describe('@tussle/storage-r2', () => {
 			// Create a new file at the same location.
 			const result2 = await firstValueFrom(storage.createFile({
 				path: 'soft-cat.jpg',
-				// contentLength: 0,
 				uploadLength: 100,
 				uploadMetadata: {
 					meow: 'meow',
@@ -324,6 +333,25 @@ describe('@tussle/storage-r2', () => {
 				expect((await collectReadable(file.slice(0, 5))).toString()).toEqual('fluff');
 				expect((await collectReadable(file.slice(7, 5))).toString()).toEqual('kitty');
 			}
+		});
+	});
+
+	describe('R2 API error cases', () => {
+		describe('creation', () => {
+			test('R2 put failure', async () => {
+				jest.mocked(bucket.put).mockImplementationOnce(() => {
+					return Promise.resolve(null);
+				});
+
+				await firstValueFrom(storage.createFile({
+					path: 'honk.iso',
+					uploadLength: 10,
+					uploadMetadata: {},
+					uploadConcat: null,
+				}));
+
+				expect(bucket.put).toHaveBeenCalled();
+			});
 		});
 	});
 });
