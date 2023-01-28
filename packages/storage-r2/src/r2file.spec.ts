@@ -1,8 +1,24 @@
-import { selectPartRanges } from "./r2file";
-import type { Part } from "./r2file";
+import {R2File, selectPartRanges} from "./r2file";
+import {R2Bucket} from '@miniflare/r2';
+import {MemoryStorage} from '@miniflare/storage-memory';
+import type {Part} from "./r2file";
 
 
 describe('R2File', () => {
+
+	describe('Read failure due to missing R2 records', () => {
+		test('idk', async () => {
+			const bucket = new R2Bucket(new MemoryStorage());
+			const parts: Readonly<Part[]> = [
+				{key: '0001', size: 5 },
+				{key: '0002', size: 5 },
+			];
+			await bucket.put('0001', new TextEncoder().encode('hello'));
+			// @ts-expect-error miniflare's R2ObjectBody
+			const file = new R2File('missing-file', 10, parts, {}, bucket);
+		});
+	});
+
 	describe('selectPartRanges with odd sized chunks', () => {
 		const parts: Readonly<Part[]> = [
 			{key: '0001', size: 0 },
