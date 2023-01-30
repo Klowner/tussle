@@ -37,3 +37,7 @@ Uploaded files have to be stored somewhere, that's the purpose of the *storage* 
 The request component a responsible for creating outbound HTTP requests and -- when possible/appropriate -- transparently proxy upload payloads, which is determined by the *storage* component.
  - [request-axios](/packages/request-axios) - Use [Axios](https://github.com/axios/axios), suitable for node environments.
  - [request-cloudflareworker](/packages/request-cloudflareworker) - Use [Cloudflare Worker's Fetch()](https://developers.cloudflare.com/workers/runtime-apis/fetch) (for use with [middleware-cloudflareworker](/packages/middleware-cloudflareworker)).
+
+### Support me
+If you find this library useful, please consider buying me a coffee as a way of showing your support!
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/mark.riedesel)
