@@ -20,6 +20,26 @@ or something even *less* reliable such as [@tussle/state-memory-ttl](../../packa
  - `appendUniqueSubdir: (location: string) => string` (optional) -- For partial concatenation requests, override the unique subdirectory for each parallel upload. The built-in implementation should be sufficient
  for most users. Example using [nanoid](https://www.npmjs.com/package/nanoid): `appendUniqueSubdir: (location) => ${location}/${nanoid()}`
 
+### Occasional R2 API errors
+R2 worker API calls will occasionally throw exceptions, from `We encountered an internal error: Please try again. (10001)` to
+slightly more cryptic errors such as `put: Client Disconnect (10054)`.
+
+If you would like to perform transparent retries in response to R2 API errors, you can
+use the [ReBucket](./src/rebucket.ts) adapter class to wrap your bucket before passing
+it to the tussle storage service.
+
+```typescript
+import {ReBucket, TussleStorageR2} from '@tussle/storage-r2';
+
+const storage = new TussleStorageR2({
+	stateService,
+	bucket: new ReBucket(bindings.BUCKET, {
+		retries: 3,
+		error: console.error,
+	}),
+});
+```
+
 
 ### Example
 See [Cloudflare Worker + R2](../../examples/cloudflare-worker-r2) for an
