@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.10](https://github.com/Klowner/tussle/compare/v0.6.9...v0.6.10) (2023-02-01)
+
+
+### Features
+
+* **storage-r2:** add optional 'ReBucket' adapter class to provide automatic retry for R2 bucket operations ([fc0bb2c](https://github.com/Klowner/tussle/commit/fc0bb2c86244b8d2a8e4c8a16cf4653290cdd1fa))
+* **storage-r2:** add test for lousyUUID default params ([01720ca](https://github.com/Klowner/tussle/commit/01720ca5c793be03a526fbaab3f42894d1f29706))
+
+
+
+
+
 ## [0.6.9](https://github.com/Klowner/tussle/compare/v0.6.8...v0.6.9) (2023-01-15)
 
 
