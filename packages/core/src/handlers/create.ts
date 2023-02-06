@@ -134,7 +134,7 @@ const toResponse = <T, P>(
 	ctx: TussleIncomingRequest<T, P>,
 	createdFile: TussleStorageCreateFileResponse
 ): TussleIncomingRequest<T, P> => {
-	if (createdFile.location) {
+	if (createdFile.location && !('error' in createdFile)) {
 		ctx.response = {
 			status: 201, // created
 			headers: {
@@ -145,6 +145,7 @@ const toResponse = <T, P>(
 	} else {
 		ctx.response = {
 			status: 400, // TODO - check this
+			body: `${createdFile.error}`,
 		};
 	}
 	return ctx;

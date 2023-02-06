@@ -78,7 +78,7 @@ const toResponse = <T, P>(
 	ctx: TussleIncomingRequest<T, P>,
 	patchedFile: TussleStoragePatchFileResponse
 ): TussleIncomingRequest<T, P> => {
-	if (patchedFile.success && patchedFile.offset !== undefined) {
+	if (patchedFile.success && patchedFile.offset !== undefined && !('error' in patchedFile)) {
 		ctx.response = {
 			status: 204, // no content (success),
 			headers: {
@@ -89,6 +89,7 @@ const toResponse = <T, P>(
 	} else {
 		ctx.response = {
 			status: 403,
+			body: `${patchedFile.error}`,
 		};
 	}
 
