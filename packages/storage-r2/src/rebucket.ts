@@ -64,7 +64,8 @@ export class ReBucket<T extends ReBucketSupportedMethods> {
 	}
 
 	put(...parameters: Parameters<ReBucketSupportedMethods['put']>) {
-		return withRetry(() => this.bucket.put(...parameters), this);
+		// FIXME - think up some strategy for tee'ing the ReadableStream so it can be retried
+		return this.bucket.put(...parameters);
 	}
 
 	head(...parameters: Parameters<ReBucketSupportedMethods['head']>) {

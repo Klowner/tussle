@@ -89,7 +89,6 @@ describe('@tussle/storage-r2', () => {
 
 			const result = await firstValueFrom(storage.createFile({
 				path: 'soft-cat.jpg',
-				// contentLength: 0,
 				uploadLength: 4,
 				uploadMetadata: {},
 				uploadConcat: null,
@@ -104,7 +103,6 @@ describe('@tussle/storage-r2', () => {
 			// Create a new file at the same location.
 			const result2 = await firstValueFrom(storage.createFile({
 				path: 'soft-cat.jpg',
-				// contentLength: 0,
 				uploadLength: 100,
 				uploadMetadata: {
 					meow: 'meow',

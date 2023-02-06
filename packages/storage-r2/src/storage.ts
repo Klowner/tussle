@@ -336,7 +336,7 @@ export class TussleStorageR2 implements TussleStorageService {
 				success: true,
 			})),
 			catchError(err => {
-				return of({
+				return of<TussleStorageCreateFileResponse>({
 					location: params.path,
 					offset: 0,
 					success: false,
@@ -491,7 +491,7 @@ export class TussleStorageR2 implements TussleStorageService {
 				// If this is a freshly created upload, then the first part should be a
 				// zero-sized placeholder containing only metadata for rebuilding
 				// upload state. We can overwrite this part with the first patch
-				// request, so we erase the parts from so the next key will be all
+				// request, so we remove the parts from it so the next key will be all
 				// zeros.
 				if (firstPartIsCreationPlaceholder(nextState.parts)) {
 					nextState.parts = [];
