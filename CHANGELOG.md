@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.11](https://github.com/Klowner/tussle/compare/v0.6.10...v0.6.11) (2023-02-06)
+
+
+### Bug Fixes
+
+* **core:** try to do a better job of surfacing creation errors thrown by storage service ([4941671](https://github.com/Klowner/tussle/commit/4941671106f6fbc82438f575187a2bf94fe85637))
+* **storage-r2:** disable R2 put() retries in ReBucket until I find a strategy for retrying already-read ReadableStreams ([2423991](https://github.com/Klowner/tussle/commit/2423991bde1fc744e0ca6c5320a43b36319e195d))
+
+
+
+
+
 ## [0.6.10](https://github.com/Klowner/tussle/compare/v0.6.9...v0.6.10) (2023-02-01)
 
 

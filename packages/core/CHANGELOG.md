@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.11](https://github.com/Klowner/tussle/compare/v0.6.10...v0.6.11) (2023-02-06)
+
+
+### Bug Fixes
+
+* **core:** try to do a better job of surfacing creation errors thrown by storage service ([4941671](https://github.com/Klowner/tussle/commit/4941671106f6fbc82438f575187a2bf94fe85637))
+
+
+
+
+
 ## [0.6.5](https://github.com/Klowner/tussle/compare/v0.6.4...v0.6.5) (2022-12-06)
 
 
