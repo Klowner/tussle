@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.12](https://github.com/Klowner/tussle/compare/v0.6.11...v0.6.12) (2023-03-28)
+
+
+### Features
+
+* enable declaration maps ([ee3f7c6](https://github.com/Klowner/tussle/commit/ee3f7c664d00d55b12b7882c5e8b647cdfd7bb69))
+
+
+
+
+
 ## [0.6.11](https://github.com/Klowner/tussle/compare/v0.6.10...v0.6.11) (2023-02-06)
 
 

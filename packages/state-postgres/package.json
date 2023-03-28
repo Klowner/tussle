@@ -1,6 +1,6 @@
 {
   "name": "@tussle/state-postgres",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "description": "Tussle state component backed by PostgresSQL",
   "main": "lib/state.js",
   "files": [
@@ -15,12 +15,12 @@
   "author": "Mark Riedesel <mark@klowner.com>",
   "license": "MIT",
   "dependencies": {
-    "@tussle/core": "^0.6.11",
+    "@tussle/core": "^0.6.12",
     "@types/pg": "^7.14.11",
     "pg": "^8.7.3"
   },
   "devDependencies": {
-    "@tussle/spec": "^0.6.11",
+    "@tussle/spec": "^0.6.12",
     "jest": "^29.2.2",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
