@@ -4,8 +4,7 @@ import { R2UploadState, TussleStorageR2 } from './storage';
 import { MemoryStorage } from "@miniflare/storage-memory";
 import { R2Bucket } from "@miniflare/r2";
 import {firstValueFrom} from 'rxjs';
-import {TussleIncomingRequest} from '@tussle/spec/interface/request';
-import {GenericRequest} from '@tussle/spec/lib/middlewareTests';
+import {mockIncomingRequest} from '@tussle/spec';
 
 storageServiceTests(
   '@tussle/storage-r2',
@@ -17,23 +16,6 @@ storageServiceTests(
 		});
 	}
 );
-
-function mockIncomingRequest(request: GenericRequest): TussleIncomingRequest<GenericRequest, void> {
-	return {
-		request: {
-			method: request.method,
-			path: request.url,
-			getReadable: () => request.body,
-			getHeader: (key) => request.headers ? request.headers[key] : undefined,
-		},
-		response: null,
-		meta: {},
-		cfg: {},
-		// @ts-ignore
-		source: null,
-		originalRequest: request,
-	}
-}
 
 describe('@tussle/storage-r2', () => {
 	let storage: TussleStorageR2;

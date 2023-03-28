@@ -2,6 +2,7 @@ import type {TussleHookDef, TussleMiddlewareService} from '@tussle/spec/interfac
 import type {TussleStorageService} from '@tussle/spec/interface/storage';
 import type {TusProtocolExtension} from '@tussle/spec/interface/tus';
 import {EMPTY, Observable, of} from 'rxjs';
+import {TussleIncomingRequest} from '../interface/request';
 
 import {
 	TussleStorageCreateFileParams,
@@ -54,7 +55,7 @@ class TussleMockStorageService implements TussleStorageService {
 	patchFile<Req, MockStorageState>(
 		_params: TussleStoragePatchFileParams<Req, MockStorageState>,
 	): Observable<TussleStoragePatchFileResponse> {
-		return EMPTY;
+		return EMPTY; // TODO
 	}
 
 	getFileInfo(
@@ -88,6 +89,31 @@ export interface GenericRequest {
 export interface GenericResponse {
 	status: number;
 	headers: Record<string, string>;
+}
+
+export function mockIncomingRequest(
+	request: GenericRequest,
+): TussleIncomingRequest<GenericRequest, void>;
+
+export function mockIncomingRequest<U>(
+	request: GenericRequest,
+	userParams?: U,
+): TussleIncomingRequest<GenericRequest, U> {
+	return {
+		request: {
+			method: request.method,
+			path: request.url,
+			getReadable: () => request.body,
+			getHeader: (key) => request.headers ? request.headers[key] : undefined,
+		},
+		response: null,
+		meta: {},
+		cfg: {},
+		/* @ts-expect-error this should be the middleware that handled the incoming GenericRequest */
+		source: null,
+		originalRequest: request,
+		...(userParams ? {userParams} : {}),
+	};
 }
 
 function prepareHeaders(headers: Record<string, string>) {

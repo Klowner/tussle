@@ -354,6 +354,7 @@ export class TussleStorageR2 implements TussleStorageService {
 			key: string;
 			size: number;
 			prev: string;
+			// time: number;
 		}
 		const prefix = stripLeadingSlashes(location) + '/';
 		let latestPart: R2Object | null = null;
@@ -379,7 +380,7 @@ export class TussleStorageR2 implements TussleStorageService {
 					continue; // ignore this object
 				}
 				const {tusslePrevKey} = obj.customMetadata;
-				partMap.set(unprefixedKey, { //.key, {
+				partMap.set(unprefixedKey, {
 					key: obj.key,
 					size: obj.size,
 					prev: tusslePrevKey,
