@@ -1,13 +1,11 @@
-import type { Readable } from 'stream';
 import type { Observable } from 'rxjs';
 import type { TussleMiddlewareService } from './middleware';
 import type { TussleStorageService } from './storage';
 
 type RequestBody =
-	| Readable
-	| Record<string, unknown>
-	| null
-	| string
+  | Record<string, unknown>
+  | null
+  | string
 ;
 
 type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'OPTIONS' | 'DELETE' | 'HEAD';
@@ -29,16 +27,16 @@ export type TussleOutgoingRequest<T = unknown> = {
 }
 
 export type TussleOutgoingResponse<T, R> = {
-	request: TussleOutgoingRequest;
-	getData: () => Promise<T>;
-	originalResponse: R;
+  request: TussleOutgoingRequest;
+  getData: () => Promise<T>;
+  originalResponse: R;
 };
 
 export interface TussleIncomingRequest<Req, U> {
   request: {
     method: HTTPMethod;
     path: string;
-    getReadable: () => Readable | ReadableStream<Uint8Array> | Uint8Array | undefined;
+    getReadable: () => ReadableStream<Uint8Array> | Uint8Array | undefined;
     getHeader: (header: string) => string|undefined;
   };
   response: null | {
@@ -61,5 +59,5 @@ export interface TussleIncomingRequest<Req, U> {
 }
 
 export interface TussleRequestService<R = unknown> {
-	makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, R>>;
+  makeRequest<T>(request: TussleOutgoingRequest): Observable<TussleOutgoingResponse<T, R>>;
 }
