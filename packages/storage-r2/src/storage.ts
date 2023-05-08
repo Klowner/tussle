@@ -45,6 +45,7 @@ export interface TussleStorageR2Options {
 	r2ListLimit?: number;
 	checkpoint?: number; // Auto-checkpoint uploads every `checkpoint` bytes.
 	appendUniqueSubdir?: (location: string) => string; // Return a unique sub-path of `location` (including location in returned value)
+	skipConcatenation?: boolean;
 }
 
 function isNonNull<T>(value: T): value is NonNullable<T> {
@@ -99,6 +100,12 @@ function getNextKey(
 
 function toPartKey(location: string, part: number): string {
 	return stripLeadingSlashes([location, toPartName(part)].join('/'));
+}
+
+function isCompleteUpload(
+	state: Readonly<R2UploadState>,
+): boolean {
+	return state.currentOffset === state.uploadLength;
 }
 
 function sliceStreamBYOB(
@@ -232,6 +239,8 @@ export class TussleStorageR2 implements TussleStorageService {
 		return state;
 	}
 
+	// Iterate over each uploadConcat part (sub-file) and collect all R2
+	// sub-parts collecting them into state.parts in the correct order.
 	private readonly collectConcatenationStateParts = pipe(
 		concatMap((state: FinalConcatState): Observable<FinalConcatState> =>
 			from(state.uploadConcat.parts).pipe(
@@ -355,9 +364,9 @@ export class TussleStorageR2 implements TussleStorageService {
 			key: string;
 			size: number;
 			prev: string;
-			// time: number;
 		}
-		const prefix = stripLeadingSlashes(location) + '/';
+		const path = stripLeadingSlashes(location);
+		const prefix = path + '/';
 		let latestPart: R2Object | null = null;
 		let more = true;
 		let cursor: string | undefined;
@@ -387,6 +396,29 @@ export class TussleStorageR2 implements TussleStorageService {
 				});
 				unprefixedPartKeys.push(unprefixedKey);
 				latestPart = (latestPart && latestPart.uploaded > obj.uploaded) ? latestPart : obj;
+			}
+		}
+		if (latestPart === null) {
+			// No parts were found, see if a record exists in the R2 bucket that
+			// matches the exact path that we're interested in. This scenario may
+			// occur when a complete R2 upload is concatenated and discarded, leaving
+			// only a single R2 record. To handle this, we construct an R2UploadState
+			// describing a completed upload with a single part which points to the
+			// single R2 record. This is somewhat silly, but it provides
+			// compatibility with R2File and getFileInfo().
+			const result = await this.options.bucket.get(path, { range: { length: 0 }});
+			if (result) {
+				return {
+					location: result.key,
+					uploadLength: result.size,
+					uploadConcat: null,
+					currentOffset: result.size,
+					metadata: result.customMetadata ?? {}, // Assume metadata is not wrapped by tussleState
+					parts: [{
+						key: result.key,
+						size: result.size,
+					}],
+				};
 			}
 		}
 		if (latestPart === null || !latestPart.customMetadata || !latestPart.customMetadata['tussleState']) {
@@ -472,7 +504,7 @@ export class TussleStorageR2 implements TussleStorageService {
 	private persistFilePart(
 		state: Readonly<R2UploadState>,
 		params: TussleStoragePatchFileParams,
-	): Observable<TussleStoragePatchFileResponse> {
+	): Observable<R2UploadState> {
 		const {length} = params;
 		const {checkpoint} = this.options;
 		const readable = params.request.request.getReadable() as ReadableStream;
@@ -516,14 +548,13 @@ export class TussleStorageR2 implements TussleStorageService {
 						},
 					},
 				));
-				const response$ = put$.pipe(
+				const state$ = put$.pipe(
 					map(() => nextState),
 					this.setState,
-					map((state) => this.asPatchResponse(state)),
 				);
-				return response$;
+				return state$;
 			}),
-			takeLast(1), // Respond with only the final state (assuming we make it that far)
+			takeLast(1), // Emit only the final state (assuming we make it that far)
 		);
 	}
 
@@ -555,6 +586,8 @@ export class TussleStorageR2 implements TussleStorageService {
 			this.getLocationState,
 			filter(isNonNull),
 			switchMap((state) => this.persistFilePart(state, params)),
+			this.optionallyMergeAndDiscardChunksIfComplete,
+			map(state => this.asPatchResponse(state)),
 			defaultIfEmpty(this.invalidPatchResponse(location)),
 		);
 	}
@@ -599,14 +632,62 @@ export class TussleStorageR2 implements TussleStorageService {
 		return firstValueFrom(of(path).pipe(
 			this.getLocationState,
 			filter(isNonNull),
-			map(state => new R2File(
-				path,
-				(state.parts || []).map(part => part.size).reduce((sum, size) => sum + size, 0),
-				state.parts || [],
-				state.metadata,
-				this.options.bucket,
-			)),
+			map(state => r2FileFromState(state, this.options.bucket)),
 			defaultIfEmpty(null),
 		));
 	}
+
+	// Merge all R2 records within an R2UploadState and return
+	// an updated state reflecting the new merged source records.
+	private readonly mergeR2Records = pipe(
+		concatMap((state: Readonly<R2UploadState>) => of(state).pipe(
+			map(state => r2FileFromState(state, this.options.bucket)),
+			mergeMap((source) => from(this.options.bucket.put(source.key, source.body, {
+					customMetadata: state.metadata,// Don't wrap user metadata in tussleState
+				})).pipe(
+					map((concatenated): R2UploadState => ({
+						...state,
+						parts: [{
+							key: concatenated.key,
+							size: concatenated.size,
+						}],
+					})),
+			)),
+		)),
+	);
+
+	private readonly mergeAndDiscardR2Chunks = pipe(
+		concatMap((state: Readonly<R2UploadState>) => of(state).pipe(
+			filter(isCompleteUpload),
+			this.mergeR2Records,
+			mergeMap(merged => from(r2FileFromState(state, this.options.bucket).delete()).pipe(
+				map(() => merged),
+			)),
+			defaultIfEmpty(state),
+		)),
+	);
+
+	private readonly optionallyMergeAndDiscardChunksIfComplete = pipe(
+		mergeMap((state: Readonly<R2UploadState>) => of(state).pipe(
+			filter(() => !this.options.skipConcatenation),
+			filter(isCompleteUpload),
+			this.mergeAndDiscardR2Chunks,
+			defaultIfEmpty(state),
+		)),
+	);
+}
+
+function r2FileFromState(
+	state: Readonly<R2UploadState>,
+	bucket: Pick<R2Bucket, 'get'|'delete'>,
+) {
+	const totalPartsSize = (state.parts || []).reduce((sum, part) => sum + part.size, 0);
+	const path = stripLeadingSlashes(state.location);
+	return new R2File(
+		path,
+		totalPartsSize,
+		state.parts ?? [],
+		state.metadata,
+		bucket,
+	);
 }
