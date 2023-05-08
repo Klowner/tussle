@@ -2426,13 +2426,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cloudflare/workers-types@npm:^4.20221111.1":
-  version: 4.20221111.1
-  resolution: "@cloudflare/workers-types@npm:4.20221111.1"
-  checksum: 6ee1ba28ee3c59926f0f49da7023a887846bb637d43da0d8787ed87b2ed624bd83471feba9519a404a58cecad73f3a74a67bc3f52ccfda916947d297cfaa988c
-  languageName: node
-  linkType: hard
-
 "@cloudflare/wrangler@npm:^1.20.0":
   version: 1.20.0
   resolution: "@cloudflare/wrangler@npm:1.20.0"
@@ -6392,7 +6385,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "cloudflare-worker-r2@workspace:examples/cloudflare-worker-r2"
   dependencies:
-    "@cloudflare/workers-types": ^4.20221111.1
+    "@cloudflare/workers-types": ^4
     "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker"
     "@tussle/storage-r2": "link:../../packages/storage-r2"
     dotenv: ^16.0.0
@@ -6408,7 +6401,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "cloudflare-worker-s3@workspace:examples/cloudflare-worker-s3"
   dependencies:
-    "@cloudflare/workers-types": ^4.20221111.1
+    "@cloudflare/workers-types": ^4
     "@tussle/middleware-cloudflareworker": "link:../../packages/middleware-cloudflareworker"
     "@tussle/request-cloudflareworker": "link:../../packages/request-cloudflareworker"
     "@tussle/storage-s3": "link:../../packages/storage-s3"

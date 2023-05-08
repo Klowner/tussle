@@ -368,12 +368,11 @@ export class TussleStorageR2 implements TussleStorageService {
 				prefix,
 				cursor,
 				limit: this.options.r2ListLimit,
-				// @ts-ignore miniflare/r2 excludes these if not explicitly provided
 				include: ['customMetadata', 'httpMetadata'],
 				delimiter: '/',
 			});
 			more = result.truncated;
-			cursor = result.cursor;
+			cursor = result.truncated ? result.cursor : undefined;
 			for (const obj of result.objects) {
 				const unprefixedKey = stripPrefix(obj.key);
 				if (!Number.isInteger(parseInt(unprefixedKey, 10)) || !obj.customMetadata || !obj.customMetadata['tussleState']) {
