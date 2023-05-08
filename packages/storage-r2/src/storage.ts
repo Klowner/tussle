@@ -182,8 +182,9 @@ type PartialConcatState = InitialState & {uploadConcat: UploadConcatPartial};
 type FinalConcatState = InitialState & {uploadConcat: UploadConcatFinal};
 
 const EXTENSIONS_SUPPORTED: TusProtocolExtension[] = [
-	'creation',
 	'concatenation',
+	'creation',
+	'creation-with-upload',
 ];
 
 export class TussleStorageR2 implements TussleStorageService {

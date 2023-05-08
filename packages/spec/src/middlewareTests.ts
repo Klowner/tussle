@@ -1,7 +1,7 @@
 import type {TussleHookDef, TussleMiddlewareService} from '@tussle/spec/interface/middleware';
 import type {TussleStorageService} from '@tussle/spec/interface/storage';
 import type {TusProtocolExtension} from '@tussle/spec/interface/tus';
-import {TussleIncomingRequest} from '../interface/request';
+import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import {Observable, of, from as observableFrom, throwError, map, filter, OperatorFunction} from 'rxjs';
 
 import {
@@ -25,6 +25,7 @@ class TussleMockStorageService implements TussleStorageService {
 	readonly extensionsRequired: TusProtocolExtension[] = [];
 	readonly extensionsSupported?: TusProtocolExtension[] = [
 		'creation',
+		'creation-with-upload',
 	];
 
 	constructor (

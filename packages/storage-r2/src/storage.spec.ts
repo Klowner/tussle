@@ -29,6 +29,15 @@ describe('@tussle/storage-r2', () => {
 		});
 	});
 
+	describe('capabilities', () => {
+		test('supported extensions includes creation', () => {
+			expect(storage.extensionsSupported).toContain('creation');
+		});
+		test('supported extensions includes creation-with-upload', () => {
+			expect(storage.extensionsSupported).toContain('creation-with-upload');
+		});
+	});
+
 	describe('upload state management', () => {
 		test('createFile() should create new upload state', async () => {
 			const result = await firstValueFrom(storage.createFile({
