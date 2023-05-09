@@ -19,6 +19,7 @@ or something even *less* reliable such as [@tussle/state-memory-ttl](../../packa
  - `r2ListLimit: number` (optional) -- Limit the maximum number of records to list while rebuilding state from R2. You probably don't need to use this, as it was primarily added to circumvent a (now resolved) Cloudflare Worker's bug. This may be removed at some point in the future.
  - `appendUniqueSubdir: (location: string) => string` (optional) -- For partial concatenation requests, override the unique subdirectory for each parallel upload. The built-in implementation should be sufficient
  for most users. Example using [nanoid](https://www.npmjs.com/package/nanoid): `appendUniqueSubdir: (location) => ${location}/${nanoid()}`
+ - `skipMerge: boolean` (default: `false`) -- After an upload is complete, individual upload chunks are merged into a single R2 record at the original storage path. Setting this option to `true` will skip this post-processing step and leave individual upload chunks as separate R2 records. Un-merged uploads can still be conveniently read/sliced using `storage.getFile()` which returns an [R2File](./src/r2file.ts) instance. The merging process is achieved by writing a new R2 record by streaming the individual chunks to it in order, this takes a little time depending on the file size and involves an additional R2 write operation and at least one read operation per uploaded chunk.
 
 ### Occasional R2 API errors
 R2 worker API calls will occasionally throw exceptions, from `We encountered an internal error: Please try again. (10001)` to

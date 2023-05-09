@@ -110,7 +110,7 @@ export interface GenericRequest {
 	method: 'GET'|'POST'|'PUT'|'PATCH'|'DELETE'|'OPTIONS';
 	url: string;
 	headers?: Record<string, string>;
-	body?: Uint8Array;
+	body?: Uint8Array | ReadableStream;
 }
 
 export interface GenericResponse {
