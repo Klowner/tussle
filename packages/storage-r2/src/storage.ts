@@ -406,7 +406,7 @@ export class TussleStorageR2 implements TussleStorageService {
 			// describing a completed upload with a single part which points to the
 			// single R2 record. This is somewhat silly, but it provides
 			// compatibility with R2File and getFileInfo().
-			const result = await this.options.bucket.get(path, { range: { length: 0 }});
+			const result = await this.options.bucket.get(path, { onlyIf: { etagMatches: 'never-match' }});
 			if (result) {
 				return {
 					location: result.key,
@@ -660,9 +660,12 @@ export class TussleStorageR2 implements TussleStorageService {
 		concatMap((state: Readonly<R2UploadState>) => of(state).pipe(
 			filter(isCompleteUpload),
 			this.mergeR2Records,
-			mergeMap(merged => from(r2FileFromState(state, this.options.bucket).delete()).pipe(
-				map(() => merged),
-			)),
+			mergeMap(merged => {
+				const file = r2FileFromState(state, this.options.bucket);
+				return from(file.delete()).pipe(
+					map(() => merged),
+				);
+			}),
 			defaultIfEmpty(state),
 		)),
 	);
@@ -686,7 +689,7 @@ function r2FileFromState(
 	return new R2File(
 		path,
 		totalPartsSize,
-		state.parts ?? [],
+		state.parts || [],
 		state.metadata,
 		bucket,
 	);
