@@ -507,6 +507,7 @@ export class TussleStorageR2 implements TussleStorageService {
 	): Observable<R2UploadState> {
 		const {length} = params;
 		const {checkpoint} = this.options;
+		// This will always be a ReadableStream in Cloudflare Workers.
 		const readable = params.request.request.getReadable() as ReadableStream;
 		let readable$;
 		if (checkpoint && checkpoint !== length) {

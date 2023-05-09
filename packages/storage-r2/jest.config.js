@@ -1,5 +1,10 @@
 module.exports = {
 	testEnvironment: 'miniflare',
+	testEnvironmentOptions: {
+		compatibilityFlags: [
+			"streams_enable_constructors",
+		],
+	},
 	testMatch: [
 		'<rootDir>/src/**/*.spec.ts'
 	],

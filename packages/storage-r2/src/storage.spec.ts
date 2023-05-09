@@ -315,9 +315,53 @@ describe('@tussle/storage-r2', () => {
 			}
 		});
 	});
+
+	describe('auto-checkpointing', () => {
+		beforeEach(() => {
+			storage = new TussleStorageR2({
+				stateService: state,
+				// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
+				bucket: new R2Bucket(new MemoryStorage()),
+				checkpoint: 25,
+			});
+		});
+
+		test('should store file in separate records no larger than specified checkpoint size', async () => {
+			// Create a new file
+			expect(await firstValueFrom(storage.createFile({
+				path: 'meowmeow.txt',
+				uploadLength: 200,
+				uploadMetadata: {},
+				uploadConcat: null,
+			}))).toHaveProperty('uploadLength', 200);
+
+			const body = asReadableStream(new Uint8Array(new TextEncoder().encode('hellocat'.repeat(25))));
+			// expect(body.length).toEqual(200);
+
+			expect(await firstValueFrom(storage.patchFile({
+				location: 'meowmeow.txt',
+				offset: 0,
+				length: 200,
+				request: mockIncomingRequest({
+					method: 'PATCH',
+					url: '<unused>',
+					body,
+				}),
+			}))).toHaveProperty('complete', true);
+
+			const file = await storage.getFile('meowmeow.txt');
+			expect(file).not.toBeNull();
+			if (file) {
+				expect(file.parts.length).toEqual(8); // auto-checkpoint will slice 200 bytes into 8 parts
+				for (let i = 0; i < 8; i++) {
+					expect(file.parts[i].size).toBe(25); // each part should be 25 bytes in length
+				}
+			}
+		});
+	});
 });
 
-async function collectReadable(readable: ReadableStream<any>): Promise<Buffer> {
+async function collectReadable(readable: ReadableStream<Uint8Array>): Promise<Buffer> {
 	const reader = readable.getReader();
 	const chunks = <Uint8Array[]>[];
 	while (true) {
@@ -326,4 +370,19 @@ async function collectReadable(readable: ReadableStream<any>): Promise<Buffer> {
 		chunks.push(value);
 	}
 	return Buffer.concat(chunks);
+}
+
+function asReadableStream(body: Uint8Array): ReadableStream<Uint8Array> {
+	let position = 0;
+	return new ReadableStream({
+		type: 'bytes',
+		pull(controller) {
+			if (position < body.length) {
+				controller.enqueue(body.slice(position, position + 1));
+				position++;
+			} else {
+				controller.close();
+			}
+		}
+	});
 }
