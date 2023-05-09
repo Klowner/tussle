@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://klowner/compare/v0.6.12...v0.7.0) (2023-05-09)
+
+
+### Bug Fixes
+
+* **storage-r2:** Update README.md ([bc1df27](https://klowner/commits/bc1df27f7c6532b8bbcbc111eedcce6dd7d9e279))
+* **storage-r2:** use etagMatches: 'never-match' to avoid R2 body response (docs claim lower latency) ([add2ca0](https://klowner/commits/add2ca031c6cec00327cfa898df20bb521715444))
+
+
+### Features
+
+* **storage-r2:** add documentation for skipMerge ([8c6417f](https://klowner/commits/8c6417f03b314abc3b0856831969525232f8517d))
+* **storage-r2:** add majority of support for auto-merge upon upload completion ([b08939f](https://klowner/commits/b08939fddecb87cb1156db669c902f8202430409))
+* **storage-r2:** add test coverage for checkpoints ([e7a4146](https://klowner/commits/e7a41461755627be7dad566229d12720b69a288b))
+* **storage-r2:** add tests for auto-merge ([91489fb](https://klowner/commits/91489fba83efae8d5658be8a2ed1c80205a01766))
+
+
+
+
+
 ## [0.6.12](https://github.com/Klowner/tussle/compare/v0.6.11...v0.6.12) (2023-03-28)
 
 **Note:** Version bump only for package @tussle/storage-r2

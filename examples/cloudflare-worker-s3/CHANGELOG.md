@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://klowner/compare/v0.6.12...v0.7.0) (2023-05-09)
+
+**Note:** Version bump only for package cloudflare-worker-s3
+
+
+
+
+
 ## [0.6.12](https://github.com/Klowner/tussle/compare/v0.6.11...v0.6.12) (2023-03-28)
 
 **Note:** Version bump only for package cloudflare-worker-s3
