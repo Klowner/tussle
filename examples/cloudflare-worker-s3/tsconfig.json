@@ -3,13 +3,13 @@
     "target": "esnext",
     "module": "esnext",
     "lib": ["esnext", "dom"],
-    "types": ["@cloudflare/workers-types"],
+    "types": ["@cloudflare/workers-types/2022-11-30"],
     "moduleResolution": "node",
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "baseUrl": "./",
-		"skipLibCheck": true,
+		"skipLibCheck": true
   },
   "include": [
     "types/**/*",

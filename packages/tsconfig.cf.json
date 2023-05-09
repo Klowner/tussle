@@ -4,7 +4,7 @@
 		"lib": ["esnext"],
 		"allowJs": true,
 		"types": [
-			"@cloudflare/workers-types/2022-08-04",
+			"@cloudflare/workers-types/2022-11-30",
 			"jest"
 		]
 	},
