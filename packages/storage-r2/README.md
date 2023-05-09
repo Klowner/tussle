@@ -3,11 +3,13 @@ Cloudflare R2 Storage
 
 Store multi-part uploads in [Cloudflare R2](https://www.cloudflare.com/products/r2/).
 
-The implementation of this Tussle storage backend differs slightly in that it
-does not reassemble multi-part uploads as part of the upload process, but
-rather provides a `getFile()` method which returns an object representing a
-collection of file parts which can be read conveniently as a single
-`ReadableStream`.
+This Tussle storage backend provides support for Tus uploads directly to Cloudflare
+R2 via Cloudflare Workers. It does not use the R2 multipart features but rather stores
+individual upload chunks as separate R2 records which are optionally merged upon
+the completion of a successful upload. If it is preferred to avoid the final
+merging step (see `skipMerge`) there is a `storage.getFile()` method which returns
+an object representing the collection of file parts in R2 which can be read
+conveniently as a single `ReadableStream`.
 
 This storage backend is also capable of fully recovering file state from R2,
 therefore it is recommended to use [@tussle/state-memory](../../packages/state-memory),
