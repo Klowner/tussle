@@ -1,6 +1,6 @@
 {
   "name": "@tussle/request-cloudflareworker",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Tussle request component utilizing Cloudflare Worker fetch/request",
   "main": "./dist-cjs/index.js",
   "types": "./dist-types/index.d.ts",

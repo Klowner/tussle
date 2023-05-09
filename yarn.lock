@@ -4638,7 +4638,7 @@ __metadata:
     rxjs: ^7.0.0
     typescript: ^4.9.3
   peerDependencies:
-    "@tussle/core": ^0.6.0
+    "@tussle/core": ^0.7.0
   languageName: unknown
   linkType: soft
 
@@ -4654,7 +4654,7 @@ __metadata:
     rxjs: ^7.0.0
     typescript: ^4.9.3
   peerDependencies:
-    "@tussle/core": ^0.6.0
+    "@tussle/core": ^0.7.0
   languageName: unknown
   linkType: soft
 
@@ -4696,7 +4696,7 @@ __metadata:
     rxjs: ^7.0.0
     typescript: ^4.9.3
   peerDependencies:
-    "@tussle/core": ^0.6.0
+    "@tussle/core": ^0.7.0
   languageName: unknown
   linkType: soft
 
@@ -4745,7 +4745,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@tussle/state-memory@^0.7.0, @tussle/state-memory@workspace:packages/state-memory":
+"@tussle/state-memory@^0.7.1, @tussle/state-memory@workspace:packages/state-memory":
   version: 0.0.0-use.local
   resolution: "@tussle/state-memory@workspace:packages/state-memory"
   dependencies:
@@ -4754,7 +4754,7 @@ __metadata:
     npm-run-all: ^4.1.5
     rimraf: ^3.0.2
   peerDependencies:
-    "@tussle/core": ^0.6.0
+    "@tussle/core": ^0.7.0
   languageName: unknown
   linkType: soft
 
@@ -4764,7 +4764,7 @@ __metadata:
   dependencies:
     "@tussle/core": ^0.7.0
     "@tussle/spec": ^0.7.0
-    "@tussle/state-memory": ^0.7.0
+    "@tussle/state-memory": ^0.7.1
     concurrently: ^7.6.0
     jest: ^29.2.2
     npm-run-all: ^4.1.5
@@ -4807,7 +4807,7 @@ __metadata:
     rxjs: ^7.0.0
     typescript: ^4.9.3
   peerDependencies:
-    "@tussle/core": ^0.6.0
+    "@tussle/core": ^0.7.0
   languageName: unknown
   linkType: soft
 
@@ -4836,7 +4836,7 @@ __metadata:
     ts-jest: ^29.0.3
     typescript: ^4.9.3
   peerDependencies:
-    "@tussle/core": ^0.6.0
+    "@tussle/core": ^0.7.0
   languageName: unknown
   linkType: soft
 

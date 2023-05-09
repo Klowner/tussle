@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.1](https://klowner/compare/v0.7.0...v0.7.1) (2023-05-09)
+
+**Note:** Version bump only for package @tussle/request-cloudflareworker
+
+
+
+
+
 # [0.7.0](https://klowner/compare/v0.6.12...v0.7.0) (2023-05-09)
 
 **Note:** Version bump only for package @tussle/request-cloudflareworker
