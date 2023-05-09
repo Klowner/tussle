@@ -7,12 +7,13 @@ import {firstValueFrom} from 'rxjs';
 import {mockIncomingRequest} from '@tussle/spec';
 
 storageServiceTests(
-  '@tussle/storage-r2',
-  async () => {
+	'@tussle/storage-r2',
+	async () => {
 		return new TussleStorageR2({
 			stateService: new TussleStateMemory(),
 			// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
 			bucket: new R2Bucket(new MemoryStorage()),
+			skipMerge: true,
 		});
 	}
 );
@@ -26,6 +27,7 @@ describe('@tussle/storage-r2', () => {
 			stateService: state,
 			// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
 			bucket: new R2Bucket(new MemoryStorage()),
+			skipMerge: true,
 		});
 	});
 
@@ -323,6 +325,7 @@ describe('@tussle/storage-r2', () => {
 				// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
 				bucket: new R2Bucket(new MemoryStorage()),
 				checkpoint: 25,
+				skipMerge: true,
 			});
 		});
 
@@ -336,7 +339,6 @@ describe('@tussle/storage-r2', () => {
 			}))).toHaveProperty('uploadLength', 200);
 
 			const body = asReadableStream(new Uint8Array(new TextEncoder().encode('hellocat'.repeat(25))));
-			// expect(body.length).toEqual(200);
 
 			expect(await firstValueFrom(storage.patchFile({
 				location: 'meowmeow.txt',
@@ -357,6 +359,95 @@ describe('@tussle/storage-r2', () => {
 					expect(file.parts[i].size).toBe(25); // each part should be 25 bytes in length
 				}
 			}
+		});
+	});
+
+	describe('automerging of completed uploads', () => {
+		beforeEach(() => {
+			storage = new TussleStorageR2({
+				stateService: state,
+				// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
+				bucket: new R2Bucket(new MemoryStorage()),
+				checkpoint: 25, // force incoming stream into 25 byte chunks in R2
+				skipMerge: false, // then merge those 25 byte chunks into a single file when complete
+			});
+		});
+
+		test('upload completion should yield a single R2 record', async () => {
+			expect(await firstValueFrom(storage.createFile({
+				path: 'meowmeow.txt',
+				uploadLength: 200,
+				uploadMetadata: {},
+				uploadConcat: null,
+			}))).toHaveProperty('uploadLength', 200);
+
+			const body = asReadableStream(new Uint8Array(new TextEncoder().encode('hellocat'.repeat(25))));
+			expect(await firstValueFrom(storage.patchFile({
+				location: 'meowmeow.txt',
+				offset: 0,
+				length: 200,
+				request: mockIncomingRequest({
+					method: 'PATCH',
+					url: '<unused>',
+					body,
+				}),
+			}))).toHaveProperty('complete', true);
+
+			const file = await storage.getFile('meowmeow.txt');
+			expect(file).not.toBeNull();
+			if (file) {
+				expect(file.size).toEqual(200);
+				expect(file.key).toEqual('meowmeow.txt');
+				expect(file.parts).toStrictEqual([
+					{
+						key: 'meowmeow.txt', // Notice, it's not meowmeow.txt/0000000000
+						size: 200,
+					},
+				]);
+			}
+		});
+
+		test('uploaded file state should still be recovered from R2', async () => {
+			expect(await firstValueFrom(storage.createFile({
+				path: 'meowmeow.txt',
+				uploadLength: 200,
+				uploadMetadata: {
+					description: 'the song of my people',
+				},
+				uploadConcat: null,
+			}))).toHaveProperty('uploadLength', 200);
+
+			const body = asReadableStream(new Uint8Array(new TextEncoder().encode('hellocat'.repeat(25))));
+			expect(await firstValueFrom(storage.patchFile({
+				location: 'meowmeow.txt',
+				offset: 0,
+				length: 200,
+				request: mockIncomingRequest({
+					method: 'PATCH',
+					url: '<unused>',
+					body,
+				}),
+			}))).toHaveProperty('complete', true);
+
+			const expectedFileInfo = {
+				details: {
+					metadata: {
+						description: 'the song of my people',
+						location: 'meowmeow.txt',
+					},
+				},
+				info: {
+					currentOffset: 200,
+					uploadConcat: null,
+					uploadLength: 200,
+				},
+				location: 'meowmeow.txt',
+			};
+
+			const fileInfo$ = storage.getFileInfo({location: 'meowmeow.txt'});
+			expect(await firstValueFrom(fileInfo$)).toStrictEqual(expectedFileInfo);
+			state.clear(); // clear the in-memory state to force state reconstruction from R2
+			expect(await firstValueFrom(fileInfo$)).toStrictEqual(expectedFileInfo);
 		});
 	});
 });

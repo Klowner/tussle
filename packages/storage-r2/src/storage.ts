@@ -45,7 +45,7 @@ export interface TussleStorageR2Options {
 	r2ListLimit?: number;
 	checkpoint?: number; // Auto-checkpoint uploads every `checkpoint` bytes.
 	appendUniqueSubdir?: (location: string) => string; // Return a unique sub-path of `location` (including location in returned value)
-	skipConcatenation?: boolean;
+	skipMerge?: boolean; // Skip the automatic merging of uploaded chunks into a single R2 record (otherwise use R2File for reads)
 }
 
 function isNonNull<T>(value: T): value is NonNullable<T> {
@@ -659,7 +659,6 @@ export class TussleStorageR2 implements TussleStorageService {
 
 	private readonly mergeAndDiscardR2Chunks = pipe(
 		concatMap((state: Readonly<R2UploadState>) => of(state).pipe(
-			filter(isCompleteUpload),
 			this.mergeR2Records,
 			mergeMap(merged => {
 				const file = r2FileFromState(state, this.options.bucket);
@@ -673,9 +672,10 @@ export class TussleStorageR2 implements TussleStorageService {
 
 	private readonly optionallyMergeAndDiscardChunksIfComplete = pipe(
 		mergeMap((state: Readonly<R2UploadState>) => of(state).pipe(
-			filter(() => !this.options.skipConcatenation),
+			filter(() => !this.options.skipMerge),
 			filter(isCompleteUpload),
 			this.mergeAndDiscardR2Chunks,
+			this.setState,
 			defaultIfEmpty(state),
 		)),
 	);
