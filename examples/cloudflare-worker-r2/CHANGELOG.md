@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.2](https://github.com/Klowner/tussle/compare/v0.7.1...v0.7.2) (2023-05-28)
+
+
+### Bug Fixes
+
+* **storage-r2:** automerge and parallel/concatenation requests should now interop as expected ([eb2b41f](https://github.com/Klowner/tussle/commit/eb2b41f4f8384b006246e098056831236e6e592c))
+
+
+
+
+
 ## [0.7.1](https://klowner/compare/v0.7.0...v0.7.1) (2023-05-09)
 
 **Note:** Version bump only for package cloudflare-worker-r2
