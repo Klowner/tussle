@@ -13,6 +13,7 @@ type UserParams = {
 	context: ExecutionContext;
 }
 
+// Optionally use Cloudflare Worker's Cache API to store details for HEAD requests
 async function cacheCompletedUploadResponse(
 	request: Request,
 	location: string,
@@ -74,9 +75,7 @@ async function handleRequest(
 	context: ExecutionContext,
 ) {
 	if (request.method === 'HEAD') {
-		console.log('looking for cache', request.url);
 		const cache = await caches.default.match(request.url);
-		console.log({cache});
 		if (cache) {
 			return cache;
 		}
@@ -85,6 +84,7 @@ async function handleRequest(
 	const storage = new TussleStorageR2({
 		stateService,
 		bucket: bindings.TUSSLE_BUCKET,
+		skipMerge: false,
 	});
 	const tussle = getTussleMiddleware(storage);
 	let res = await tussle.handleRequest(request, {context});

@@ -9,5 +9,4 @@ r2_buckets = [
 ]
 
 [miniflare]
-r2_persist = "./data/r2"
 cache_persist = "./data/cache"

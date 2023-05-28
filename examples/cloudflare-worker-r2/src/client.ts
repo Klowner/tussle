@@ -21,7 +21,7 @@ function calculateBoundaries(
 	const parallelUploads = Math.min(numChunks, maxParallelUploads);
 	if (parallelUploads > 1) {
 		const bytesPerThread = Math.floor(numChunks / parallelUploads) * chunkSize;
-		const ranges = [];
+		const ranges: {start:number; end:number}[] = [];
 		for (let i = 0; i < parallelUploads; i++) {
 			ranges[i] = {
 				start: bytesPerThread * i,

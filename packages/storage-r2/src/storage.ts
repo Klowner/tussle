@@ -20,7 +20,7 @@ import {
 	of,
 	pipe,
 	share, switchMap,
-	take, takeLast, toArray, throwError, throwIfEmpty, catchError
+	take, takeLast, toArray, throwError, throwIfEmpty, catchError, MonoTypeOperatorFunction,
 } from "rxjs";
 import {R2File} from './r2file';
 import {lousyUUID} from "./lousyuuid";
@@ -66,6 +66,12 @@ function getMostRecentPartKey(state: R2UploadState) {
 }
 
 type InitialState = ReturnType<TussleStorageR2['createInitialState']>;
+
+function isNonConcatState(
+	state: Readonly<R2UploadState>,
+): state is NonConcatState {
+	return state.uploadConcat === null;
+}
 
 function isPartialConcatState(
 	state: Readonly<R2UploadState>,
@@ -187,6 +193,7 @@ function sliceStreamBYOB(
 
 type PartialConcatState = InitialState & {uploadConcat: UploadConcatPartial};
 type FinalConcatState = InitialState & {uploadConcat: UploadConcatFinal};
+type NonConcatState = InitialState & {uploadConcat: null};
 
 const EXTENSIONS_SUPPORTED: TusProtocolExtension[] = [
 	'concatenation',
@@ -223,7 +230,7 @@ export class TussleStorageR2 implements TussleStorageService {
 	}
 
 	private readonly setState = pipe(
-		mergeMap(async (state: R2UploadState) => {
+		mergeMap(async (state: Readonly<R2UploadState>) => {
 			await this.state.setItem(state.location, state);
 			return state;
 		}),
@@ -232,12 +239,35 @@ export class TussleStorageR2 implements TussleStorageService {
 	private readonly appendUniqueSubdir = this.options.appendUniqueSubdir
 		|| ((location: string) => `${location}/${lousyUUID(16)}`);
 
-	private handlePartialConcatenation(
-		state: PartialConcatState,
-	) {
-		state.location = this.appendUniqueSubdir(state.location);
-		return state;
+	// Combines all R2 records associated with state and concatenate them to a
+	// single R2 record, and if successful, delete all R2 records associated with
+	// the original pre-merged state.
+	protected async mergeAndDiscardR2Chunks(
+		state: Readonly<R2UploadState>,
+	): Promise<R2UploadState> {
+		const file = createR2FileFromState(state, this.options.bucket);
+		const {key, size} = await this.options.bucket.put(file.key, file.body, {
+			customMetadata: state.metadata,
+		});
+		await file.delete();
+		return {
+			...state,
+			uploadConcat: null, // Discard concatenation details upon merge.
+			parts: [
+				{key, size}, // Use single new concatenated record.
+			],
+		};
 	}
+
+	private readonly optionallyMergeAndDiscardChunksIfComplete = pipe(
+		mergeMap((state: Readonly<R2UploadState>) => of(state).pipe(
+			filter(() => !this.options.skipMerge),
+			filter(isCompleteUpload),
+			mergeMap(state => this.mergeAndDiscardR2Chunks(state)),
+			this.setState,
+			defaultIfEmpty(state),
+		)),
+	);
 
 	// Iterate over each uploadConcat part (sub-file) and collect all R2
 	// sub-parts collecting them into state.parts in the correct order.
@@ -248,7 +278,7 @@ export class TussleStorageR2 implements TussleStorageService {
 				toArray(),
 				map((parts) => ({
 					...state,
-					parts: [...state.parts, ...parts],
+					parts,
 				})),
 			)
 		),
@@ -263,14 +293,26 @@ export class TussleStorageR2 implements TussleStorageService {
 		)),
 	);
 
-	private readonly updateConcatUploadLength = pipe(
-		mergeMap((state: FinalConcatState) => {
+	private readonly updateConcatUploadLength: MonoTypeOperatorFunction<Readonly<FinalConcatState>> = pipe(
+		mergeMap((state) => {
 			const size = state.parts.reduce((sum, {size}) => sum + size, 0);
-			state.currentOffset = size;
-			if (!isNaN(state.uploadLength) && state.currentOffset !== state.uploadLength) {
-				return throwError(() => new Error("Final concatenated size does not match upload-length"));
+			const currentOffset = size;
+			let uploadLength = state.uploadLength;
+			if (currentOffset !== uploadLength) {
+				if (!isNaN(state.uploadLength)) {
+					return throwError(() => new Error("Final concatenated size does not match upload-length"));
+				} else {
+					// Tus 1.0 protocol states "The Client MUST NOT include the
+					// Upload-Length header in the final upload creation. Here we set it
+					// to the total size of all the accumulated parts.
+					uploadLength = size;
+				}
 			}
-			return of(state);
+			return of({
+				...state,
+				currentOffset,
+				uploadLength,
+			});
 		}),
 	);
 
@@ -296,15 +338,24 @@ export class TussleStorageR2 implements TussleStorageService {
 		}),
 	);
 
-	private readonly handleFinalConcatenation = pipe(
+	protected handlePartialConcatenation(
+		state: PartialConcatState,
+	) {
+		state.location = this.appendUniqueSubdir(state.location);
+		return state;
+	}
+
+	protected readonly handleFinalConcatenation = pipe(
 		this.collectConcatenationStateParts,
 		this.updateConcatUploadLength,
-		this.createConcatenatedR2Record,
+		!!this.options.skipMerge
+			? this.createConcatenatedR2Record
+			: switchMap(s => this.mergeAndDiscardR2Chunks(s)),
 	);
 
-	private readonly handleConcatenation = pipe(
-		mergeMap((state: InitialState): Observable<InitialState> => {
-			if (state.uploadConcat === null) {
+	protected readonly handleConcatenation = pipe(
+		mergeMap((state: InitialState): Observable<R2UploadState> => {
+			if (isNonConcatState(state)) {
 				return of(state);
 			} else if (isPartialConcatState(state)) {
 				return of(state).pipe(map(state => this.handlePartialConcatenation(state)));
@@ -315,10 +366,11 @@ export class TussleStorageR2 implements TussleStorageService {
 		}),
 	);
 
-	private readonly createStatePlaceholderRecord = pipe(
-		mergeMap((state: R2UploadState) => {
-			const key = toPartKey(state.location, 0);
-			return from(this.options.bucket.put(key, null, {
+	protected async createStatePlaceholderRecord(
+		state: Readonly<R2UploadState>,
+	): Promise<R2UploadState> {
+		const key = toPartKey(state.location, 0);
+		await this.options.bucket.put(key, null, {
 				customMetadata: {
 					tussleState: JSON.stringify({
 						...state,
@@ -326,10 +378,16 @@ export class TussleStorageR2 implements TussleStorageService {
 					}),
 					tusslePrevKey: '', // Store full R2 key
 				},
-			})).pipe(
-				map(() => state),
-			);
-		}),
+		});
+		return state;
+	}
+
+	private readonly createStatePlaceholderRecordIfIncomplete = pipe(
+		switchMap((state: Readonly<R2UploadState>) => of(state).pipe(
+			filter(state => !isCompleteUpload(state)),
+			switchMap(state => this.createStatePlaceholderRecord(state)),
+			defaultIfEmpty(state),
+		)),
 	);
 
 	createFile(
@@ -339,7 +397,7 @@ export class TussleStorageR2 implements TussleStorageService {
 			map(params => this.createInitialState(params)),
 			this.handleConcatenation,
 			this.setState,
-			this.createStatePlaceholderRecord,
+			this.createStatePlaceholderRecordIfIncomplete,
 			map((state) => ({
 				...state,
 				offset: state.currentOffset,
@@ -633,55 +691,13 @@ export class TussleStorageR2 implements TussleStorageService {
 		return firstValueFrom(of(path).pipe(
 			this.getLocationState,
 			filter(isNonNull),
-			map(state => r2FileFromState(state, this.options.bucket)),
+			map(state => createR2FileFromState(state, this.options.bucket)),
 			defaultIfEmpty(null),
 		));
 	}
-
-	// Merge all R2 records within an R2UploadState and return
-	// an updated state reflecting the new merged source records.
-	private readonly mergeR2Records = pipe(
-		concatMap((state: Readonly<R2UploadState>) => of(state).pipe(
-			map(state => r2FileFromState(state, this.options.bucket)),
-			mergeMap((source) => from(this.options.bucket.put(source.key, source.body, {
-					customMetadata: state.metadata,// Don't wrap user metadata in tussleState
-				})).pipe(
-					map((concatenated): R2UploadState => ({
-						...state,
-						parts: [{
-							key: concatenated.key,
-							size: concatenated.size,
-						}],
-					})),
-			)),
-		)),
-	);
-
-	private readonly mergeAndDiscardR2Chunks = pipe(
-		concatMap((state: Readonly<R2UploadState>) => of(state).pipe(
-			this.mergeR2Records,
-			mergeMap(merged => {
-				const file = r2FileFromState(state, this.options.bucket);
-				return from(file.delete()).pipe(
-					map(() => merged),
-				);
-			}),
-			defaultIfEmpty(state),
-		)),
-	);
-
-	private readonly optionallyMergeAndDiscardChunksIfComplete = pipe(
-		mergeMap((state: Readonly<R2UploadState>) => of(state).pipe(
-			filter(() => !this.options.skipMerge),
-			filter(isCompleteUpload),
-			this.mergeAndDiscardR2Chunks,
-			this.setState,
-			defaultIfEmpty(state),
-		)),
-	);
 }
 
-function r2FileFromState(
+function createR2FileFromState(
 	state: Readonly<R2UploadState>,
 	bucket: Pick<R2Bucket, 'get'|'delete'>,
 ) {

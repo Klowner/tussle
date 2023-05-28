@@ -1,4 +1,4 @@
-import { storageServiceTests } from '@tussle/spec';
+import { stateServiceTests, storageServiceTests } from '@tussle/spec';
 import TussleStateMemory from '@tussle/state-memory';
 import { R2UploadState, TussleStorageR2 } from './storage';
 import { MemoryStorage } from "@miniflare/storage-memory";
@@ -21,12 +21,14 @@ storageServiceTests(
 describe('@tussle/storage-r2', () => {
 	let storage: TussleStorageR2;
 	let state: TussleStateMemory<R2UploadState>;
+	let bucket: R2Bucket;
 	beforeEach(() => {
 		state = new TussleStateMemory();
+		bucket = new R2Bucket(new MemoryStorage());
 		storage = new TussleStorageR2({
 			stateService: state,
 			// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
-			bucket: new R2Bucket(new MemoryStorage()),
+			bucket,
 			skipMerge: true,
 		});
 	});
@@ -233,7 +235,7 @@ describe('@tussle/storage-r2', () => {
 				request: mockIncomingRequest({
 					method: 'PATCH',
 					url: '<unused>',
-					body: new Uint8Array(new TextEncoder().encode('kitty cat')),
+					body: asReadableStream(new Uint8Array(new TextEncoder().encode('kitty cat'))),
 				}),
 			}));
 
@@ -252,7 +254,7 @@ describe('@tussle/storage-r2', () => {
 				request: mockIncomingRequest({
 					method: 'PATCH',
 					url: '<unused>',
-					body: new Uint8Array(new TextEncoder().encode('flu')),
+					body: asReadableStream(new Uint8Array(new TextEncoder().encode('flu'))),
 				}),
 			}));
 
@@ -263,7 +265,7 @@ describe('@tussle/storage-r2', () => {
 				request: mockIncomingRequest({
 					method: 'PATCH',
 					url: '<unused>',
-					body: new Uint8Array(new TextEncoder().encode('ffy ')),
+					body: asReadableStream(new Uint8Array(new TextEncoder().encode('ffy '))),
 				}),
 			}));
 
@@ -295,6 +297,115 @@ describe('@tussle/storage-r2', () => {
 
 			// Now let's wipe the state and make sure our concatenated records
 			// look the same as before.
+
+			const concatenatedInfo = await firstValueFrom(storage.getFileInfo({
+				location: 'fluffy-cat.png',
+			}));
+
+			state.clear(); // force state to be rebuilt from R2
+
+			const concatenatedInfoRebuilt = await firstValueFrom(storage.getFileInfo({
+				location: 'fluffy-cat.png',
+			}));
+
+			expect(concatenatedInfoRebuilt).toStrictEqual(concatenatedInfo);
+
+			const file = await storage.getFile('fluffy-cat.png');
+			expect(file).not.toBeNull();
+			if (file) {
+				expect((await collectReadable(file.body)).toString()).toEqual('fluffy kitty cat');
+				expect((await collectReadable(file.slice(0, 5))).toString()).toEqual('fluff');
+				expect((await collectReadable(file.slice(7, 5))).toString()).toEqual('kitty');
+			}
+		});
+
+
+		test('concatenation with automerge', async () => {
+			const bucket = new R2Bucket(new MemoryStorage());
+			const storage = new TussleStorageR2({
+				stateService: state,
+				// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
+				bucket,
+				checkpoint: 25, // force incoming stream into 25 byte chunks in R2
+				skipMerge: false, // then merge those 25 byte chunks into a single file when complete
+			});
+
+			// Create first part in one chunk.
+			const part1 = await firstValueFrom(storage.createFile({
+				path: 'fluffy-cat.png',
+				uploadLength: 9,
+				uploadMetadata: {},
+				uploadConcat: {action: 'partial'},
+			}));
+
+			expect(part1).toHaveProperty('location');
+
+			await firstValueFrom(storage.patchFile({
+				location: part1.location,
+				offset: 0,
+				length: 9,
+				request: mockIncomingRequest({
+					method: 'PATCH',
+					url: '<unused>',
+					body: asReadableStream(new Uint8Array(new TextEncoder().encode('kitty cat'))),
+				}),
+			}));
+
+			// Create second part by uploading two chunks.
+			const part2 = await firstValueFrom(storage.createFile({
+				path: 'fluffy-cat.png',
+				uploadLength: 7,
+				uploadMetadata: {},
+				uploadConcat: {action: 'partial'},
+			}));
+
+			await firstValueFrom(storage.patchFile({
+				location: part2.location,
+				offset: 0,
+				length: 3,
+				request: mockIncomingRequest({
+					method: 'PATCH',
+					url: '<unused>',
+					body: asReadableStream(new Uint8Array(new TextEncoder().encode('flu'))),
+				}),
+			}));
+
+			await firstValueFrom(storage.patchFile({
+				location: part2.location,
+				offset: 3,
+				length: 4,
+				request: mockIncomingRequest({
+					method: 'PATCH',
+					url: '<unused>',
+					body: asReadableStream(new Uint8Array(new TextEncoder().encode('ffy '))),
+				}),
+			}));
+
+			expect(await firstValueFrom(storage.getFileInfo({
+				location: part2.location,
+			}))).toHaveProperty('info.currentOffset', 7);
+
+
+			expect(await firstValueFrom(storage.getFileInfo({
+				location: part1.location,
+			}))).toHaveProperty('info.currentOffset', 9);
+
+			// Now concatenate the two files.
+			const concatenated = await firstValueFrom(storage.createFile({
+				path: 'fluffy-cat.png',
+				uploadLength: 7 + 9,
+				uploadMetadata: {},
+				uploadConcat: {
+					action: 'final',
+					parts: [
+						part2.location,
+						part1.location,
+					],
+				}
+			}));
+
+			expect(concatenated).toHaveProperty('success', true);
+			expect(concatenated).toHaveProperty('currentOffset', 7 + 9);
 
 			const concatenatedInfo = await firstValueFrom(storage.getFileInfo({
 				location: 'fluffy-cat.png',
@@ -476,4 +587,11 @@ function asReadableStream(body: Uint8Array): ReadableStream<Uint8Array> {
 			}
 		}
 	});
+}
+
+async function listRecords(bucket: R2Bucket) {
+	const list = await bucket.list();
+	return list.objects.map(({ key, size, customMetadata }) => ({
+		key, size, customMetadata,
+	}));
 }
