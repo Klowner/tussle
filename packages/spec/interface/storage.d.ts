@@ -9,13 +9,18 @@ export interface TussleStorageCreateFileParams {
 	uploadConcat: UploadConcatPartial | UploadConcatFinal | null;
 }
 
+interface StorageError {
+	shouldRetry: boolean;
+	error: string | Error;
+}
+
 export interface TussleStorageCreateFileResponse {
 	location: string;
 	success: boolean;
 	metadata?: Record<string, unknown>;
 	uploadConcat?: UploadConcatPartial | UploadConcatFinal | null;
 	offset: number;
-	error?: unknown;
+	error?: StorageError;
 }
 
 export interface TussleStoragePatchFileParams<Req = unknown, U = unknown> {
@@ -36,7 +41,7 @@ export interface TussleStoragePatchFileResponse {
 	offset?: number; // only if success
 	complete: boolean; // signifies that upload is complete
 	details?: Details;
-	error?: unknown;
+	error?: StorageError;
 }
 
 export interface TussleStoragePatchFileCompleteResponse {

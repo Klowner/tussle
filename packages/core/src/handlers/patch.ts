@@ -84,7 +84,7 @@ const toResponse = <T, P>(
 	ctx: TussleIncomingRequest<T, P>,
 	patchedFile: TussleStoragePatchFileResponse
 ): TussleIncomingRequest<T, P> => {
-	if (patchedFile.success && patchedFile.offset !== undefined && !('error' in patchedFile)) {
+	if (patchedFile.success && patchedFile.offset !== undefined && !(patchedFile.error)) {
 		ctx.response = {
 			status: 204, // no content (success),
 			headers: {
@@ -93,9 +93,10 @@ const toResponse = <T, P>(
 			}
 		};
 	} else {
+		const {error} = patchedFile;
 		ctx.response = {
-			status: 403,
-			body: `${patchedFile.error}`,
+			status: error?.shouldRetry ? 503 : 400,
+			body: `${patchedFile.error?.error ?? 'unknown storage write error'}`,
 		};
 	}
 

@@ -165,7 +165,7 @@ const toResponse = <T, P>(
 	ctx: TussleIncomingRequest<T, P>,
 	createdFile: TussleStorageCreateFileResponse
 ): TussleIncomingRequest<T, P> => {
-	if (createdFile.location && !('error' in createdFile)) {
+	if (createdFile.location && !(createdFile.error)) {
 		ctx.response = {
 			status: 201, // created
 			headers: {
@@ -174,9 +174,10 @@ const toResponse = <T, P>(
 			},
 		};
 	} else {
+		const {error} = createdFile;
 		ctx.response = {
-			status: 400, // TODO - check this
-			body: `${createdFile.error}`,
+			status: error?.shouldRetry ? 503 : 400,
+			body: `${createdFile.error?.error ?? 'unknown storage creation error'}`,
 		};
 	}
 	return ctx;
