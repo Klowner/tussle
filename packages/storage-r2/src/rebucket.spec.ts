@@ -1,6 +1,6 @@
 import { ReBucket } from './rebucket';
-import { Miniflare } from 'miniflare';
 import { R2Bucket } from '@miniflare/r2';
+import { MemoryStorage } from '@miniflare/storage-memory';
 
 jest.spyOn(R2Bucket.prototype, 'get');
 jest.spyOn(R2Bucket.prototype, 'list');
@@ -9,15 +9,11 @@ jest.spyOn(R2Bucket.prototype, 'delete');
 jest.useFakeTimers();
 
 describe('ReBucket - R2 bucket API error auto-retry adapter', () => {
-	const miniflare = new Miniflare({
-		script: `async function fetch (req, env, ctx) { return new Response(); }`,
-		r2Buckets: ['EXAMPLE_BUCKET'],
-	});
+	let bucket: R2Bucket;
 
 	beforeEach(async () => {
-		const bucket = await miniflare.getR2Bucket('EXAMPLE_BUCKET');
+		bucket = new R2Bucket(new MemoryStorage());
 		await bucket.put('test', new TextEncoder().encode('🌈🦄✨'));
-
 	});
 
 	describe('get()', () => {
@@ -29,8 +25,7 @@ describe('ReBucket - R2 bucket API error auto-retry adapter', () => {
 		});
 
 		test('should retry on failure and succeed', async () => {
-			const bucket = await miniflare.getR2Bucket('EXAMPLE_BUCKET');
-			// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
+			// @ts-expect-error property 'readAtLeast' is missing in miniflare's ReadableStreamDefaultReader<T>
 			const rebucket = new ReBucket(bucket, {retries:3});
 
 			jest.mocked(bucket).get.mockReset().mockImplementationOnce(() => {
@@ -52,9 +47,8 @@ describe('ReBucket - R2 bucket API error auto-retry adapter', () => {
 		});
 
 		test('should throw if errors exceed retry limit', async () => {
-			const bucket = await miniflare.getR2Bucket('EXAMPLE_BUCKET');
 			const errorCallback = jest.fn();
-			// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
+			// @ts-expect-error property 'readAtLeast' is missing in miniflare's ReadableStreamDefaultReader<T>
 			const rebucket = new ReBucket(bucket, {retries: 2, error: errorCallback});
 
 			jest.mocked(bucket).get.mockReset().mockImplementation(() => {
