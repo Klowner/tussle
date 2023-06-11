@@ -8,38 +8,15 @@ export class R2File {
 	) {}
 
 	get body(): ReadableStream {
-		const {readable, writable} = new FixedLengthStream(this.size);
-		(async () => {
-			for (const {key, size} of this.parts) {
-				if (size === 0) {
-					continue; // skip placeholder records
-				}
-				const obj = await this.getPart(key);
-				if (!obj) {
-					writable.abort(`Failed to read R2 key: ${key}`);
-					return;
-				}
-				if (obj.body) {
-					await obj.body.pipeTo(writable, {preventClose: true});
-				}
-			}
-			writable.close();
-		})();
-		return readable;
+		return this.slice(0, this.size);
 	}
 
 	slice(
 		offset: number,
 		length: number,
 	): ReadableStream {
-		if (
-			length === this.size
-			&& offset === 0
-		) {
-			return this.body;
-		}
 		length = Math.min(this.size - offset, length);
-		const parts = selectPartRanges(this.parts, offset, length);
+		const parts = selectPartRanges(this, offset, length);
 		const { readable, writable } = new FixedLengthStream(length);
 		try {
 			(async () => {
@@ -92,14 +69,20 @@ export interface RangedPart {
 	}
 }
 
+
 export function selectPartRanges(
-		parts: Readonly<Part[]>,
+		file: Readonly<{size: number; parts: Readonly<Part[]>}>,
 		offset: number,
 		length: number,
 	): RangedPart[] {
 		const selected: RangedPart[] = [];
 		let partOffset = 0; // n bytes before current part
 		let i = 0;
+		// Optimized path if slice represents entirety of file
+		if (file.size === length && offset === 0) {
+			return file.parts.map(part => ({part}));
+		}
+		const parts = file.parts;
 		while (i < parts.length) {
 			const partSize = parts[i].size;
 			if ((partOffset + partSize) > offset) {
