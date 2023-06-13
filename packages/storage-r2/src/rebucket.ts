@@ -14,7 +14,7 @@ export async function withRetry<R>(
 	options: {
 		retries: number;
 		delay: number;
-		error?: (error: unknown) => unknown,
+		error?: (error: unknown, state: {retry: number; fn: string;}) => unknown,
 	},
 ): Promise<R> {
 	let err;
@@ -25,7 +25,7 @@ export async function withRetry<R>(
 		} catch (error) {
 			err = error;
 			if (options.error) {
-				options.error(err);
+				options.error(err, {retry: i, fn: fn.name});
 			}
 			if (i > 0) {
 				await sleep(options.delay * i * i); // Exponential delay (0s, 1s, 4s, 9s, ...)
