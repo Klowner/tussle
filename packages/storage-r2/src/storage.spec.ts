@@ -1,4 +1,4 @@
-import { stateServiceTests, storageServiceTests } from '@tussle/spec';
+import {storageServiceTests} from '@tussle/spec';
 import TussleStateMemory from '@tussle/state-memory';
 import { R2UploadState, TussleStorageR2 } from './storage';
 import { MemoryStorage } from "@miniflare/storage-memory";
@@ -208,7 +208,7 @@ describe('@tussle/storage-r2', () => {
 
 			state.clear(); // ensure state can still be rebuilt from R2
 			const rootInfo = await firstValueFrom(storage.getFileInfo({
-					location: 'fluffy-cat.png',
+				location: 'fluffy-cat.png',
 			}));
 			expect(rootInfo).toHaveProperty('info', {
 				currentOffset: 0,
@@ -238,6 +238,7 @@ describe('@tussle/storage-r2', () => {
 					body: asReadableStream(new Uint8Array(new TextEncoder().encode('kitty cat'))),
 				}),
 			}));
+
 
 			// Create second part by uploading two chunks.
 			const part2 = await firstValueFrom(storage.createFile({

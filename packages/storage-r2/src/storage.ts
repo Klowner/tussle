@@ -125,9 +125,9 @@ function sliceStreamBYOB(
 	return new Observable((subscriber) => {
 		let cancel = false;
 		let bytesRemaining = totalLength;
+		let transform: IdentityTransformStream | null = null;
 
 		const {advance, finish} = (() => {
-			let transform: IdentityTransformStream | null = null;
 			let writer: WritableStreamDefaultWriter;
 			return {
 				advance: async () => {
@@ -163,7 +163,9 @@ function sliceStreamBYOB(
 						transform = null;
 					}
 					reader.releaseLock();
-					subscriber.complete();
+					if (!subscriber.closed) {
+						subscriber.complete();
+					}
 				},
 			};
 		})();
@@ -187,6 +189,7 @@ function sliceStreamBYOB(
 
 		return () => {
 			cancel = true;
+			finish();
 		};
 	});
 }
@@ -278,7 +281,11 @@ export class TussleStorageR2 implements TussleStorageService {
 				toArray(),
 				map((parts) => ({
 					...state,
-					parts,
+					currentOffset: parts.reduce((accum, {size}) => accum + size, 0),
+					parts: [
+						...state.parts.map(({key}) => ({key, size: 0})),
+						...parts,
+					],
 				})),
 			)
 		),
@@ -502,8 +509,10 @@ export class TussleStorageR2 implements TussleStorageService {
 			});
 			iter = partMap.get(stripPrefix(iter.prev));
 		}
+		const latestMetadataState: R2UploadState = JSON.parse(latestPart.customMetadata['tussleState'] || '{}');
 		const state: R2UploadState = {
-			...JSON.parse(latestPart.customMetadata['tussleState'] || 'null'),
+			...latestMetadataState,
+			currentOffset: latestMetadataState.currentOffset + latestPart.size,
 			parts,
 		};
 		return state;
@@ -576,31 +585,29 @@ export class TussleStorageR2 implements TussleStorageService {
 		}
 
 		// Clone state so we can potentially repeatedly mutate it (locally).
-		let nextState: R2UploadState = {...state};
+		let localState: R2UploadState = {...state};
 
 		return readable$.pipe(
-			concatMap(({readable, length}) => {
+			concatMap(({readable}) => {
 				// If this is a freshly created upload, then the first part should be a
 				// zero-sized placeholder containing only metadata for rebuilding
 				// upload state. We can overwrite this part with the first patch
-				// request, so we remove the parts from it so the next key will be all
-				// zeros.
-				if (firstPartIsCreationPlaceholder(nextState.parts)) {
-					nextState.parts = [];
+				// request, discard all parts so the next key will be all zeros.
+				if (firstPartIsCreationPlaceholder(localState.parts)) {
+					localState.parts = [];
 				}
 				// Store the resulting "next" state that we will be at after this part
 				// is written. If the write succeeds, then the most accurate state will
 				// be stored within its metadata.
-				const tusslePrevKey = getMostRecentPartKey(nextState) || '';
-				const key = getNextKey(nextState);
-				nextState = this.advanceStateProgress(nextState, length, key);
+				const tusslePrevKey = getMostRecentPartKey(localState) || '';
+				const key = getNextKey(localState);
 				const put$ = from(this.options.bucket.put(
 					key,
 					readable,
 					{
 						customMetadata: {
 							tussleState: JSON.stringify({
-								...nextState,
+								...localState,
 								parts: null,
 							}),
 							tusslePrevKey, // Store full R2 key
@@ -608,7 +615,10 @@ export class TussleStorageR2 implements TussleStorageService {
 					},
 				));
 				const state$ = put$.pipe(
-					map(() => nextState),
+					map(({size, key}) => {
+						localState = this.advanceStateProgress(localState, size, key);
+						return localState;
+					}),
 					this.setState,
 				);
 				return state$;

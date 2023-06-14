@@ -80,7 +80,7 @@ export function selectPartRanges(
 		let i = 0;
 		// Optimized path if slice represents entirety of file
 		if (file.size === length && offset === 0) {
-			return file.parts.map(part => ({part}));
+			return file.parts.filter(({size}) => size > 0).map(part => ({part}));
 		}
 		const parts = file.parts;
 		while (i < parts.length) {
