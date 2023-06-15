@@ -38,7 +38,7 @@ export async function withRetry<R>(
 export interface ReBucketOptions {
 	retries?: number;
 	delay?: number;
-	error?: (error: unknown) => unknown;
+	error?: (error: unknown, state: {retry: number; fn: string;}) => unknown;
 }
 
 export class ReBucket<T extends ReBucketSupportedMethods> {
