@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.3](https://github.com/Klowner/tussle/compare/v0.7.2...v0.7.3) (2023-06-15)
+
+
+### Features
+
+* upgrade miniflare to 3.0.1 ([e5440a9](https://github.com/Klowner/tussle/commit/e5440a965d8f0441decfa074efb0d04fd7432441))
+
+
+
+
+
 ## [0.7.1](https://klowner/compare/v0.7.0...v0.7.1) (2023-05-09)
 
 **Note:** Version bump only for package @tussle/middleware-cloudflareworker

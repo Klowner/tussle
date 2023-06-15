@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.3](https://github.com/Klowner/tussle/compare/v0.7.2...v0.7.3) (2023-06-15)
+
+
+### Bug Fixes
+
+* **storage-r2:** avoid predicted future state, rebuild state from known truths only ([67fd69b](https://github.com/Klowner/tussle/commit/67fd69b0cf6cb2628229f8866543666db77b73b8))
+
+
+### Features
+
+* **storage-r2:** add internal state as second parameter to ReBucket error callback ([08adb58](https://github.com/Klowner/tussle/commit/08adb58d4c85f3763bb09ef242d0b9b073cd728b))
+* **storage-r2:** move R2File.body() optimizations to R2File.slice(), body() now calls slice() ([9ef0834](https://github.com/Klowner/tussle/commit/9ef083475cf51f3159d78923ffbb8a5b12d88c92))
+* upgrade miniflare to 3.0.1 ([e5440a9](https://github.com/Klowner/tussle/commit/e5440a965d8f0441decfa074efb0d04fd7432441))
+
+
+
+
+
 ## [0.7.2](https://github.com/Klowner/tussle/compare/v0.7.1...v0.7.2) (2023-05-28)
 
 
