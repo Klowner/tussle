@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.4](https://github.com/Klowner/tussle/compare/v0.7.3...v0.7.4) (2023-06-15)
+
+
+### Bug Fixes
+
+* **storage-r2:** update rebucket error callback types ([6ec4e81](https://github.com/Klowner/tussle/commit/6ec4e81ef078c157392b08df7050dff406e0184c))
+
+
+
+
+
 ## [0.7.3](https://github.com/Klowner/tussle/compare/v0.7.2...v0.7.3) (2023-06-15)
 
 
