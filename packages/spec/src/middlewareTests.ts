@@ -322,10 +322,12 @@ export function middlewareTests<
 				test('returning a null storage path should deny upload', async () => {
 					const createFileSpy = jest.spyOn(storage, 'createFile');
 
-					const beforeCreate = jest.fn(async (_req, params) => ({
-						...params,
-						path: null,
-					}));
+					const beforeCreate = jest.fn(async (req, params) => {
+						return {
+							...params,
+							path: null,
+						};
+					});
 
 					const afterCreate = jest.fn(async (_req, params) => params);
 
@@ -384,9 +386,43 @@ export function middlewareTests<
 						expect(response.status).toEqual(201); // No Content (success)
 					}
 				});
+
+				test('upload metadata is accessible in hook params', async () => {
+					const uploadMetadata = {
+						filename: 'something.png',
+						filetype: 'image/png',
+					} satisfies Record<string, string>;
+					const beforeCreate = jest.fn(async (req, params) => {
+						return params;
+					});
+					const instance = await createMiddleware(storage, {
+						'before-create': beforeCreate,
+					});
+					const response = await handleRequest(instance, createRequest({
+						method: 'POST',
+						url: 'https://tussle-middleware-test/files/my-file.bin',
+						headers: prepareHeaders({
+							'Upload-Length': '1000',
+							'Upload-Metadata': encodeMetadata(uploadMetadata),
+						}),
+					}));
+					expect(response).not.toBeUndefined();
+					expect(beforeCreate).toHaveBeenCalledTimes(1);
+					expect(jest.mocked(beforeCreate).mock.calls[0][1]).toEqual(expect.objectContaining({
+						uploadMetadata,
+					}));
+				});
 			});
 		});
 	});
+}
+
+function encodeMetadata(metadata: Record<string, string>): string {
+	const parts: string[] = [];
+	for (const key in metadata) {
+		parts.push(`${key} ${Buffer.from(metadata[key]).toString('base64')}`);
+	}
+	return parts.join(',');
 }
 
 export async function collectRequestBody(readable:{getReader: () => unknown}|Uint8Array): Promise<Uint8Array|undefined> {
