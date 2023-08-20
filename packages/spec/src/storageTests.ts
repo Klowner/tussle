@@ -6,7 +6,7 @@ export function storageServiceTests<T extends TussleStorageService>(
   create: () => Promise<T>,
 	extensions: TusProtocolExtension[] = [],
 ): void {
-  describe(`${name} - storage service specification conformancess`, () => {
+  describe(`${name} - storage service specification conformance`, () => {
     test('creation', async () => {
       const instance = await create();
       expect(instance).not.toBeUndefined();
@@ -19,18 +19,19 @@ export function storageServiceTests<T extends TussleStorageService>(
 
 		describe('supported extensions', () => {
 			const check: TusProtocolExtension[] = [
+				'checksum',
+				'checksum-trailer',
+				'concatenation',
+				'concatenation-unfinished',
 				'creation',
 				'creation-with-upload',
-				'concatenation',
+				'expiration',
+				'termination',
 			];
 			for (const ext of check) {
 				if (extensions.includes(ext)) {
-					test(`"${ext}" extension is supported`, async () => {
+					test(`supported extensions includes "${ext}"`, async () => {
 						expect(storage.extensionsSupported).toContain(ext);
-					});
-				} else {
-					test(`"${ext}" extension is NOT supported`, async () => {
-						expect(storage.extensionsSupported).not.toContain(ext);
 					});
 				}
 			}

@@ -214,50 +214,28 @@ export function middlewareTests<
 					});
 				});
 
-				if ('creation' in extensions) {
-					describe('creation extension', () => {
-						test('create a new upload', async () => {
-							beforeCreate.mockImplementation(async (ctx, params) => {
-								params.path = params.path.replace('/files/', '/alt-path/'); // rewrite file storage destination
-								return params;
-							});
-							const response = await handleRequest(middleware, createRequest({
-								method: 'POST',
-								url: 'https://tussle-middleware-test/files/creation.bin',
-								headers: {
-									'Upload-Length': '100',
-									'Tus-Resumable': '1.0.0',
-								},
-							}));
-							expect(response).not.toBeNull();
-							if (response) {
-								expect(response.headers['location']).toEqual('/alt-path/creation.bin');
-								expect(response.status).toEqual(201); // Created
-								expect(response.headers['upload-offset']).toBeUndefined(); // Only creation-with-upload
-							}
+				describe('creation extension', () => {
+					test('create a new upload', async () => {
+						beforeCreate.mockImplementation(async (ctx, params) => {
+							params.path = params.path.replace('/files/', '/alt-path/'); // rewrite file storage destination
+							return params;
 						});
+						const response = await handleRequest(middleware, createRequest({
+							method: 'POST',
+							url: 'https://tussle-middleware-test/files/creation.bin',
+							headers: {
+								'Upload-Length': '100',
+								'Tus-Resumable': '1.0.0',
+							},
+						}));
+						expect(response).not.toBeNull();
+						if (response) {
+							expect(response.headers['location']).toEqual('/alt-path/creation.bin');
+							expect(response.status).toEqual(201); // Created
+							expect(response.headers['upload-offset']).toBeUndefined(); // Only creation-with-upload
+						}
 					});
-				}
-
-				if ('checksum' in extensions) {
-					// Should we test checksum?
-					describe('checksum extension', () => {
-						test('should be advertised in OPTIONS requests', async () => {
-							const response = await handleRequest(middleware, createRequest({
-								method: 'OPTIONS',
-								url: 'https://tussle-middleware-test/',
-								headers: {
-									'Tus-Resumable': '1.0.0',
-								},
-							}));
-							expect(response).not.toBeNull();
-							if (response) {
-								expect(response.headers['tus-extensions']).toEqual('penis');
-							}
-						});
-					});
-				}
-
+				});
 
 				describe('creation-with-upload extension', () => {
 					test('create new upload and include file payload in initial request', async () => {

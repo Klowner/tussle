@@ -199,7 +199,6 @@ type FinalConcatState = InitialState & {uploadConcat: UploadConcatFinal};
 type NonConcatState = InitialState & {uploadConcat: null};
 
 const EXTENSIONS_SUPPORTED: TusProtocolExtension[] = [
-	'checksum',
 	'concatenation',
 	'creation',
 	'creation-with-upload',
