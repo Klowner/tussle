@@ -15,7 +15,12 @@ storageServiceTests(
 			bucket: new R2Bucket(new MemoryStorage()),
 			skipMerge: true,
 		});
-	}
+	},
+	[
+		'concatenation',
+		'creation',
+		'creation-with-upload',
+	],
 );
 
 describe('@tussle/storage-r2', () => {

@@ -508,11 +508,11 @@ export class TussleStorageB2 implements TussleStorageService {
 		return of();
 	}
 
-	public readonly extensionsRequired: TusProtocolExtension[] = [
-		"checksum",
-		"concatenation",
-		"termination",
+	readonly extensionsSupported: TusProtocolExtension[] = [
+		"creation",
 	];
+
+	public readonly extensionsRequired: TusProtocolExtension[] = [];
 
 	private getState(location: string): Observable<B2PersistentLocationState | null> {
 		return defer(() => from(this.persistentState.getItem(location))).pipe(
