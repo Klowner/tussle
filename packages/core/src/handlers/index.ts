@@ -1,11 +1,13 @@
-import handlePost from './post';
-import handlePatch from './patch';
+import handleDelete from './delete';
 import handleHead from './head';
 import handleOptions from './options';
+import handlePatch from './patch';
+import handlePost from './post';
 
 export const defaultHandlers = {
-  'POST': handlePost,
-  'PATCH': handlePatch,
+  'DELETE': handleDelete,
   'HEAD': handleHead,
   'OPTIONS': handleOptions,
+  'PATCH': handlePatch,
+  'POST': handlePost,
 };

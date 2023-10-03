@@ -20,6 +20,7 @@ storageServiceTests(
 		'concatenation',
 		'creation',
 		'creation-with-upload',
+		'termination',
 	],
 );
 

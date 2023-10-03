@@ -51,6 +51,11 @@ export interface TussleStorageDeleteFileParams {
 	location: string;
 }
 
+export interface TussleStorageDeleteFileResponse {
+	location: string;
+	success: boolean;
+}
+
 export interface TussleStorageFileInfoParams {
 	location: string;
 }
@@ -88,5 +93,8 @@ export interface TussleStorageService {
 	getFileInfo(
 		params: TussleStorageFileInfoParams
 	): Observable<TussleStorageFileInfo>;
-}
 
+	deleteFile?(
+		params: TussleStorageDeleteFileParams,
+	): Observable<TussleStorageDeleteFileResponse>;
+}

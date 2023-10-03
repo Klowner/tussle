@@ -51,8 +51,11 @@ export class R2File {
 	// Delete all related R2Objects
 	async delete(): Promise<string[]> {
 		const keys = this.parts.map(({key}) => key);
-		await this.bucket.delete(keys);
-		return keys;
+		const {error, deleted} = await deleteR2Records(this.bucket, keys);
+		if (error) {
+			throw error;
+		}
+		return deleted;
 	}
 }
 
@@ -118,4 +121,26 @@ function isR2ObjectBody(
 	obj: Readonly<R2Object|R2ObjectBody|null>
 ): obj is R2ObjectBody {
 	return obj !== null && 'body' in obj;
+}
+
+export async function deleteR2Records(
+	bucket: Pick<R2Bucket, 'delete'>,
+	keys: string[],
+	maxKeysPerDelete = 1000,
+): Promise<{deleted: string[], error?: Error}> {
+	let deleted: string[] = [];
+	for (let i = 0; i < keys.length; i += maxKeysPerDelete) {
+		const slice = keys.slice(i, i + maxKeysPerDelete);
+		try {
+			await bucket.delete(slice);
+		} catch (err: unknown) {
+			const error = err instanceof Error ? err: new Error(typeof err === 'string' ? err : 'unknown error deleting R2 keys');
+			return {
+				error,
+				deleted,
+			};
+		}
+		deleted = deleted.concat(slice);
+	}
+	return {deleted};
 }

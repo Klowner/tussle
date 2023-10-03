@@ -1,10 +1,11 @@
 import type {
   TussleStorageCreateFileResponse,
+  TussleStorageDeleteFileResponse,
   TussleStorageFileInfo,
   TussleStoragePatchFileCompleteResponse,
   TussleStoragePatchFileResponse,
-	UploadConcatFinal,
-	UploadConcatPartial,
+  UploadConcatFinal,
+  UploadConcatPartial,
 } from "@tussle/spec/interface/storage";
 import type {Observable} from 'rxjs';
 import type {TussleIncomingRequest} from './request';
@@ -27,7 +28,7 @@ interface TussleCreationParams {
 }
 
 interface TussleAbortedCreationParams extends TussleCreationParams {
-	path: null|undefined;
+  path: null|undefined;
 }
 
 interface TusslePatchParams<Req, U> {
@@ -42,6 +43,10 @@ interface TussleHeadParams {
   location: string;
 }
 
+interface TussleDeleteParams {
+  location: string;
+}
+
 interface TussleOptionsParams {
   status: number;
   headers: Record<string, string>;
@@ -50,18 +55,20 @@ interface TussleOptionsParams {
 type HookResult<T> = Observable<T> | Promise<T>;
 
 export interface TussleHooks<Req, U> extends TussleHookDef<Req, U> {
-  'after-create': TussleHookFunc<Req, U, TussleStorageCreateFileResponse, HookResult<TussleStorageCreateFileResponse>>;
   'after-complete': TussleHookFunc<Req, U, TussleStoragePatchFileCompleteResponse, HookResult<TussleStoragePatchFileCompleteResponse|undefined>>;
-  'after-patch': TussleHookFunc<Req, U, TussleStoragePatchFileResponse, HookResult<TussleStoragePatchFileResponse>>;
+  'after-create': TussleHookFunc<Req, U, TussleStorageCreateFileResponse, HookResult<TussleStorageCreateFileResponse>>;
+  'after-delete': TussleHookFunc<Req, U, TussleStorageDeleteFileResponse, HookResult<TussleStorageDeleteFileResponse>>;
   'after-head': TussleHookFunc<Req, U, TussleStorageFileInfo, HookResult<TussleStorageFileInfo>>;
+  'after-patch': TussleHookFunc<Req, U, TussleStoragePatchFileResponse, HookResult<TussleStoragePatchFileResponse>>;
   'before-create': TussleHookFunc<Req, U, TussleCreationParams, HookResult<TussleCreationParams|TussleAbortedCreationParams>>;
-  'before-patch': TussleHookFunc<Req, U, TusslePatchParams<Req, U>, HookResult<TusslePatchParams<Req, U>>>;
+  'before-delete': TussleHookFunc<Req, U, TussleDeleteParams, HookResult<TussleDeleteParams>>;
   'before-head': TussleHookFunc<Req, U, TussleHeadParams, HookResult<TussleHeadParams>>;
   'before-options': TussleHookFunc<Req, U, TussleOptionsParams, HookResult<TussleOptionsParams>>;
+  'before-patch': TussleHookFunc<Req, U, TusslePatchParams<Req, U>, HookResult<TusslePatchParams<Req, U>>>;
 }
 
 export interface TussleMiddlewareService<Req, U> {
-	core: Readonly<Tussle>;
+  core: Readonly<Tussle>;
   // These are called by the core at various points in the request/response life cycle.
   hook<K extends keyof TussleHooks<Req, U>>(
     which: K,

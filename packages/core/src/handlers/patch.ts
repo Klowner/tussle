@@ -22,7 +22,7 @@ export function processUploadBodyAndCallHooks<T,P>(
 	const store = ctx.cfg.storage;
 	const params = extractPatchHeaders(ctx);
 	if (!store) {
-		return throwError(() => new Error('no storage service sleected'));
+		return throwError(() => new Error('no storage service selected'));
 	}
 	// Upload requests MUST use Content-Type: application/offset+octet-stream
 	if (params.contentType !== 'application/offset+octet-stream') {
@@ -33,6 +33,7 @@ export function processUploadBodyAndCallHooks<T,P>(
 		return of({ctx, patchedFile: null});
 	}
 	return of(params).pipe(
+		switchMap(params => ctx.source.hook('before-patch', ctx, params)),
 		switchMap(params => store.patchFile(params)),
 		switchMap((patchedFile) => callOptionalHooks(ctx, patchedFile)),
 		switchMap((patchedFile) => ctx.source.hook('after-patch', ctx, patchedFile)),

@@ -2,6 +2,8 @@ import type {TussleStateService} from "@tussle/spec/interface/state";
 import type {
 	TussleStorageCreateFileParams,
 	TussleStorageCreateFileResponse,
+	TussleStorageDeleteFileParams,
+	TussleStorageDeleteFileResponse,
 	TussleStorageFileInfo,
 	TussleStorageFileInfoParams,
 	TussleStoragePatchFileParams,
@@ -20,9 +22,9 @@ import {
 	of,
 	pipe,
 	share, switchMap,
-	take, takeLast, toArray, throwError, throwIfEmpty, catchError, MonoTypeOperatorFunction,
+	take, takeLast, toArray, throwError, throwIfEmpty, catchError, MonoTypeOperatorFunction, first,
 } from "rxjs";
-import {R2File} from './r2file';
+import {deleteR2Records, R2File} from './r2file';
 import {lousyUUID} from "./lousyuuid";
 
 interface Part {
@@ -202,6 +204,7 @@ const EXTENSIONS_SUPPORTED: TusProtocolExtension[] = [
 	'concatenation',
 	'creation',
 	'creation-with-upload',
+	'termination',
 ];
 
 export class TussleStorageR2 implements TussleStorageService {
@@ -704,6 +707,39 @@ export class TussleStorageR2 implements TussleStorageService {
 			map(state => createR2FileFromState(state, this.options.bucket)),
 			defaultIfEmpty(null),
 		));
+	}
+
+	deleteFile(
+		params: TussleStorageDeleteFileParams,
+	): Observable<TussleStorageDeleteFileResponse> {
+		const path = stripLeadingSlashes(params.location);
+		return of(path).pipe(
+			this.getLocationState,
+			filter(isNonNull),
+			switchMap(state => from(this.deleteAllR2Records(state))),
+			defaultIfEmpty({
+				location: path,
+				success: false,
+			}),
+		);
+	}
+
+	protected async deleteAllR2Records(state: R2UploadState) {
+		const keys = state.parts?.map(({ key }) => key);
+		const {location} = state;
+		const {bucket} = this.options;
+		if (!keys) {
+			await this.state.removeItem(state.location);
+			return {
+				location,
+				success: true,
+			};
+		}
+		const {error} = await deleteR2Records(bucket, keys);
+		return {
+			location: state.location,
+			success: !error,
+		};
 	}
 }
 

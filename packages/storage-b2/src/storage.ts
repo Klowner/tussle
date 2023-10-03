@@ -502,12 +502,6 @@ export class TussleStorageB2 implements TussleStorageService {
 		return response$;
 	}
 
-	// Termination extension
-	deleteFile(params: TussleStorageDeleteFileParams): Observable<unknown> {
-		console.log("b2.deleteFile", params); // TODO
-		return of();
-	}
-
 	readonly extensionsSupported: TusProtocolExtension[] = [
 		"creation",
 	];
