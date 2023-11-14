@@ -35,7 +35,7 @@ class TussleMockStorageService implements TussleStorageService {
 	createFile(
 		params: TussleStorageCreateFileParams,
 	): Observable<TussleStorageCreateFileResponse> {
-		const { path } = params;
+		const path = this.stripLeadingSlashes(params.path);
 		const state: MockStorageState = {
 			location: path,
 			metadata: {
@@ -56,7 +56,7 @@ class TussleMockStorageService implements TussleStorageService {
 	patchFile<Req, MockStorageState>(
 		params: TussleStoragePatchFileParams<Req, MockStorageState>,
 	): Observable<TussleStoragePatchFileResponse> {
-		const { location } = params;
+		const location = this.stripLeadingSlashes(params.location);
 		const state = this.state[location];
 		const readable = params.request.request.getReadable();
 		if (!readable) {
@@ -88,7 +88,7 @@ class TussleMockStorageService implements TussleStorageService {
 	getFileInfo(
 		params: TussleStorageFileInfoParams,
 	): Observable<TussleStorageFileInfo> {
-		const { location } = params;
+		const location = this.stripLeadingSlashes(params.location);
 		let info;
 		if (location in this.state) {
 			const { currentOffset, uploadLength } = this.state[location];
@@ -104,7 +104,12 @@ class TussleMockStorageService implements TussleStorageService {
 			info,
 		});
 	}
+
+	private stripLeadingSlashes(path: string) {
+		return path.replace(/^\/*/, '');
+	}
 }
+
 
 export interface GenericRequest {
 	method: 'GET'|'POST'|'PUT'|'PATCH'|'DELETE'|'OPTIONS';
@@ -151,12 +156,14 @@ function prepareHeaders(headers: Record<string, string>) {
 }
 
 export function middlewareTests<
-	T extends TussleMiddlewareService<Req, U>, Req, U
+	T extends TussleMiddlewareService<Req, U>,
+	Req, U,
 >(
 	name: string,
 	options: {
-		createMiddleware: <S extends TussleStorageService>(
-			storage: S,
+		createStorage?: () => TussleStorageService,
+		createMiddleware: (
+			storage: TussleStorageService,
 			hooks?: TussleHookDef<Req, U>,
 		) => Promise<T>,
 		createRequest: (request: GenericRequest) => Req,
@@ -164,12 +171,16 @@ export function middlewareTests<
 	},
 	extensions: string[] = ['creation'],
 ): void {
-	const { createRequest, createMiddleware, handleRequest } = options;
-	describe(`${name} - middleware specification tests`, () => {
+	const { createRequest, createMiddleware, createStorage, handleRequest } = options;
 
+	function createStorageService(): TussleStorageService {
+		return createStorage ? createStorage() : new TussleMockStorageService();
+	}
+
+	describe(`${name} - middleware specification tests`, () => {
 		describe('configuration', () => {
 			test('hooks are optional' , async () => {
-				const storage = new TussleMockStorageService();
+				const storage = createStorageService();
 				const middleware = await createMiddleware(storage, undefined);
 				expect(middleware).not.toBeNull();
 			});
@@ -177,7 +188,7 @@ export function middlewareTests<
 
 		describe('hooks', () => {
 			test('hooks are optional', async () => {
-				const storage = new TussleMockStorageService();
+				const storage = createStorageService();
 				const middleware = await createMiddleware(storage);
 				const response = await handleRequest(middleware, createRequest({
 					method: 'POST',
@@ -190,13 +201,13 @@ export function middlewareTests<
 				}));
 				expect(response).toBeTruthy();
 				if (response) {
-					expect(response.headers).toHaveProperty('location', '/files/my-file.bin');
+					expect(response.headers).toHaveProperty('location', 'files/my-file.bin');
 					expect(response.status).toEqual(201); // Created
 				}
 			});
 
 			describe('request validation', () => {
-				let storage: TussleMockStorageService;
+				let storage: TussleStorageService;
 				let middleware: T;
 				const beforeCreate = jest.fn(async (_ctx, params) => params);
 				const afterCreate = jest.fn(async (_ctx, params) => params);
@@ -205,7 +216,7 @@ export function middlewareTests<
 				beforeEach(async () => {
 					beforeCreate.mockClear();
 					beforePatch.mockClear();
-					storage = new TussleMockStorageService();
+					storage = createStorageService();
 					middleware = await createMiddleware(storage, {
 						'before-create': beforeCreate,
 						'after-create': afterCreate,
@@ -230,7 +241,7 @@ export function middlewareTests<
 						}));
 						expect(response).not.toBeNull();
 						if (response) {
-							expect(response.headers['location']).toEqual('/alt-path/creation.bin');
+							expect(response.headers['location']).toEqual('alt-path/creation.bin');
 							expect(response.status).toEqual(201); // Created
 							expect(response.headers['upload-offset']).toBeUndefined(); // Only creation-with-upload
 						}
@@ -257,7 +268,7 @@ export function middlewareTests<
 						}));
 						expect(response).not.toBeNull();
 						if (response) {
-							expect(response.headers['location']).toEqual('/new-destination.bin');
+							expect(response.headers['location']).toEqual('new-destination.bin');
 							expect(response.status).toEqual(201); // Created
 							expect(response.headers['upload-offset']).toEqual(body.length.toString());
 						}
@@ -315,9 +326,9 @@ export function middlewareTests<
 			});
 
 			describe('before-create', () => {
-				let storage: TussleMockStorageService;
+				let storage: TussleStorageService;
 				beforeEach(() => {
-					storage = new TussleMockStorageService();
+					storage = createStorageService();
 				});
 
 				test('returning a null storage path should deny upload', async () => {
