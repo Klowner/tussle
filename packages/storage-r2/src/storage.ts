@@ -14,18 +14,18 @@ import type {
 } from "@tussle/spec/interface/storage";
 import type {TusProtocolExtension} from "@tussle/spec/interface/tus";
 import {
-	concat, concatMap, defaultIfEmpty, defer, EMPTY, filter,
+	catchError, concat, concatMap, defaultIfEmpty, defer, EMPTY, filter,
 	firstValueFrom,
 	from, map,
-	mergeMap,
-	Observable,
+	mergeMap, MonoTypeOperatorFunction, Observable,
 	of,
 	pipe,
 	share, switchMap,
-	take, takeLast, toArray, throwError, throwIfEmpty, catchError, MonoTypeOperatorFunction, first,
+	take, takeLast, throwError, throwIfEmpty, toArray
 } from "rxjs";
-import {deleteR2Records, R2File} from './r2file';
 import {lousyUUID} from "./lousyuuid";
+import {deleteR2Records, R2File} from './r2file';
+import {ChunkOffsetError} from '@tussle/spec/lib/error';
 
 interface Part {
 	key: string;
@@ -549,11 +549,13 @@ export class TussleStorageR2 implements TussleStorageService {
 
 	private invalidPatchResponse(
 		location: string,
+		offset?: number,
 	): TussleStoragePatchFileResponse {
 		return {
 			location,
 			success: false,
 			complete: false,
+			offset,
 		};
 	}
 
@@ -649,6 +651,15 @@ export class TussleStorageR2 implements TussleStorageService {
 		};
 	}
 
+	private checkFileOffset(params: Readonly<TussleStoragePatchFileParams<unknown, unknown>>) {
+		return map((state: Readonly<R2UploadState>) => {
+			if (state.currentOffset !== params.offset) {
+				throw new ChunkOffsetError(state.location, params.offset, state.currentOffset);
+			}
+			return state;
+		});
+	}
+
 	patchFile(
 		params: TussleStoragePatchFileParams,
 	): Observable<TussleStoragePatchFileResponse> {
@@ -657,6 +668,7 @@ export class TussleStorageR2 implements TussleStorageService {
 		return of(path).pipe(
 			this.getLocationState,
 			filter(isNonNull),
+			this.checkFileOffset(params),
 			switchMap((state) => this.persistFilePart(state, params)),
 			this.optionallyMergeAndDiscardChunksIfComplete,
 			map(state => this.asPatchResponse(state)),

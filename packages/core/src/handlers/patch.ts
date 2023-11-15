@@ -1,12 +1,14 @@
 import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import type {TussleStoragePatchFileCompleteResponse, TussleStoragePatchFileResponse} from '@tussle/spec/interface/storage';
-import {from as observableFrom, Observable, of, throwError} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import {from as observableFrom, MonoTypeOperatorFunction, Observable, of, throwError} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {isStorageError} from '@tussle/spec/lib/error';
 
 export default function handlePatch<T, P>(
 	ctx: TussleIncomingRequest<T, P>
 ): Observable<TussleIncomingRequest<T, P>> {
 	return processUploadBodyAndCallHooks(ctx).pipe(
+		handleStorageErrors(ctx),
 		map(({ctx, patchedFile}) => {
 			if (!patchedFile) {
 				return ctx;
@@ -16,6 +18,18 @@ export default function handlePatch<T, P>(
 	);
 }
 
+function handleStorageErrors<T,P>(
+	ctx: TussleIncomingRequest<T, P>,
+): MonoTypeOperatorFunction<{ ctx: TussleIncomingRequest<T, P>; patchedFile: TussleStoragePatchFileResponse|null; }> {
+	return catchError((err) => {
+		if (isStorageError(err)) {
+			ctx.response = err.toResponse();
+			return of({ctx, patchedFile: null});
+		}
+		throw err;
+	});
+}
+
 export function processUploadBodyAndCallHooks<T,P>(
 	ctx: TussleIncomingRequest<T, P>
 ): Observable<{ ctx: TussleIncomingRequest<T, P>, patchedFile: TussleStoragePatchFileResponse|null}> {
@@ -23,6 +37,9 @@ export function processUploadBodyAndCallHooks<T,P>(
 	const params = extractPatchHeaders(ctx);
 	if (!store) {
 		return throwError(() => new Error('no storage service selected'));
+	}
+	if (isNaN(params.length)) {
+		return throwError(() => new Error('request did not include Content-Length'));
 	}
 	// Upload requests MUST use Content-Type: application/offset+octet-stream
 	if (params.contentType !== 'application/offset+octet-stream') {
@@ -83,8 +100,11 @@ export type ExtractedPatchHeaders = ReturnType<typeof extractPatchHeaders>;
 
 const toResponse = <T, P>(
 	ctx: TussleIncomingRequest<T, P>,
-	patchedFile: TussleStoragePatchFileResponse
+	patchedFile: TussleStoragePatchFileResponse|null
 ): TussleIncomingRequest<T, P> => {
+	if (patchedFile === null) {
+		return ctx;
+	}
 	if (patchedFile.success && patchedFile.offset !== undefined && !('error' in patchedFile)) {
 		ctx.response = {
 			status: 204, // no content (success),
@@ -93,12 +113,11 @@ const toResponse = <T, P>(
 				...ctx.response?.headers,
 			}
 		};
-	} else {
+	} else if (ctx.response === null){
 		ctx.response = {
 			status: 403,
 			body: `${patchedFile.error}`,
 		};
 	}
-
 	return ctx;
 };

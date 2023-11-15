@@ -3,6 +3,7 @@ import type {TussleStorageService} from '@tussle/spec/interface/storage';
 import type {TusProtocolExtension} from '@tussle/spec/interface/tus';
 import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import {Observable, of, from as observableFrom, throwError, map, filter, OperatorFunction} from 'rxjs';
+import {ChunkOffsetError} from './error';
 
 import {
 	TussleStorageCreateFileParams,
@@ -62,6 +63,13 @@ class TussleMockStorageService implements TussleStorageService {
 		if (!readable) {
 			return throwError(() => new Error('unable to read request body'));
 		}
+		if (state.currentOffset !== params.offset) {
+			return throwError(() => new ChunkOffsetError(
+				location,
+				params.offset,
+				state.currentOffset,
+			));
+		}
 		const body$ = observableFrom(collectRequestBody(readable));
 		const persisted$ = body$.pipe(
 			filter(body => !!body) as OperatorFunction<Uint8Array|undefined, Uint8Array>,
@@ -112,7 +120,7 @@ class TussleMockStorageService implements TussleStorageService {
 
 
 export interface GenericRequest {
-	method: 'GET'|'POST'|'PUT'|'PATCH'|'DELETE'|'OPTIONS';
+	method: 'GET'|'POST'|'PUT'|'PATCH'|'DELETE'|'OPTIONS'|'HEAD';
 	url: string;
 	headers?: Record<string, string>;
 	body?: Uint8Array | ReadableStream;
@@ -404,7 +412,7 @@ export function middlewareTests<
 						filename: 'something.png',
 						filetype: 'image/png',
 					} satisfies Record<string, string>;
-					const beforeCreate = jest.fn(async (req, params) => {
+					const beforeCreate = jest.fn(async (_req, params) => {
 						return params;
 					});
 					const instance = await createMiddleware(storage, {
@@ -424,6 +432,117 @@ export function middlewareTests<
 						uploadMetadata,
 					}));
 				});
+			});
+		});
+
+		describe('client misbehavior mitigation', () => {
+
+			let storage: TussleStorageService;
+			beforeEach(() => {
+				storage = createStorageService();
+			});
+
+
+			test('client attempts to send patch with incorrect offset', async () => {
+				const instance = await createMiddleware(storage, {});
+				const created = await handleRequest(instance, createRequest({
+					method: 'POST',
+					url: 'https://tussle-middleware-test/files/stomp',
+					headers: prepareHeaders({
+						'Upload-Length': '1000',
+						'Upload-Metadata': '',
+						'Tus-Resumable': '1.0.0',
+					}),
+				}));
+
+				expect(created).toStrictEqual(expect.objectContaining({
+					status: 201,
+				}));
+
+				const part1 = await handleRequest(instance, createRequest({
+					method: 'PATCH',
+					url: 'https://tussle-middleware-test/files/stomp',
+					headers: {
+						'Content-Type': 'application/offset+octet-stream',
+						'Content-Length': '500',
+						'Upload-Offset': '0',
+						'Tus-Resumable': '1.0.0',
+					},
+					body: new Uint8Array(new TextEncoder().encode('aaaaabbbbb'.repeat(50))),
+				}));
+
+				const part2 = await handleRequest(instance, createRequest({
+					method: 'PATCH',
+					url: 'https://tussle-middleware-test/files/stomp',
+					headers: {
+						'Content-Type': 'application/offset+octet-stream',
+						'Content-Length': '500',
+						'Upload-Offset': '0',
+						'Tus-Resumable': '1.0.0',
+					},
+					body: new Uint8Array(new TextEncoder().encode('aaaaabbbbb'.repeat(50))),
+				}));
+
+				// First part should have succeeded
+				expect(part1).toStrictEqual(expect.objectContaining({
+					headers: expect.objectContaining({
+						'upload-offset': '500',
+					}),
+					status: 204,
+				}));
+
+				// Second part should conflict
+				expect(part2).toStrictEqual(expect.objectContaining({
+					status: 409,
+				}));
+
+				const info = await handleRequest(instance, createRequest({
+					method: 'HEAD',
+					url: 'https://tussle-middleware-test/files/stomp',
+					headers: {
+						'Tus-Resumable': '1.0.0',
+					}
+				}));
+				// Server state should still show a 500 byte offset
+				expect(info).toEqual(expect.objectContaining({
+					status: 200,
+					headers: expect.objectContaining({
+						'upload-offset': '500',
+					}),
+				}));
+
+				const complete = await handleRequest(instance, createRequest({
+					method: 'PATCH',
+					url: 'https://tussle-middleware-test/files/stomp',
+					headers: {
+						'Content-Type': 'application/offset+octet-stream',
+						'Content-Length': '500',
+						'Upload-Offset': '500',
+						'Tus-Resumable': '1.0.0',
+					},
+					body: new Uint8Array(new TextEncoder().encode('aaaaabbbbb'.repeat(50))),
+				}));
+
+				expect(complete).toStrictEqual(expect.objectContaining({
+					status: 204, // Complete
+				}));
+
+				// File is complete
+				expect(
+					await handleRequest(instance, createRequest({
+						method: 'HEAD',
+						url: 'https://tussle-middleware-test/files/stomp',
+						headers: {
+							'Tus-Resumable': '1.0.0',
+						}
+					}))
+				).toEqual(expect.objectContaining({
+					status: 200,
+					headers: expect.objectContaining({
+						'upload-length': '1000',
+						'upload-offset': '1000',
+					}),
+				}));
 			});
 		});
 	});
