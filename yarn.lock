@@ -3038,7 +3038,6 @@ __metadata:
     "@types/jest": ^29.2.3
     "@typescript-eslint/eslint-plugin": ^5.45.0
     "@typescript-eslint/parser": ^5.45.0
-    better-sqlite3: ^9.1.1
     coveralls: ^3.1.1
     eslint: ^8.26.0
     eslint-plugin-deprecation: ^1.3.2
@@ -6115,17 +6114,6 @@ __metadata:
     node-gyp: latest
     prebuild-install: ^7.1.0
   checksum: f8b180c26428a2d381482e83b4519d0d81a918e00f92cafd255f42eb9583f49b2fed1015121ad49ebe1f3f790cc8c6f4697d1e805193d65e70dacf2e8abbd6af
-  languageName: node
-  linkType: hard
-
-"better-sqlite3@npm:^9.1.1":
-  version: 9.1.1
-  resolution: "better-sqlite3@npm:9.1.1"
-  dependencies:
-    bindings: ^1.5.0
-    node-gyp: latest
-    prebuild-install: ^7.1.1
-  checksum: b016b225b1c23717acb596848729ca9118d2496c3059643fcf23e11e22e63bf35bd1e61dd5b30c5b649d56df821521aba9c0f2cbad8fc7cdca9f3a4484e7ebcb
   languageName: node
   linkType: hard
 
@@ -12720,7 +12708,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prebuild-install@npm:^7.1.0, prebuild-install@npm:^7.1.1":
+"prebuild-install@npm:^7.1.0":
   version: 7.1.1
   resolution: "prebuild-install@npm:7.1.1"
   dependencies:

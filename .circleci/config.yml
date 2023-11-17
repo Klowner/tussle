@@ -11,8 +11,8 @@ workflows:
 jobs:
   run-tests:
     docker:
-      - image: cimg/node:21.0
-      - image: cimg/postgres:14.2
+      - image: cimg/node:lts
+      - image: cimg/postgres:14.10
         environment:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -33,14 +33,13 @@ jobs:
             sudo apt-get install postgresql-client
       - checkout
       - restore_cache:
-          key: packages-{{ checksum "yarn.lock" }}
+          key: yarn-packages-{{ checksum "yarn.lock" }}
       - run: yarn install --immutable
       - save_cache:
           paths:
-            - node_modules
             - .yarn/cache
             - .yarn/unplugged
-          key: packages-{{ checksum "yarn.lock" }}
+          key: yarn-packages-{{ checksum "yarn.lock" }}
       - run: yarn lerna run clean --scope "@tussle/*" --concurrency=1
       - run: yarn lerna run build --scope "@tussle/*" --concurrency=1
       - run: dockerize -wait tcp://localhost:5432 -timeout 1m
