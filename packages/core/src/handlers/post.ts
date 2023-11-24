@@ -3,7 +3,7 @@ import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import type {TussleStorageCreateFileResponse, TussleStoragePatchFileCompleteResponse, UploadConcatFinal, UploadConcatPartial} from '@tussle/spec/interface/storage';
 import {decode} from 'js-base64';
 import {from as observableFrom, Observable, of, pipe} from 'rxjs';
-import {defaultIfEmpty, filter, map, switchMap} from 'rxjs/operators';
+import {defaultIfEmpty, filter, map, switchMap, tap} from 'rxjs/operators';
 import {processUploadBodyAndCallHooks} from './patch';
 
 export default function handlePost<T, P>(
@@ -15,6 +15,7 @@ export default function handlePost<T, P>(
 		withParamsUpdatedByBeforeCreateHook,
 		filterValidStoragePath,
 		switchMap(({ctx, params, store}) => store.createFile(params).pipe(
+			tap(x => console.log('debug', x)),
 			map((created) => ({ctx, created})),
 			postCreateHooks,
 			handlePotentialCreationWithUpload,

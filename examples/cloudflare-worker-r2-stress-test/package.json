@@ -1,5 +1,5 @@
 {
-	"name": "cloudflare-worker-r2",
+	"name": "cloudflare-worker-r2-stress-test",
 	"version": "0.7.4",
 	"license": "MIT",
 	"private": true,

@@ -13,32 +13,13 @@ type UserParams = {
 	context: ExecutionContext;
 }
 
-// Optionally use Cloudflare Worker's Cache API to store details for HEAD requests
-async function cacheCompletedUploadResponse(
-	request: Request,
-	location: string,
-	offset: number,
-) {
-	const url = new URL(request.url);
-	url.pathname = location;
-	console.log('CACHED ' + url.toString());
-	await caches.default.put(url.toString(), new Response(null, {
-		headers: {
-			'Upload-Offset': offset.toString(10),
-			'Upload-Length': offset.toString(10),
-			'Tus-Resumable': '1.0.0',
-			'Cache-Control': 'max-age=604800',
-		},
-	}));
-}
-
 const getTussleMiddleware = (() => {
 	let instance: TussleCloudflareWorker<UserParams>;
 	return (storage: TussleStorageService) => {
 		if (!instance) {
 			instance = new TussleCloudflareWorker({
 				hooks: {
-					"before-create": async (ctx, params) => {
+					"before-create": async (_ctx, params) => {
 						let path: string;
 						switch (params.uploadConcat?.action) {
 							case 'partial': // Creating a file to hold a segment of a parallel upload.
@@ -49,15 +30,14 @@ const getTussleMiddleware = (() => {
 								path = params.path + '/' + nanoid();
 								break;
 						}
-						console.log('creating', ctx, {...params, path});
 						return {
 							...params,
 							path,
 						};
 					},
-					"after-complete": async (ctx, params) => {
-						const { location, offset } = params;
-						await cacheCompletedUploadResponse(ctx.originalRequest, location, offset);
+					"after-complete": async (_ctx, params) => {
+						const { location } = params;
+						console.log('completed', location);
 						return params;
 					},
 				},
@@ -82,11 +62,11 @@ async function handleRequest(
 		}
 	}
 
-	console.log(bindings.TUSSLE_BUCKET);
 	const storage = new TussleStorageR2({
 		stateService,
 		bucket: bindings.TUSSLE_BUCKET,
-		skipMerge: false,
+		skipMerge: true,
+		checkpoint: 1024 * 1024 * 5,
 	});
 	const tussle = getTussleMiddleware(storage);
 	let res = await tussle.handleRequest(request, {context});

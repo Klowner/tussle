@@ -21,7 +21,7 @@ import {
 	of,
 	pipe,
 	share, switchMap,
-	take, takeLast, throwError, throwIfEmpty, toArray
+	take, takeLast, tap, throwError, throwIfEmpty, toArray
 } from "rxjs";
 import {lousyUUID} from "./lousyuuid";
 import {deleteR2Records, R2File} from './r2file';
@@ -380,15 +380,22 @@ export class TussleStorageR2 implements TussleStorageService {
 		state: Readonly<R2UploadState>,
 	): Promise<R2UploadState> {
 		const key = toPartKey(state.location, 0);
-		await this.options.bucket.put(key, null, {
-				customMetadata: {
-					tussleState: JSON.stringify({
-						...state,
-						parts: null,
-					}),
-					tusslePrevKey: '', // Store full R2 key
-				},
-		});
+		console.log('partkey', key);
+		try {
+			console.log('callling put on bucket', this.options.bucket.put);
+			await this.options.bucket.put(key, 'ok', {
+					customMetadata: {
+						tussleState: JSON.stringify({
+							...state,
+							parts: null,
+						}),
+						tusslePrevKey: '', // Store full R2 key
+					},
+			});
+		} catch (err) {
+			console.error('error?', err);
+		}
+		console.log('finished creating placeholder');
 		return state;
 	}
 
@@ -407,7 +414,9 @@ export class TussleStorageR2 implements TussleStorageService {
 			map(params => this.createInitialState(params)),
 			this.handleConcatenation,
 			this.setState,
+			// tap(x => console.log('create', x)),
 			this.createStatePlaceholderRecordIfIncomplete,
+			tap(x => console.log('create', x)),
 			map((state) => ({
 				...state,
 				offset: state.currentOffset,

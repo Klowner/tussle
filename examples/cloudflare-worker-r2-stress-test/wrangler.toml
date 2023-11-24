@@ -1,0 +1,11 @@
+name = "tussle-r2-example"
+compatibility_date = "2022-05-30"
+workers_dev = true
+main = "dist/worker.mjs"
+
+r2_buckets = [
+	{ binding = "TUSSLE_BUCKET", bucket_name = "tussledemo", preview_bucket_name = "tussledemo-preview"}
+]
+
+#[miniflare]
+#cache_persist = "./data/cache"
