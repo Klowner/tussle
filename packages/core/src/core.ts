@@ -132,11 +132,13 @@ export class Tussle {
 }
 
 function respondWithUnsupportedProtocolVersion<T, P>(ctx: TussleIncomingRequest<T, P>): TussleIncomingRequest<T, P> {
+	const version = ctx.request.getHeader('tus-resumable');
 	ctx.response = {
 		status: 412, // precondition failed
 		headers: {
 			...ctx.response?.headers,
 		},
+		body: `Unsupported protocol version (received: "${version}")`,
 	};
 	return ctx;
 }
