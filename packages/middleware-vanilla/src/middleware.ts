@@ -35,6 +35,7 @@ export type TussleServerResponse = Pick<ServerResponse,
 	| 'statusCode'
 	| 'setHeader'
 	| 'write'
+	| 'end'
 	>;
 
 export interface ReqResPair {
@@ -58,7 +59,7 @@ export class TussleVanilla<U = void> extends TussleBaseMiddleware<ReqResPair, U>
 		const req = createTussleRequest(this, request, params);
 		if (req) {
 			return firstValueFrom(of(req).pipe(this.core.handle))
-				.then((response) => response ? handleTussleResponse(response) : null);
+				.then((response) => handleTussleResponse(response));
 		}
 		return null;
 	}
@@ -76,7 +77,7 @@ const createTussleRequest = <T extends ReqResPair, U>(
 	const overrideMethod = first(ctx.request.headers['x-http-method-override']);
 	const requestMethod = ctx.request.method || 'GET';
 	const method = allowedMethod(requestMethod, overrideMethod);
-	const { pathname } = new URL(originalRequest.request.url || '');
+	const { pathname } = new URL(ctx.request.url || '', `http://${ctx.request.headers['origin']}/`);
 	if (method) {
 		return {
 			request: {
@@ -108,14 +109,20 @@ const handleTussleResponse = async <T extends ReqResPair, U>(ctx: TussleIncoming
 			ctx.originalRequest.response.setHeader(key, ctx.response.headers[key]);
 		}
 		ctx.originalRequest.response.statusCode = ctx.response.status;
-		if (ctx.response.body) {
-			const body = ctx.response.body;
-			return new Promise((resolve, reject) => {
-				ctx.originalRequest.response.write(body, (err) => err ? reject(err) : resolve(ctx.response));
-			});
-		} else {
-			return Promise.resolve(ctx.response);
-		}
+
+		const body = ctx.response.body;
+		const pendingWrite = new Promise<void>((resolve, reject) => {
+			if (body) {
+				ctx.originalRequest.response.write(body, (err) => {
+					return err ? reject(err) : resolve();
+				});
+			} else {
+				resolve();
+			}
+		});
+
+		await pendingWrite;
+		return await new Promise((resolve) => ctx.originalRequest.response.end(() => resolve(ctx.response)));
 	}
 	return Promise.resolve(null);
 };
