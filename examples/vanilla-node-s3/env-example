@@ -1,0 +1,5 @@
+# copy this to .env and edit appropriately
+TUSSLE_S3_KEY_ID="<s3KeyId>"
+TUSSLE_S3_KEY="<s3Key>"
+TUSSLE_S3_ENDPOINT="<endpointUrl>"
+TUSSLE_S3_BUCKET="<bucketName>"

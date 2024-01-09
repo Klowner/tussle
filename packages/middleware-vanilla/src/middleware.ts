@@ -78,6 +78,7 @@ const createTussleRequest = <T extends ReqResPair, U>(
 	const requestMethod = ctx.request.method || 'GET';
 	const method = allowedMethod(requestMethod, overrideMethod);
 	const { pathname } = new URL(ctx.request.url || '', `http://${ctx.request.headers['origin']}/`);
+
 	if (method) {
 		return {
 			request: {
@@ -86,8 +87,7 @@ const createTussleRequest = <T extends ReqResPair, U>(
 					return header || undefined;
 				},
 				getReadable: () => {
-					const readable = Readable.toWeb(ctx.request) as ReadableStream<Uint8Array>;
-					return readable;
+					return ctx.request;
 				},
 				method,
 				path: pathname,

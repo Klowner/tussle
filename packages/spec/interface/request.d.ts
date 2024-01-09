@@ -36,7 +36,7 @@ export interface TussleIncomingRequest<Req, U> {
   request: {
     method: HTTPMethod;
     path: string;
-    getReadable: () => ReadableStream<Uint8Array> | Uint8Array | undefined;
+    getReadable: () => ReadableStream<Uint8Array> | Uint8Array | Readable | undefined;
     getHeader: (header: string) => string|undefined;
   };
   response: null | {
