@@ -15,7 +15,6 @@ export default function handlePost<T, P>(
 		withParamsUpdatedByBeforeCreateHook,
 		filterValidStoragePath,
 		switchMap(({ctx, params, store}) => store.createFile(params).pipe(
-			tap(x => console.log('debug', x)),
 			map((created) => ({ctx, created})),
 			postCreateHooks,
 			handlePotentialCreationWithUpload,
