@@ -4,6 +4,7 @@ import type {TusProtocolExtension} from '@tussle/spec/interface/tus';
 import type {TussleIncomingRequest} from '@tussle/spec/interface/request';
 import {Observable, of, from as observableFrom, throwError, map, filter, OperatorFunction} from 'rxjs';
 import {ChunkOffsetError} from './error';
+import {Readable} from 'node:stream';
 
 import {
 	TussleStorageCreateFileParams,
@@ -565,6 +566,9 @@ export async function collectRequestBody(readable:{getReader: () => unknown}|Uin
 		const reader = (readable as ReadableStream<Uint8Array>).getReader();
 		const { value } = await reader.read();
 		return value;
+	} else if (readable instanceof Readable) {
+		const value = readable.read(100000) as Buffer;
+		return Uint8Array.from(value);
 	} else {
 		throw new Error('middleware test harness did not recognize readable type');
 	}

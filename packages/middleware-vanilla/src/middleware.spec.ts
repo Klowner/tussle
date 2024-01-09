@@ -25,9 +25,8 @@ class IncomingRequest extends Readable {
 		this.body = body;
 	}
 
-	_read(size: number) {
-		// console.log({size, body: this.body});
-		this.push(this.body);
+	_read(_size: number) {
+		this.push(this.body); // TODO slice body by _size
 		this.push(null);
 	}
 }
@@ -58,6 +57,10 @@ middlewareTests<TussleVanilla<UserParams>, ReqResPair, UserParams>(
 					statusCode: -1,
 					setHeader: (name: string, value: string|number|readonly string[]) => {
 						headers[name] = `${value}`;
+						return {} as ServerResponse;
+					},
+					end: (cb?: (err?: Error) => void) => {
+						cb && cb();
 						return {} as ServerResponse;
 					},
 					write: (chunk, encOrCb, cb?) => {
