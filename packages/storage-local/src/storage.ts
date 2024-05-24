@@ -4,6 +4,8 @@ import type {
 import type {
 	TussleStorageCreateFileParams,
 	TussleStorageCreateFileResponse,
+	TussleStorageDeleteFileParams,
+	TussleStorageDeleteFileResponse,
 	TussleStorageFileInfo,
 	TussleStorageFileInfoParams,
 	TussleStoragePatchFileParams,
@@ -230,15 +232,17 @@ export class TussleStorageLocal implements TussleStorageService {
 		}
 		const readable$ = observableOf({readable, length});
 
-		let localState: LocalUploadState = {...state};
+		// let localState: LocalUploadState = {...state};
 
 		return readable$.pipe(
-			concatMap(({readable}) => {
-				const tusslePrevKey = getMostRecentPartKey(localState) || '';
-				const key = getNextKey(localState);
+			// concatMap(({readable}) => {
+			// 	// const tusslePrevKey = getMostRecentPartKey(localState) || '';
+			// 	// const key = getNextKey(localState);
 
-			}),
+			// }),
+			map(() => state.location),
 			this.getState,
+			filterNonNull,
 			takeLast(1),
 		);
 	}
@@ -256,6 +260,16 @@ export class TussleStorageLocal implements TussleStorageService {
 			this.stateToSuccessfulPatchResponse,
 			defaultIfEmpty(this.invalidPatchResponse(params)),
 		);
+	}
+
+	deleteFile(
+		params: TussleStorageDeleteFileParams,
+	): Observable<TussleStorageDeleteFileResponse> {
+		const {location} = params;
+		return observableOf({
+			success: true,
+			location,
+		});
 	}
 
 	getFileInfo(
@@ -298,4 +312,3 @@ function toPartKey(location: string, part: number): string {
 function toPartName(part: number): string {
 	return part.toString(10).padStart(10, '0');
 }
-
