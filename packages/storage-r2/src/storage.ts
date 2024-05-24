@@ -476,7 +476,11 @@ export class TussleStorageR2 implements TussleStorageService {
 				});
 				unprefixedPartKeys.push(unprefixedKey);
 				// If there's no latest part set or the current obj is more recent than what we have...
-				if (!latestPart || !latestPart?.uploaded || obj.uploaded >= latestPart.uploaded) {
+				if (!latestPart
+					|| !latestPart?.uploaded
+					|| obj.uploaded >= latestPart.uploaded
+					|| (obj.uploaded === latestPart.uploaded && obj.key > latestPart.key)
+				) {
 					latestPart = obj;
 				}
 			}
@@ -597,7 +601,7 @@ export class TussleStorageR2 implements TussleStorageService {
 		// This will always be a ReadableStream in Cloudflare Workers.
 		const readable = params.request.request.getReadable() as ReadableStream;
 		let readable$;
-		if (checkpoint && checkpoint !== length) {
+		if (checkpoint && checkpoint !== length && 'getReader' in readable) {
 			const reader = readable.getReader({mode: 'byob'});
 			readable$ = sliceStreamBYOB(reader, length, checkpoint, this.options.checkpointMaxBufferSize);
 		} else {
