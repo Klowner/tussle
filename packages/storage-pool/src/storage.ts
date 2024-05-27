@@ -15,10 +15,9 @@ import {EMPTY, Observable, Subject, catchError, concatMap, defaultIfEmpty, filte
 export interface TussleStoragePoolOptions {
 	stores: Record<string, TussleStorageService>;
 	// Cache of upload location to storage pool storage key. Does not have to be
-	// durable as the pool will attempt to rebuild state from stores.
+	// durable as the pool will attempt to rebuild state from stores when no
+	// match is found.
 	stateService: TussleStateService<string>;
-	// // Called when creating a new unrecognized upload.
-	// select: () => Promise<string>;
 }
 
 interface StoragePoolHint {
@@ -48,7 +47,7 @@ export type TussleStoragePoolState = string;
 export class TussleStoragePool implements TussleStorageService {
 	constructor (readonly options: TussleStoragePoolOptions) {}
 
-	readonly getStorageByKey = map((key: string) => this.options.stores[key]);
+	readonly getStorageByKey = (key: string) => this.options.stores[key];
 
 	private readonly error = new Subject<TussleStoragePoolError>();
 
