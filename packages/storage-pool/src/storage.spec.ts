@@ -4,7 +4,7 @@ import { TussleStoragePool, TussleStoragePoolState } from './storage';
 import { TussleStorageR2, R2UploadState } from '@tussle/storage-r2';
 import { MemoryStorage } from "@miniflare/storage-memory";
 import { R2Bucket } from "@miniflare/r2";
-import {firstValueFrom} from 'rxjs';
+import {defer, firstValueFrom, map, of, throwError} from 'rxjs';
 import {mockIncomingRequest} from '@tussle/spec';
 import {TussleStorageService} from '@tussle/spec/interface/storage';
 
@@ -139,7 +139,6 @@ describe('@tussle/storage-pool', () => {
 				uploadLength: 4,
 				uploadMetadata: {},
 				uploadConcat: null,
-				storageKey: 'b',
 			}));
 
 			expect(result).toHaveProperty('location', 'soft-cat.jpg');
@@ -158,7 +157,6 @@ describe('@tussle/storage-pool', () => {
 				uploadConcat: null,
 			}));
 
-			console.log(result2);
 			expect(result2).toHaveProperty('location', 'soft-cat.jpg');
 			expect(result2).toHaveProperty('uploadLength', 100); // new size
 			expect(result2.metadata).toStrictEqual({
@@ -167,7 +165,171 @@ describe('@tussle/storage-pool', () => {
 			});
 		});
 
+		test('rebuilt state from should match in-memory state', async () => {
+			await firstValueFrom(storage.createFile({
+				path: 'soft-cat.jpg',
+				uploadLength: 8,
+				uploadMetadata: {},
+				uploadConcat: null,
+			}));
 
+			const initialState = await firstValueFrom(storage.getFileInfo({
+				location: 'soft-cat.jpg',
+			}));
+
+			state.clear(); // erase in-memory state.
+
+			const rebuiltState = await firstValueFrom(storage.getFileInfo({
+				location: 'soft-cat.jpg',
+			}));
+
+			expect(rebuiltState).toStrictEqual(initialState);
+		});
+
+		test('rebuild state should handle sibling subdirectories', async () => {
+			await firstValueFrom(storage.createFile({
+				path: 'fluffy-cat.png/part1',
+				uploadLength: 8,
+				uploadMetadata: {},
+				uploadConcat: null,
+			}));
+
+			await firstValueFrom(storage.createFile({
+				path: 'fluffy-cat.png/part2',
+				uploadLength: 8,
+				uploadMetadata: {},
+				uploadConcat: null,
+			}));
+
+			await firstValueFrom(storage.patchFile({
+				location: 'fluffy-cat.png/part1',
+				offset: 0,
+				length: 8,
+				request: mockIncomingRequest({
+					method: 'PATCH',
+					url: '<unused>',
+					body: new Uint8Array(new TextEncoder().encode('hellocat')),
+				}),
+			}));
+
+			await firstValueFrom(storage.patchFile({
+				location: 'fluffy-cat.png/part2',
+				offset: 0,
+				length: 8,
+				request: mockIncomingRequest({
+					method: 'PATCH',
+					url: '<unused>',
+					body: new Uint8Array(new TextEncoder().encode('meowmeow')),
+				}),
+			}));
+
+			expect(await firstValueFrom(storage.getFileInfo({
+				location: 'fluffy-cat.png/part1',
+			}))).toHaveProperty('info.currentOffset', 8); // should be a completed upload
+
+			expect(await firstValueFrom(storage.getFileInfo({
+				location: 'fluffy-cat.png/part2',
+			}))).toHaveProperty('info.currentOffset', 8); // should be a completed upload
+
+			state.clear(); // clear state to force state-rebuild from R2 storage.
+
+			expect(await firstValueFrom(storage.getFileInfo({
+				location: 'fluffy-cat.png/part1',
+			}))).toHaveProperty('info.currentOffset', 8); // should still be a completed upload
+
+			expect(await firstValueFrom(storage.getFileInfo({
+				location: 'fluffy-cat.png/part2',
+			}))).toHaveProperty('info.currentOffset', 8); // should still be a completed upload
+
+			const nonexistantFluffyCat = await firstValueFrom(storage.getFileInfo({
+				location: 'fluffy-cat.png',
+			}));
+
+			expect(nonexistantFluffyCat).toHaveProperty('info', null);
+			expect(nonexistantFluffyCat).not.toHaveProperty('details');
+
+			const root = await firstValueFrom(storage.createFile({
+				path: 'fluffy-cat.png',
+				uploadLength: 8,
+				uploadMetadata: {},
+				uploadConcat: null,
+			}));
+
+			// @ts-expect-error parts is not an exposed property
+			expect(root.parts).toStrictEqual([]);
+
+			b_state.clear(); // force state rebuild
+			a_state.clear(); // force state rebuild
+			state.clear(); // ensure state can still be rebuilt
+			const rootInfo = await firstValueFrom(storage.getFileInfo({
+				location: 'fluffy-cat.png',
+			}));
+			expect(rootInfo).toHaveProperty('info', {
+				currentOffset: 0,
+				uploadConcat: null,
+				uploadLength: 8,
+			});
+		});
+
+		describe('sticky storage assignment', () => {
+			test("storage B is used if storage A's underlying R2 bucket put() fails", async () => {
+				const spy = jest.spyOn(a_bucket, 'put').mockImplementation(() => {
+					throw new Error('R2 error during put()');
+				});
+				const result = await firstValueFrom(storage.createFile({
+					path: 'soft-cat.jpg',
+					uploadLength: 8,
+					uploadMetadata: {
+						cat: 'meow',
+					},
+					uploadConcat: null,
+				}));
+
+				expect(result).toEqual(expect.objectContaining({
+					success: true,
+					storageKey: 'b',
+				}));
+				spy.mockRestore();
+			});
+
+			test("storage B is always used if failover redirects to storage B during creation", async () => {
+				const putSpy = jest.spyOn(a_bucket, 'put').mockImplementation(() => {
+					throw new Error('R2 error during put()');
+				});
+				const result = await firstValueFrom(storage.createFile({
+					path: 'soft-cat.jpg',
+					uploadLength: 8,
+					uploadMetadata: {
+						cat: 'meow',
+					},
+					uploadConcat: null,
+				}));
+
+				expect(result).toEqual(expect.objectContaining({
+					success: true,
+					storageKey: 'b',
+				}));
+
+				putSpy.mockRestore(); // store a_bucket.put()
+
+				const patch = await firstValueFrom(storage.patchFile({
+					location: 'soft-cat.jpg',
+					offset: 0,
+					length: 8,
+					request: mockIncomingRequest({
+						method: 'PATCH',
+						url: '<unused>',
+						body: new Uint8Array(new TextEncoder().encode('meowmeow')),
+					}),
+				}));
+
+				expect(patch).toEqual(expect.objectContaining({
+					success: true,
+					storageKey: 'b',
+				}));
+			});
+
+		}); // end sticky storage assignment
 	});
 });
 

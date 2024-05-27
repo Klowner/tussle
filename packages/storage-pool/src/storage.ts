@@ -56,10 +56,10 @@ export class TussleStoragePool implements TussleStorageService {
 		return this.error.asObservable();
 	}
 
-	private setStickyStoragePath<T extends {location: string}>(key: string) {
-		return concatMap(async (created: T): Promise<T> => {
-			await this.options.stateService.setItem(created.location, key);
-			return {...created, storageKey: key};
+	private setStickyStoragePath<T extends {location: string}>(storageKey: string) {
+		return concatMap(async (created: T): Promise<T & {storageKey: string}> => {
+			await this.options.stateService.setItem(created.location, storageKey);
+			return {...created, storageKey};
 		});
 	}
 
@@ -71,15 +71,26 @@ export class TussleStoragePool implements TussleStorageService {
 		});
 	}
 
+	// Ensures the params either already include a requested `storageKey` or the
+	// pool attempts to rebuild the `storageKey` from the sub-stores.
+	// An error is thrown if the sticky path can not be determined.
 	ensureStickyStoragePath<T extends {location: string} & Partial<StoragePoolHint>>() {
-		return concatMap((params: T) => {
-			if (params.storage || params.storageKey) {
+		return concatMap((params: T): Observable<T & {storageKey: string}> => {
+			if (hasStorageKey(params)) {
 				return of(params);
+			} else {
+				const info$ = this.getFileInfo(params).pipe(
+					concatMap(({ storageKey }) => {
+						if (storageKey) {
+							return of(params).pipe(
+								this.setStickyStoragePath(storageKey),
+							);
+						}
+						throw new TussleStoragePoolError('Fatal: failed to reconstruct sticky storage path');
+					}),
+				);
+				return info$;
 			}
-			return this.getFileInfo(params).pipe(
-				map(({storageKey}) => ({...params, storageKey})),
-				this.setStickyStoragePath(params.location),
-			);
 		});
 	}
 
@@ -228,4 +239,11 @@ function toTussleError(err: unknown): Error|TussleStoragePoolError {
 		return err;
 	}
 	return new TussleStoragePoolError(typeof err === 'string' ? err : 'unknown storage pool error');
+}
+
+function hasStorageKey<T>(o: T): o is T & {storageKey: string} {
+	return o
+		&& typeof o === 'object'
+		&& 'storageKey' in o
+		&& typeof o.storageKey === 'string';
 }
