@@ -1,0 +1,11 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"outDir": "dist-types",
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"noEmit": false,
+		"removeComments": false,
+		"strict": true
+	}
+}

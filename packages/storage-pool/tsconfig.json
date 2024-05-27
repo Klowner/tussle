@@ -1,0 +1,19 @@
+{
+	"extends": "../tsconfig.settings.json",
+	"compilerOptions": {
+		"resolveJsonModule": true,
+		"outDir": "lib",
+		"rootDir": "src",
+		"baseUrl": "./",
+		"target": "es2017",
+		"lib": [],
+		"types": [
+			"@cloudflare/workers-types/2022-11-30"
+		]
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "**/*.spec.*"],
+	"references": [
+		{"path": "../core"}
+	]
+}
