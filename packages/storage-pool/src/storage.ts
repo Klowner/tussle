@@ -30,7 +30,7 @@ interface StoragePoolHint {
 // prioritize([1,2,3], 0) => [1,2,3]
 // prioritize([1,2,3], 2) => [2,3,1]
 // prioritize([1,2,3], 3) => [3,1,2]
-function prioritize<T>(
+export function prioritize<T>(
 	keys: Readonly<T[]>,
 	which: T,
 ): T[] {
@@ -39,6 +39,30 @@ function prioritize<T>(
 		return keys.slice(index).concat(keys.slice(0, index));
 	}
 	return [...keys];
+}
+
+export function distinctExtensions(
+	stores: Readonly<Pick<TussleStorageService, 'extensionsRequired'>[]>,
+): TusProtocolExtension[] {
+		const distinct = new Set<TusProtocolExtension>();
+		for (const storage of Object.values(stores)) {
+			storage.extensionsRequired?.forEach(e => distinct.add(e));
+		}
+		return Array.from(distinct.values());
+}
+
+export function commonExtensions(
+	stores: Readonly<TussleStorageService[]>,
+) {
+	const supported = stores[0].extensionsSupported || [];
+	for (const store of stores.slice(1)) {
+		(store.extensionsSupported || []).forEach(ext => {
+			if (!supported.includes(ext)) {
+				supported.splice(supported.indexOf(ext), 1);
+			}
+		});
+	}
+	return supported;
 }
 
 export class TussleStoragePoolError extends Error {}
@@ -95,25 +119,14 @@ export class TussleStoragePool implements TussleStorageService {
 
 	// List all distinct extensions required by the stores within the pool
 	get extensionsRequired(): TusProtocolExtension[] {
-		const distinct = new Set<TusProtocolExtension>();
-		for (const storage of Object.values(this.options.stores)) {
-			storage.extensionsRequired?.forEach(e => distinct.add(e));
-		}
-		return Array.from(distinct.values());
+		return distinctExtensions(Object.values(this.options.stores));
 	}
 
 	// List extensions which are supported by ALL stores within the pool
 	get extensionsSupported(): TusProtocolExtension[] {
 		const stores = Object.values(this.options.stores);
-		const supported = stores.pop()?.extensionsSupported || [];
-		for (const store of stores) {
-			(store.extensionsSupported || []).forEach(ext => {
-				if (!supported.includes(ext)) {
-					supported.splice(supported.indexOf(ext), 1);
-				}
-			});
-		}
-		return supported;
+		return commonExtensions(stores);
+
 	}
 
 	// Attempt to create a new upload. If storageKey is provided, that

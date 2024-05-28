@@ -1,10 +1,10 @@
 import {storageServiceTests} from '@tussle/spec';
 import TussleStateMemory from '@tussle/state-memory';
-import { TussleStoragePool, TussleStoragePoolState } from './storage';
+import { commonExtensions, prioritize, TussleStoragePool, TussleStoragePoolState } from './storage';
 import { TussleStorageR2, R2UploadState } from '@tussle/storage-r2';
 import { MemoryStorage } from "@miniflare/storage-memory";
 import { R2Bucket } from "@miniflare/r2";
-import {defer, firstValueFrom, map, of, throwError} from 'rxjs';
+import {defer, firstValueFrom, map, of, throwError, toArray} from 'rxjs';
 import {mockIncomingRequest} from '@tussle/spec';
 import {TussleStorageService} from '@tussle/spec/interface/storage';
 
@@ -33,6 +33,23 @@ storageServiceTests(
 		// 'concatenation'
 	],
 );
+
+describe('@tussle/storage-pool - prioritize', () => {
+	test('with matching search result', () => {
+		expect(prioritize(['one', 'two',  'three','four'], 'two'))
+			.toStrictEqual( ['two', 'three', 'four', 'one']);
+
+		expect(prioritize(['one',  'two', 'three','four'], 'four'))
+			.toStrictEqual( ['four', 'one', 'two', 'three']);
+	});
+
+	test('search key does not exist returning list identity', () => {
+		expect(prioritize(['one', 'two', 'three'], 'potato'))
+			.toStrictEqual(['one', 'two', 'three']);
+		expect(prioritize(['one', 'two', 'three'], 'unicorns'))
+			.toStrictEqual(['one', 'two', 'three']);
+	});
+});
 
 describe('@tussle/storage-pool', () => {
 	let storage: TussleStoragePool;
@@ -73,6 +90,72 @@ describe('@tussle/storage-pool', () => {
 				'a': storage_a,
 				'b': storage_b,
 			}
+		});
+	});
+
+	describe('getStorageByKey(key)', () => {
+		test('should return requested internal store', () => {
+			expect(storage.getStorageByKey('a')).toBe(storage_a);
+			expect(storage.getStorageByKey('b')).toBe(storage_b);
+		});
+
+		test('should return undefined if no match is found', () => {
+			expect(storage.getStorageByKey('missing')).toBe(undefined);
+		});
+	});
+
+	describe('error$ obserable', () => {
+		test('emits errors from the sub-storage service', async () => {
+			const errors = firstValueFrom(storage.error$);
+
+			// Have initial storage throw an error for file creation...
+			jest.spyOn(storage_a, 'createFile').mockImplementationOnce(() => {
+				throw new Error('Boom');
+			});
+
+			// This will cause fail-over to secondary storage...
+			jest.spyOn(storage_b, 'createFile').mockImplementationOnce(() => {
+				throw new Error('Boom');
+			});
+
+			const result = await firstValueFrom(storage.createFile({
+				path: 'error-file',
+				uploadLength: 100000,
+				uploadMetadata: {},
+				uploadConcat: null,
+			}));
+
+			// Both storages failed to create so that's a pool exhaustion
+			expect(result).toStrictEqual(expect.objectContaining({
+				success: false, //
+				error: new Error("Exhausted storage pool while attempting to create file"),
+			}));
+
+			expect(await errors).toStrictEqual(new Error('Boom'));
+		});
+	});
+
+	describe('extensionsRequired', () => {
+		test('should return all required extensions of sub-pools', () => {
+			expect(storage.extensionsRequired)
+				.toStrictEqual(storage_a.extensionsRequired);
+		});
+	});
+
+	describe('extensionsSupported', () => {
+		test('should return all required extensions of sub-pools', () => {
+			expect(storage.extensionsSupported)
+				.toStrictEqual(storage_a.extensionsSupported);
+		});
+	});
+
+	describe('distinctExtensions', () => {
+		test('the stuff', () => {
+			expect(
+				commonExtensions([
+
+				])
+			).toBe([]);
 		});
 	});
 
