@@ -9,7 +9,7 @@ import {
 	TussleStorageService,
 } from "@tussle/spec/interface/storage";
 import {TusProtocolExtension} from "@tussle/spec/interface/tus";
-import {EMPTY, Observable, Subject, catchError, concatMap, defaultIfEmpty, filter, from, map, mergeMap, of, take} from "rxjs";
+import {EMPTY, Observable, Subject, catchError, concat, concatMap, defaultIfEmpty, filter, from, map, mergeMap, of, take} from "rxjs";
 
 
 export interface TussleStoragePoolOptions {
@@ -97,29 +97,32 @@ export class TussleStoragePool implements TussleStorageService {
 		});
 	}
 
-	// Ensures the params either already include a requested `storageKey` or the
-	// pool attempts to rebuild the `storageKey` from the sub-stores.
-	// An error is thrown if the sticky path can not be determined.
-	ensureStickyStoragePath<T extends {location: string} & Partial<StoragePoolHint>>() {
-		return concatMap((params: T): Observable<T & {storageKey: string}> => {
-			if (hasStorageKey(params)) {
-				return of(params);
-			} else {
-				const info$ = this.getFileInfo(params).pipe(
-					concatMap(({ storageKey }) => {
-						if (storageKey) {
-							return of(params).pipe(
-								this.setStickyStoragePath(storageKey),
-							);
-						}
-						const error = new TussleStoragePoolError('Fatal: failed to reconstruct sticky storage path');
-						this.error.next(error);
-						throw error;
-					}),
-				);
-				return info$;
-			}
-		});
+	// First check local sticky path state for records that match
+	// the `location` parameter. If not matches are found, attempt
+	// to reconstruct the sticky path by scanning the pool for the
+	// store which (hopefully) contains the data.
+	// An error is thrown if the sticky path cannot be determined.
+	ensureStickyStoragePath<T extends {location: string}>() {
+		return concatMap((params: T) => concat(
+			of(params).pipe(
+				this.getStickyStoragePath(),
+				filter(({ storageKey }) => !!storageKey),
+			),
+			this.getFileInfo(params).pipe(
+				concatMap(({ storageKey }) => {
+					if (storageKey) {
+						return of(params).pipe(
+							this.setStickyStoragePath(storageKey),
+						);
+					}
+					const error = new TussleStoragePoolError('Fatal: failed to reconstruct sticky storage path');
+					this.error.next(error);
+					throw error;
+				}),
+			)).pipe(
+				take(1),
+			)
+		);
 	}
 
 	// List all distinct extensions required by the stores within the pool
@@ -163,7 +166,7 @@ export class TussleStoragePool implements TussleStorageService {
 				location: params.path,
 				offset: 0,
 				success: false,
-				error: toTussleError("Exhausted storage pool while attempting to create file"),
+				error: new TussleStoragePoolError('Exhausted storage pool while attempting to create file'),
 			}),
 		);
 	}
@@ -253,16 +256,9 @@ export class TussleStoragePool implements TussleStorageService {
 	}
 }
 
-function toTussleError(err: unknown): Error|TussleStoragePoolError {
+export function toTussleError(err: unknown): Error|TussleStoragePoolError {
 	if (err instanceof Error) {
-		return err;
+		return err; // TODO this is probably not what we want
 	}
 	return new TussleStoragePoolError(typeof err === 'string' ? err : 'unknown storage pool error');
-}
-
-function hasStorageKey<T>(o: T): o is T & {storageKey: string} {
-	return o
-		&& typeof o === 'object'
-		&& 'storageKey' in o
-		&& typeof o.storageKey === 'string';
 }
