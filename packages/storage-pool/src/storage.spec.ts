@@ -1,12 +1,11 @@
-import {storageServiceTests} from '@tussle/spec';
-import TussleStateMemory from '@tussle/state-memory';
-import { commonExtensions, prioritize, TussleStoragePool, TussleStoragePoolState } from './storage';
-import { TussleStorageR2, R2UploadState } from '@tussle/storage-r2';
-import { MemoryStorage } from "@miniflare/storage-memory";
-import { R2Bucket } from "@miniflare/r2";
-import {defer, firstValueFrom, map, of, throwError, toArray} from 'rxjs';
-import {mockIncomingRequest} from '@tussle/spec';
+import {R2Bucket} from "@miniflare/r2";
+import {MemoryStorage} from "@miniflare/storage-memory";
+import {mockIncomingRequest, storageServiceTests} from '@tussle/spec';
 import {TussleStorageService} from '@tussle/spec/interface/storage';
+import TussleStateMemory from '@tussle/state-memory';
+import {R2UploadState, TussleStorageR2} from '@tussle/storage-r2';
+import {firstValueFrom} from 'rxjs';
+import {commonExtensions, distinctExtensions, prioritize, TussleStoragePool, TussleStoragePoolState} from './storage';
 
 storageServiceTests(
 	'@tussle/storage-pool',
@@ -29,8 +28,6 @@ storageServiceTests(
 	[
 		'creation',
 		'creation-with-upload',
-		// 'termination',
-		// 'concatenation'
 	],
 );
 
@@ -149,13 +146,35 @@ describe('@tussle/storage-pool', () => {
 		});
 	});
 
-	describe('distinctExtensions', () => {
-		test('the stuff', () => {
+	describe('commonExtensions', () => {
+		test('should return the subset of common elements of the passed-in arrays', () => {
 			expect(
 				commonExtensions([
-
+					['creation', 'checksum', 'expiration', 'creation-with-upload', 'termination'],
+					['creation', 'checksum', 'expiration', 'checksum-trailer'],
+					['creation', 'checksum', 'expiration', 'checksum-trailer', 'concatenation'],
 				])
-			).toBe([]);
+			).toStrictEqual(
+					['creation', 'checksum', 'expiration'],
+			);
+		});
+
+		test('should handle empty request gracefully', () => {
+			expect(commonExtensions([])).toStrictEqual([]);
+		});
+	});
+
+	describe('distinctExtensions', () => {
+		test('should return all distinct elements from the passed-in arrays', () => {
+			expect(
+				distinctExtensions([
+					['creation', 'termination', 'expiration'],
+					['creation', 'checksum', 'expiration', 'checksum-trailer'],
+					['creation', 'checksum', 'expiration'],
+				])
+			).toStrictEqual(expect.arrayContaining(
+					['creation', 'termination', 'checksum', 'expiration', 'checksum-trailer'],
+			));
 		});
 	});
 
@@ -410,6 +429,69 @@ describe('@tussle/storage-pool', () => {
 					success: true,
 					storageKey: 'b',
 				}));
+			});
+
+			test("attempts to patch an upload which can't be located throws an error", async () => {
+				const listSpyB = jest.spyOn(b_bucket, 'list');
+
+				const result = await firstValueFrom(storage.createFile({
+					path: 'boopicorn.jpg',
+					uploadLength: 100,
+					uploadMetadata: {},
+					uploadConcat: null,
+					storageKey: 'b', // direct to B storage since that's not default
+				}));
+
+				expect(result).toStrictEqual(expect.objectContaining({
+					success: true,
+					storageKey: 'b', // stored in B as expected
+				}));
+
+				// Simulate a typical Cloudflare worker reboot
+				a_state.clear();
+				b_state.clear();
+				state.clear();
+
+				const patchOne = await firstValueFrom(storage.patchFile({
+					location: 'boopicorn.jpg',
+					offset: 0,
+					length: 8,
+					request: mockIncomingRequest({
+						method: 'PATCH',
+						url: '<unused>',
+						body: new Uint8Array(new TextEncoder().encode('blahblah')),
+					}),
+				}));
+
+				expect(patchOne).toStrictEqual(expect.objectContaining({
+					success: true,
+					offset: 8,
+					storageKey: 'b',
+				}));
+
+				// Wipe all the states again...
+				a_state.clear();
+				b_state.clear();
+				state.clear();
+
+				listSpyB.mockImplementationOnce(() => {
+					throw new Error('some stupid R2 error');
+				});
+
+				expect(async () => await firstValueFrom(storage.patchFile({
+						location: 'boopicorn.jpg',
+						offset: 8,
+						length: 8,
+						request: mockIncomingRequest({
+							method: 'PATCH',
+							url: '<unused>',
+							body: new Uint8Array(new TextEncoder().encode('blahblah')),
+						}),
+					}))
+				).rejects.toThrowError('Fatal: failed to reconstruct sticky storage path');
+
+				// B storage should have been scanned for matches
+				expect(listSpyB).toHaveBeenCalled();
 			});
 
 		}); // end sticky storage assignment

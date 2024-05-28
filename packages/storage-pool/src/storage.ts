@@ -42,25 +42,28 @@ export function prioritize<T>(
 }
 
 export function distinctExtensions(
-	stores: Readonly<Pick<TussleStorageService, 'extensionsRequired'>[]>,
+	extensionSets: Readonly<TusProtocolExtension>[][]
 ): TusProtocolExtension[] {
-		const distinct = new Set<TusProtocolExtension>();
-		for (const storage of Object.values(stores)) {
-			storage.extensionsRequired?.forEach(e => distinct.add(e));
-		}
-		return Array.from(distinct.values());
+	const distinct = new Set<TusProtocolExtension>();
+	for (const extensions of extensionSets) {
+		extensions.forEach(e => distinct.add(e));
+	}
+	return Array.from(distinct.values());
 }
 
 export function commonExtensions(
-	stores: Readonly<TussleStorageService[]>,
-) {
-	const supported = stores[0].extensionsSupported || [];
-	for (const store of stores.slice(1)) {
-		(store.extensionsSupported || []).forEach(ext => {
-			if (!supported.includes(ext)) {
-				supported.splice(supported.indexOf(ext), 1);
+	extensionSets: Readonly<TusProtocolExtension>[][],
+): TusProtocolExtension[] {
+	if (!extensionSets.length) {
+		return [];
+	}
+	const [supported, ...restExtensionSets] = extensionSets;
+	for (const extensions of restExtensionSets) {
+		for (const supportedExt of supported) {
+			if (!extensions.includes(supportedExt)) {
+				supported.splice(supported.indexOf(supportedExt), 1);
 			}
-		});
+		}
 	}
 	return supported;
 }
@@ -109,7 +112,9 @@ export class TussleStoragePool implements TussleStorageService {
 								this.setStickyStoragePath(storageKey),
 							);
 						}
-						throw new TussleStoragePoolError('Fatal: failed to reconstruct sticky storage path');
+						const error = new TussleStoragePoolError('Fatal: failed to reconstruct sticky storage path');
+						this.error.next(error);
+						throw error;
 					}),
 				);
 				return info$;
@@ -119,14 +124,16 @@ export class TussleStoragePool implements TussleStorageService {
 
 	// List all distinct extensions required by the stores within the pool
 	get extensionsRequired(): TusProtocolExtension[] {
-		return distinctExtensions(Object.values(this.options.stores));
+		const extensionSets = Object.values(this.options.stores)
+			.map(store => store.extensionsRequired);
+		return distinctExtensions(extensionSets);
 	}
 
 	// List extensions which are supported by ALL stores within the pool
 	get extensionsSupported(): TusProtocolExtension[] {
-		const stores = Object.values(this.options.stores);
-		return commonExtensions(stores);
-
+		const extensionSets = Object.values(this.options.stores)
+			.map(store => store.extensionsSupported || []);
+		return commonExtensions(extensionSets);
 	}
 
 	// Attempt to create a new upload. If storageKey is provided, that
@@ -156,7 +163,7 @@ export class TussleStoragePool implements TussleStorageService {
 				location: params.path,
 				offset: 0,
 				success: false,
-				error: new Error("Exhausted storage pool while attempting to create file"),
+				error: toTussleError("Exhausted storage pool while attempting to create file"),
 			}),
 		);
 	}
