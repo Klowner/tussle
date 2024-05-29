@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.5](https://github.com/Klowner/tussle/compare/v0.7.4...v0.7.5) (2024-05-29)
+
+
+### Bug Fixes
+
+* **cloudflare-example-r2:** switch to wrangler 3 which uses sqlite based R2 driver which avoids name conflict bug ([c45f613](https://github.com/Klowner/tussle/commit/c45f61336bddcdf6ce0fb3798938758597f67ccd))
+
+
+
+
+
 ## [0.7.4](https://github.com/Klowner/tussle/compare/v0.7.3...v0.7.4) (2023-06-15)
 
 **Note:** Version bump only for package cloudflare-worker-r2

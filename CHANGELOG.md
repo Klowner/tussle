@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.5](https://github.com/Klowner/tussle/compare/v0.7.4...v0.7.5) (2024-05-29)
+
+
+### Bug Fixes
+
+* **cloudflare-example-r2:** switch to wrangler 3 which uses sqlite based R2 driver which avoids name conflict bug ([c45f613](https://github.com/Klowner/tussle/commit/c45f61336bddcdf6ce0fb3798938758597f67ccd))
+* **storage-r2:** ensure state reconstruction picks the higher value key of two equally-timed uploads ([82b035a](https://github.com/Klowner/tussle/commit/82b035a238f0188a01794775f5f4d50b0e0c243e))
+
+
+### Features
+
+* add middleware test for tus Upload-Metadata header ([80a57a7](https://github.com/Klowner/tussle/commit/80a57a7ce4385a3038953a080e36f7a9a7c06f26))
+* **core,storage-r2:** add basic support for termination protocol extension ([f544ffd](https://github.com/Klowner/tussle/commit/f544ffd0a68ac7fa0066651e7ef97f0f17a0e3fc))
+* **spec:** add TussleStorageServiceWithDeleteCapability type which includes deleteFile() ([5298280](https://github.com/Klowner/tussle/commit/5298280b551ab6184ded3c7545c2a5bb82b528ef))
+* **storage-r2:** add option to limit working buffer size of checkpoint ReadableStream slicer ([c87e507](https://github.com/Klowner/tussle/commit/c87e507221109755d8c30ae47347237e6b5ef11b))
+
+
+
+
+
 ## [0.7.4](https://github.com/Klowner/tussle/compare/v0.7.3...v0.7.4) (2023-06-15)
 
 

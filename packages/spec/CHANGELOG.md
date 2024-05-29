@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.5](https://github.com/Klowner/tussle/compare/v0.7.4...v0.7.5) (2024-05-29)
+
+
+### Features
+
+* add middleware test for tus Upload-Metadata header ([80a57a7](https://github.com/Klowner/tussle/commit/80a57a7ce4385a3038953a080e36f7a9a7c06f26))
+* **core,storage-r2:** add basic support for termination protocol extension ([f544ffd](https://github.com/Klowner/tussle/commit/f544ffd0a68ac7fa0066651e7ef97f0f17a0e3fc))
+* **spec:** add TussleStorageServiceWithDeleteCapability type which includes deleteFile() ([5298280](https://github.com/Klowner/tussle/commit/5298280b551ab6184ded3c7545c2a5bb82b528ef))
+
+
+
+
+
 # [0.7.0](https://klowner/compare/v0.6.12...v0.7.0) (2023-05-09)
 
 

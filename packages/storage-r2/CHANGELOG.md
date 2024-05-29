@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.5](https://github.com/Klowner/tussle/compare/v0.7.4...v0.7.5) (2024-05-29)
+
+
+### Bug Fixes
+
+* **storage-r2:** ensure state reconstruction picks the higher value key of two equally-timed uploads ([82b035a](https://github.com/Klowner/tussle/commit/82b035a238f0188a01794775f5f4d50b0e0c243e))
+
+
+### Features
+
+* **core,storage-r2:** add basic support for termination protocol extension ([f544ffd](https://github.com/Klowner/tussle/commit/f544ffd0a68ac7fa0066651e7ef97f0f17a0e3fc))
+* **storage-r2:** add option to limit working buffer size of checkpoint ReadableStream slicer ([c87e507](https://github.com/Klowner/tussle/commit/c87e507221109755d8c30ae47347237e6b5ef11b))
+
+
+
+
+
 ## [0.7.4](https://github.com/Klowner/tussle/compare/v0.7.3...v0.7.4) (2023-06-15)
 
 

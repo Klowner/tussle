@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.5](https://github.com/Klowner/tussle/compare/v0.7.4...v0.7.5) (2024-05-29)
+
+
+### Features
+
+* **core,storage-r2:** add basic support for termination protocol extension ([f544ffd](https://github.com/Klowner/tussle/commit/f544ffd0a68ac7fa0066651e7ef97f0f17a0e3fc))
+
+
+
+
+
 ## [0.7.1](https://klowner/compare/v0.7.0...v0.7.1) (2023-05-09)
 
 **Note:** Version bump only for package @tussle/storage-b2
