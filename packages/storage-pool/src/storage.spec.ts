@@ -140,9 +140,11 @@ describe('@tussle/storage-pool', () => {
 	});
 
 	describe('extensionsSupported', () => {
-		test('should return all required extensions of sub-pools', () => {
+		test('should return all required extensions of sub-pools (minus concatenation)', () => {
+			const extensions = storage_a.extensionsSupported
+				?.filter(ext => ext !== 'concatenation') || [];
 			expect(storage.extensionsSupported)
-				.toStrictEqual(storage_a.extensionsSupported);
+				.toStrictEqual(extensions);
 		});
 	});
 

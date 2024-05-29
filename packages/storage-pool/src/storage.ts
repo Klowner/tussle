@@ -11,6 +11,12 @@ import {
 import {TusProtocolExtension} from "@tussle/spec/interface/tus";
 import {EMPTY, Observable, Subject, catchError, concat, concatMap, defaultIfEmpty, filter, from, map, mergeMap, of, take} from "rxjs";
 
+const unsupportedExtensions = new Set<TusProtocolExtension>([
+	// Tus concatenation extension is disabled to avoid potentially attempting to
+	// concatenate uploads across multiple sub-stores. While this is technically
+	// achievable, it is not implemented at this time.
+	'concatenation',
+]);
 
 export interface TussleStoragePoolOptions {
 	stores: Record<string, TussleStorageService>;
@@ -57,7 +63,8 @@ export function commonExtensions(
 	if (!extensionSets.length) {
 		return [];
 	}
-	const [supported, ...restExtensionSets] = extensionSets;
+	const [firstExtensionSet, ...restExtensionSets] = extensionSets;
+	const supported = firstExtensionSet.filter(ext => !unsupportedExtensions.has(ext));
 	for (const extensions of restExtensionSets) {
 		for (const supportedExt of supported) {
 			if (!extensions.includes(supportedExt)) {
