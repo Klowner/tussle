@@ -98,3 +98,5 @@ export interface TussleStorageService {
 		params: TussleStorageDeleteFileParams,
 	): Observable<TussleStorageDeleteFileResponse>;
 }
+
+export type TussleStorageServiceWithDeleteCapability = Required<TussleStorageService>;
