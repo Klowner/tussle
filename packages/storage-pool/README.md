@@ -1,7 +1,8 @@
 Tussle Storage Pool
 ===
 
-Pool multiple Tussle storage services into a single logical storage service.
+Pool multiple Tussle storage services into a single logical storage service with
+smart-switching behavior.
 
 When attempting to create a new file upload, each store is tried until one is
 successful. The pool will then attempt to direct all read and write operations
@@ -13,7 +14,7 @@ is *unsupported*. This capability _may_ be added in the future (PRs welcome!).
 
 `TussleStoragePool` is compatible with transient state providers ([StateMemory](../state-memory),
 [StateMemoryTTL](../state-memory-ttl)). As long as the pool is constructed with the same
-configuration, then pool state will be reconstructed from the sub-stores as necessary.
+configuration, then pool state will be reconstructed from the sub-stores as needed.
 
 ### Configuration
 
@@ -40,3 +41,16 @@ const storage = new TussleStoragePool({
 	},
 });
 ```
+
+### Methods
+While TussleStoragePool implements all the (TussleStorageService)[../spec/interface/storage.d.ts]
+methods, they also take an optional `storageKey` parameter which should
+correspond to the names defined in the pool's `stores` object.
+
+Providing a `storageKey` for `createFile()` is all that's necessary to
+permanently route operations for the created file to the same storage service.
+
+Calling `getFileInfo()` for a location will scan the pool for a match if there
+is no location-to-store mapping cached in the pool. If a match is found, then
+the location-to-store mapping is cached within the TussleStoragePool for
+subsequent operations.

@@ -2,11 +2,14 @@ import type {TussleStateService} from '@tussle/spec/interface/state';
 import {
 	TussleStorageCreateFileParams,
 	TussleStorageCreateFileResponse,
+	TussleStorageDeleteFileParams,
+	TussleStorageDeleteFileResponse,
 	TussleStorageFileInfo,
 	TussleStorageFileInfoParams,
 	TussleStoragePatchFileParams,
 	TussleStoragePatchFileResponse,
 	TussleStorageService,
+	TussleStorageServiceWithDeleteCapability,
 } from "@tussle/spec/interface/storage";
 import {TusProtocolExtension} from "@tussle/spec/interface/tus";
 import {EMPTY, Observable, Subject, catchError, concat, concatMap, defaultIfEmpty, filter, from, map, mergeMap, of, take} from "rxjs";
@@ -78,7 +81,7 @@ export function commonExtensions(
 export class TussleStoragePoolError extends Error {}
 export type TussleStoragePoolState = string;
 
-export class TussleStoragePool implements TussleStorageService {
+export class TussleStoragePool implements TussleStorageServiceWithDeleteCapability {
 	constructor (readonly options: TussleStoragePoolOptions) {}
 
 	readonly getStorageByKey = (key: string) => this.options.stores[key];
@@ -261,6 +264,36 @@ export class TussleStoragePool implements TussleStorageService {
 			filter(({ storage }) => !!storage),
 		);
 	}
+
+	deleteFile(
+		params: TussleStorageDeleteFileParams & Partial<StoragePoolHint>,
+	): Observable<TussleStorageDeleteFileResponse> {
+		return of(params).pipe(
+			this.ensureStickyStoragePath(),
+			concatMap(params => this.getStores(params).pipe(
+				concatMap(({ storage, storageKey }) => of(storage).pipe(
+					filter(hasDeleteCapability),
+					mergeMap(storage => storage.deleteFile(params).pipe(
+						map((deleted) => ({...deleted, storage, storageKey})),
+					)),
+					catchError((err: unknown) => {
+						this.error.next(toTussleError(err));
+						return EMPTY;
+					}),
+				)),
+			)),
+			take(1),
+			defaultIfEmpty({
+				success: false,
+				location: params.location,
+			}),
+		);
+	}
+}
+
+function hasDeleteCapability<T extends TussleStorageService>(s: T): s is T & TussleStorageServiceWithDeleteCapability {
+	return 'deleteFile' in s
+	&& typeof s.deleteFile === 'function';
 }
 
 export function toTussleError(err: unknown): Error|TussleStoragePoolError {
