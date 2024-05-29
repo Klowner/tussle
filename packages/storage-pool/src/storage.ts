@@ -12,7 +12,7 @@ import {
 	TussleStorageServiceWithDeleteCapability,
 } from "@tussle/spec/interface/storage";
 import {TusProtocolExtension} from "@tussle/spec/interface/tus";
-import {EMPTY, Observable, Subject, catchError, concat, concatMap, defaultIfEmpty, filter, from, map, mergeMap, of, take} from "rxjs";
+import {EMPTY, Observable, Subject, catchError, concat, concatMap, defaultIfEmpty, filter, from, map, mergeMap, of, take, tap} from "rxjs";
 
 const unsupportedExtensions = new Set<TusProtocolExtension>([
 	// Tus concatenation extension is disabled to avoid potentially attempting to
@@ -123,16 +123,17 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 					if (storageKey) {
 						return of(params).pipe(
 							this.setStickyStoragePath(storageKey),
+							map(({storageKey}) => ({...params, storageKey})),
 						);
 					}
 					const error = new TussleStoragePoolError('Fatal: failed to reconstruct sticky storage path');
 					this.error.next(error);
 					throw error;
 				}),
-			)).pipe(
-				take(1),
 			)
-		);
+		).pipe(
+			take(1),
+		));
 	}
 
 	// List all distinct extensions required by the stores within the pool
@@ -191,8 +192,8 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 			this.getStickyStoragePath(),
 			concatMap(params => this.getStores(params)),
 			concatMap(({storage, storageKey}) => storage.getFileInfo(params).pipe(
-				filter((fileinfo) => fileinfo.info !== null),
-				map((info) => ({...info, storageKey, storage})),
+				filter(({ info }) => info !== null),
+				map((info) => ({...info, storageKey})),
 				catchError((err: unknown) => {
 					this.error.next(toTussleError(err));
 					return EMPTY;
@@ -220,7 +221,7 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 			concatMap((params) => this.getStores(params).pipe(
 				take(1), // Fail if unable to patch to the selected store.
 				concatMap(({ storage, storageKey }) => storage.patchFile(params).pipe(
-					map((patched) => ({...patched, storage, storageKey})),
+					map((patched) => ({...patched, storageKey})),
 				)),
 			)),
 			take(1),
@@ -270,16 +271,18 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 	): Observable<TussleStorageDeleteFileResponse> {
 		return of(params).pipe(
 			this.ensureStickyStoragePath(),
+			catchError(() => EMPTY),
 			concatMap(params => this.getStores(params).pipe(
 				concatMap(({ storage, storageKey }) => of(storage).pipe(
 					filter(hasDeleteCapability),
-					mergeMap(storage => storage.deleteFile(params).pipe(
-						map((deleted) => ({...deleted, storage, storageKey})),
+					concatMap(storage => storage.deleteFile(params).pipe(
+						filter(({ success }) => !!success),
+						map((deleted) => ({...deleted, storageKey})),
+						catchError((err: unknown) => {
+							this.error.next(toTussleError(err));
+							return EMPTY;
+						}),
 					)),
-					catchError((err: unknown) => {
-						this.error.next(toTussleError(err));
-						return EMPTY;
-					}),
 				)),
 			)),
 			take(1),

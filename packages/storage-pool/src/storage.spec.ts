@@ -4,7 +4,7 @@ import {mockIncomingRequest, storageServiceTests} from '@tussle/spec';
 import {TussleStorageService} from '@tussle/spec/interface/storage';
 import TussleStateMemory from '@tussle/state-memory';
 import {R2UploadState, TussleStorageR2} from '@tussle/storage-r2';
-import {firstValueFrom} from 'rxjs';
+import {first, firstValueFrom, of, tap} from 'rxjs';
 import {commonExtensions, distinctExtensions, prioritize, toTussleError, TussleStoragePool, TussleStoragePoolError, TussleStoragePoolState} from './storage';
 
 storageServiceTests(
@@ -48,7 +48,7 @@ describe('@tussle/storage-pool - prioritize', () => {
 	});
 });
 
-describe('@tussle/storage-pool', () => {
+describe('@tussle/storage-pool - package specific tests', () => {
 	let storage: TussleStoragePool;
 	let state: TussleStateMemory<TussleStoragePoolState>;
 	let storage_a: TussleStorageService;
@@ -512,6 +512,94 @@ describe('@tussle/storage-pool', () => {
 			});
 
 		}); // end sticky storage assignment
+	});
+
+	describe('delete', () => {
+		test('deleteFile() should respond with success: false if no matches are found to delete', async () => {
+			const listSpyA = jest.spyOn(a_bucket, 'list');
+			const result = await firstValueFrom(storage.deleteFile({location: 'DELETEME.md'}));
+			expect(result).toStrictEqual({
+				location: 'DELETEME.md',
+				success: false,
+			});
+		});
+
+		test('should return the storageKey in response to successful deletion', async () => {
+			const created = await firstValueFrom(storage_b.createFile({
+				path: 'please-delete',
+				uploadLength: 4 * 100,
+				uploadMetadata: {},
+				uploadConcat: null,
+			}));
+
+			expect(created).toHaveProperty('success', true);
+			// expect(created).toHaveProperty('storageKey', 'b')
+
+			for (let i = 0; i < 100; i++) {
+				await firstValueFrom(storage_b.patchFile({
+					location: 'please-delete',
+					offset: i * 4,
+					length: 4,
+					request: mockIncomingRequest({
+						method: 'PATCH',
+						url: '<unused>',
+						body: new Uint8Array(new TextEncoder().encode('boop')),
+					}),
+				}));
+			}
+
+			const deleteSpyA = jest.spyOn(a_bucket, 'delete');
+			const deleteSpyB = jest.spyOn(b_bucket, 'delete');
+			// Now we delete from the pool, selecting store 'A' first but
+			// we really want to delete from 'B', but that's fine since the
+			// pool will try that one as well.
+			const deleted = await firstValueFrom(storage.deleteFile({
+				location: 'please-delete',
+				// storageKey: 'a', // let's start with the wrong storage
+			}));
+			expect(deleted).toHaveProperty('success', true);
+			expect(deleteSpyA).toHaveBeenCalledTimes(0);
+			expect(deleteSpyB).toHaveBeenCalledTimes(1);
+		});
+
+		test('should handle sub-store errors by trying other stores', async () => {
+			// We'll find nothing in storage A
+			const getFileInfoA = jest.spyOn(storage_a, 'getFileInfo').mockImplementation((params) => of({
+				location: params.location,
+				info: null,
+			}));
+
+			// Storage B has the one we want
+			const getFileInfoB = jest.spyOn(storage_b, 'getFileInfo').mockImplementation((params) => of({
+				location: params.location,
+				info: {
+					currentOffset: 100,
+					uploadLength: 100,
+					uploadConcat: null,
+				},
+			}));
+
+			// Spy on deletions so we can see which storage receives the actual
+			// deletion requestion.
+			const deleteBucketA = jest.spyOn(storage_a, 'deleteFile').mockImplementation(() => {
+				throw new Error('deleteFile() error');
+			});
+			const deleteBucketB = jest.spyOn(storage_b, 'deleteFile').mockImplementation((params) => of({
+				location: params.location,
+				success: true,
+			}));
+
+			const deleted = await firstValueFrom(storage.deleteFile({
+				location: 'deletable.jpg',
+			}));
+
+			expect(deleted).toHaveProperty('success', true);
+
+			expect(getFileInfoA).toHaveBeenCalled();
+			expect(getFileInfoB).toHaveBeenCalled();
+			expect(deleteBucketA).not.toHaveBeenCalled();
+			expect(deleteBucketB).toHaveBeenCalled();
+		});
 	});
 
 	describe('toTussleError()', () => {
