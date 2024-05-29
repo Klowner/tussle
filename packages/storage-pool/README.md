@@ -45,7 +45,9 @@ const storage = new TussleStoragePool({
 ### Methods
 While TussleStoragePool implements all the [TussleStorageService](../spec/interface/storage.d.ts)
 methods, they also take an optional `storageKey` parameter which should
-correspond to the names defined in the pool's `stores` object.
+correspond to the names defined in the pool's `stores` object. Similarly, response
+bodies will always include an additional `storageKey: string` indicating which sub-store
+handled the request.
 
 Providing a `storageKey` for `createFile()` is all that's necessary to
 permanently route operations for the created file to the same storage service.
