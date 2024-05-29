@@ -30,8 +30,9 @@ Tussle state components are modeled after the [Web Storage API](https://develope
 ### Storage
 Uploaded files have to be stored somewhere, that's the purpose of the *storage* components.
  - [storage-b2](/packages/storage-b2) - Backblaze B2 cloud storage (supports large file upload)
- - [storage-s3](/packages/storage-s3) - AWS S3 compatible cloud storage (supports large file upload)
+ - [storage-pool](/packages/storage-pool) - Pool multiple storages into a single logical pool with auto-failover.
  - [storage-r2](/packages/storage-r2) - Cloudflare R2 cloud storage (supports large file upload, ^0.4.0 adds parallel support)
+ - [storage-s3](/packages/storage-s3) - AWS S3 compatible cloud storage (supports large file upload)
 
 ### Request
 The request component a responsible for creating outbound HTTP requests and -- when possible/appropriate -- transparently proxy upload payloads, which is determined by the *storage* component.
