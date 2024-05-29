@@ -45,9 +45,18 @@ export interface TussleStorageR2Options {
 	stateService: TussleStateService<R2UploadState>,
 	bucket: Pick<R2Bucket, 'get'|'delete'|'put'|'list'>;
 	r2ListLimit?: number;
-	checkpoint?: number; // Auto-checkpoint uploads every `checkpoint` bytes.
-	appendUniqueSubdir?: (location: string) => string; // Return a unique sub-path of `location` (including location in returned value)
-	skipMerge?: boolean; // Skip the automatic merging of uploaded chunks into a single R2 record (otherwise use R2File for reads)
+	// Auto-checkpoint uploads every `checkpoint` bytes.
+	checkpoint?: number;
+	// If checkpoint is used, limit working buffer size, otherwise `checkpoint`
+	// size is used as the max buffer size. Smaller buffer will decrease the
+	// chance of exceeding worker memory limits but increase the chance of
+	// hitting worker execution limits.
+	checkpointMaxBufferSize?: number;
+	// Return a unique sub-path of `location` (including location in returned value)
+	appendUniqueSubdir?: (location: string) => string;
+	// Skip the automatic merging of uploaded chunks into a single R2 record
+	// (otherwise use R2File for reads)
+	skipMerge?: boolean;
 }
 
 function isNonNull<T>(value: T): value is NonNullable<T> {
@@ -120,6 +129,7 @@ function sliceStreamBYOB(
 	reader: ReadableStreamBYOBReader,
 	totalLength: number, // Expected length of data which reader will provide.
 	chunkSize: number,
+	sliceMaxBufferSize = Infinity,
 ): Observable<{
 	readable: ReadableStream;
 	length: number;
@@ -149,8 +159,8 @@ function sliceStreamBYOB(
 						length,
 					});
 					writer = transform.writable.getWriter();
-					return async (chunk: Uint8Array) => {
-						bytesRemaining = bytesRemaining - chunk.length;
+					return async (chunk: DataView) => {
+						bytesRemaining = bytesRemaining - chunk.byteLength;
 						const result = await writer.write(chunk);
 						writer.releaseLock();
 						return result;
@@ -175,8 +185,10 @@ function sliceStreamBYOB(
 		(async () => {
 			let push = await advance();
 			while (bytesRemaining > 0 && !cancel) {
-				const expected = Math.min(bytesRemaining, chunkSize);
-				const {done, value} = await reader.readAtLeast(expected, new Uint8Array(expected));
+				const expected = Math.min(Math.min(bytesRemaining, chunkSize), sliceMaxBufferSize);
+				const buffer = new ArrayBuffer(expected);
+				const view = new DataView(buffer);
+				const {done, value} = await reader.readAtLeast(expected, view);
 				if (!done) {
 					push(value);
 					if (bytesRemaining) {
@@ -463,7 +475,14 @@ export class TussleStorageR2 implements TussleStorageService {
 					prev: tusslePrevKey,
 				});
 				unprefixedPartKeys.push(unprefixedKey);
-				latestPart = (latestPart && latestPart.uploaded > obj.uploaded) ? latestPart : obj;
+				// If there's no latest part set or the current obj is more recent than what we have...
+				if (!latestPart
+					|| !latestPart?.uploaded
+					|| obj.uploaded >= latestPart.uploaded
+					|| (obj.uploaded === latestPart.uploaded && obj.key > latestPart.key)
+				) {
+					latestPart = obj;
+				}
 			}
 		}
 		if (latestPart === null) {
@@ -582,9 +601,9 @@ export class TussleStorageR2 implements TussleStorageService {
 		// This will always be a ReadableStream in Cloudflare Workers.
 		const readable = params.request.request.getReadable() as ReadableStream;
 		let readable$;
-		if (checkpoint && checkpoint !== length) {
+		if (checkpoint && checkpoint !== length && 'getReader' in readable) {
 			const reader = readable.getReader({mode: 'byob'});
-			readable$ = sliceStreamBYOB(reader, length, checkpoint);
+			readable$ = sliceStreamBYOB(reader, length, checkpoint, this.options.checkpointMaxBufferSize);
 		} else {
 			readable$ = of({readable, length});
 		}
