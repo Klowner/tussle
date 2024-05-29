@@ -1,6 +1,6 @@
 {
 	"name": "@tussle/state-namespace",
-	"version": "0.7.5",
+	"version": "0.7.6",
 	"description": "Wrapper for Tussle State to add transparent key namespacing",
 	"main": "dist-cjs/index.js",
 	"types": "dist-types/index.d.ts",
@@ -22,9 +22,9 @@
 	"author": "Mark Riedesel <mark@klowner.com>",
 	"license": "MIT",
 	"devDependencies": {
-		"@tussle/core": "^0.7.5",
-		"@tussle/spec": "^0.7.5",
-		"@tussle/state-memory": "^0.7.5",
+		"@tussle/core": "^0.7.6",
+		"@tussle/spec": "^0.7.6",
+		"@tussle/state-memory": "^0.7.6",
 		"concurrently": "^7.6.0",
 		"jest": "^29.2.2",
 		"npm-run-all": "^4.1.5",
