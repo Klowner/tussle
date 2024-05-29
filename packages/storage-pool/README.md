@@ -43,7 +43,7 @@ const storage = new TussleStoragePool({
 ```
 
 ### Methods
-While TussleStoragePool implements all the (TussleStorageService)[../spec/interface/storage.d.ts]
+While TussleStoragePool implements all the [TussleStorageService](../spec/interface/storage.d.ts)
 methods, they also take an optional `storageKey` parameter which should
 correspond to the names defined in the pool's `stores` object.
 
