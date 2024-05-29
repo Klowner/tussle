@@ -24,7 +24,7 @@
     "miniflare": "^3.20230814.1",
     "npm-run-all": "^4.1.5",
     "rimraf": "^5.0.5",
-    "typescript": "^4.9.3"
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "rxjs": "^7.0.0"

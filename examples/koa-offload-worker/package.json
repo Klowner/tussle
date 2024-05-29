@@ -24,7 +24,7 @@
     "storage-b2": "link:../../packages/storage-b2",
     "tslib": "^2.4.1",
     "tus-js-client": "^3.0.1",
-    "typescript": "^4.9.3"
+    "typescript": "^5.4.5"
   },
   "devDependencies": {
     "jest": "^29.2.2"
