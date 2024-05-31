@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"types": [
+			"@cloudflare/workers-types/2022-11-30",
+			"jest"
+		],
+		"lib": []
+	},
+	"include": ["**/*.ts"],
+	"exclude": ["node_modules"]
+}

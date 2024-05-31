@@ -4798,6 +4798,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@tussle/middleware-cloudflareworker@file:../../packages/middleware-cloudflareworker::locator=cloudflare-tussle-e2e-tests%40workspace%3Ae2e%2Fcloudflare":
+  version: 0.7.6
+  resolution: "@tussle/middleware-cloudflareworker@file:../../packages/middleware-cloudflareworker#../../packages/middleware-cloudflareworker::hash=f555f0&locator=cloudflare-tussle-e2e-tests%40workspace%3Ae2e%2Fcloudflare"
+  dependencies:
+    rxjs: ^7.0.0
+  peerDependencies:
+    "@tussle/core": ^0.7.0
+  checksum: 810605ebd93c7d5cc4b2215294875f500f95a11ca69d3f3ad88c3c44c9663d41537c0199485acf6b6fdc6c8767494cee4fc92afd63c9178babc53c00a04e6ee5
+  languageName: node
+  linkType: hard
+
 "@tussle/middleware-cloudflareworker@link:../../packages/middleware-cloudflareworker::locator=cloudflare-worker-b2%40workspace%3Aexamples%2Fcloudflare-worker-b2":
   version: 0.0.0-use.local
   resolution: "@tussle/middleware-cloudflareworker@link:../../packages/middleware-cloudflareworker::locator=cloudflare-worker-b2%40workspace%3Aexamples%2Fcloudflare-worker-b2"
@@ -4904,6 +4915,13 @@ __metadata:
     typescript: ^5.4.5
   languageName: unknown
   linkType: soft
+
+"@tussle/spec@file:../../packages/spec::locator=cloudflare-tussle-e2e-tests%40workspace%3Ae2e%2Fcloudflare":
+  version: 0.7.6
+  resolution: "@tussle/spec@file:../../packages/spec#../../packages/spec::hash=6b5d6b&locator=cloudflare-tussle-e2e-tests%40workspace%3Ae2e%2Fcloudflare"
+  checksum: 81d366c3f0ab3b7777603c136096491861ee73775bab04f947768a7ca2907a2949a05d9aae26379ed3e8531f9485a9d9f256778e3ea3a0cc772ba1506d635752
+  languageName: node
+  linkType: hard
 
 "@tussle/state-cloudflareworkerkv@link:../../packages/state-cloudflareworkerkv::locator=cloudflare-worker-b2%40workspace%3Aexamples%2Fcloudflare-worker-b2":
   version: 0.0.0-use.local
@@ -6727,6 +6745,25 @@ __metadata:
   checksum: d06418b7335897209e77bdd430d04f882189582e67bd1f75a04565f3f07f5b3f119a9d670c943b6697d0afb100f03b866b3b8a1f91d4d02d72c4ecf2bb64b5dd
   languageName: node
   linkType: hard
+
+"cloudflare-tussle-e2e-tests@workspace:e2e/cloudflare":
+  version: 0.0.0-use.local
+  resolution: "cloudflare-tussle-e2e-tests@workspace:e2e/cloudflare"
+  dependencies:
+    "@babel/core": ^7.20.5
+    "@babel/preset-env": ^7.20.2
+    "@miniflare/r2": ^2.14.0
+    "@miniflare/storage-memory": ^2.14.0
+    "@tussle/middleware-cloudflareworker": ../../packages/middleware-cloudflareworker
+    "@tussle/spec": ../../packages/spec
+    "@types/jest": ^29.2.3
+    jest: ^29.2.2
+    nanoid: ^3.3.3
+    rxjs: ^7
+    ts-jest: ^29.0.3
+    tus-js-client: ^4.1.0
+  languageName: unknown
+  linkType: soft
 
 "cloudflare-worker-b2@workspace:examples/cloudflare-worker-b2":
   version: 0.0.0-use.local
@@ -14647,6 +14684,21 @@ __metadata:
     proper-lockfile: ^4.1.2
     url-parse: ^1.5.7
   checksum: 43f37070c0e8d0648f5cc8b009028e1a7af3d348935644d6f23dbc2dbd016bebd78d2cd12afa6963c34a54631691157154bc885ba07c6a7451648118cf6c57fe
+  languageName: node
+  linkType: hard
+
+"tus-js-client@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "tus-js-client@npm:4.1.0"
+  dependencies:
+    buffer-from: ^1.1.2
+    combine-errors: ^3.0.3
+    is-stream: ^2.0.0
+    js-base64: ^3.7.2
+    lodash.throttle: ^4.1.1
+    proper-lockfile: ^4.1.2
+    url-parse: ^1.5.7
+  checksum: 64f4806b3b8e3057e666259d8b974dee37f86097bb981d44eb34a2fb4e3bbb7bee6078f290229ba8f0964da18c9f676de3abe727ac7c611589acaeea6f787a3f
   languageName: node
   linkType: hard
 
