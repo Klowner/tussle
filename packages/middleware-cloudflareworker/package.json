@@ -1,6 +1,6 @@
 {
   "name": "@tussle/middleware-cloudflareworker",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "description": "Tussle middleware for Cloudflare Workers",
   "main": "lib/index.js",
   "files": [
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4",
     "@tussle/spec": "^0.7.6",
-    "@tussle/storage-r2": "^0.7.6",
+    "@tussle/storage-r2": "^0.7.7",
     "jest": "^29.2.2",
     "jest-environment-miniflare": "^2.14.0",
     "miniflare": "^3.20230814.1",
