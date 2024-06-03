@@ -152,7 +152,7 @@ function sliceStreamBYOB(
 					}
 					// Unless we're all finished, create a new transform
 					// and next() the readable end.
-					const length = Math.min(chunkSize, bytesRemaining); // Readable will be this length (if all goes well).
+					const length = Math.min(Math.min(bytesRemaining, chunkSize), sliceMaxBufferSize); // Readable will be this length (if all goes well).
 					transform = new FixedLengthStream(length);
 					subscriber.next({
 						readable: transform.readable,

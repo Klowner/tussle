@@ -334,6 +334,7 @@ describe('@tussle/storage-r2', () => {
 				// @ts-expect-error property 'checksums' is missing in miniflare's R2ObjectBody
 				bucket,
 				checkpoint: 25, // force incoming stream into 25 byte chunks in R2
+				checkpointMaxBufferSize: 2,
 				skipMerge: false, // then merge those 25 byte chunks into a single file when complete
 			});
 
