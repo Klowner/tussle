@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.9](https://github.com/Klowner/tussle/compare/v0.7.8...v0.7.9) (2024-06-06)
+
+
+### Features
+
+* **storage-pool:** add performance reporting capability ([1249292](https://github.com/Klowner/tussle/commit/1249292011ece650e5d53c4052641714a9bbef8d))
+
+
+
+
+
 ## [0.7.8](https://github.com/Klowner/tussle/compare/v0.7.7...v0.7.8) (2024-06-06)
 
 

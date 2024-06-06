@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.9](https://github.com/Klowner/tussle/compare/v0.7.8...v0.7.9) (2024-06-06)
+
+
+### Features
+
+* **spec:** add TussleStoragePerfEvent and optional event$ Observable to TussleStorageService ([3b80854](https://github.com/Klowner/tussle/commit/3b80854584724f39d255fd83414a902d1d07c2ac))
+* **storage-pool:** add performance reporting capability ([1249292](https://github.com/Klowner/tussle/commit/1249292011ece650e5d53c4052641714a9bbef8d))
+* **storage-r2:** add performance reporting capability ([e4a9860](https://github.com/Klowner/tussle/commit/e4a986084aeb8da4cd15e76b1889997927aae8f1))
+
+
+
+
+
 ## [0.7.8](https://github.com/Klowner/tussle/compare/v0.7.7...v0.7.8) (2024-06-06)
 
 

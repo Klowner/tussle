@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.9](https://github.com/Klowner/tussle/compare/v0.7.8...v0.7.9) (2024-06-06)
+
+**Note:** Version bump only for package @tussle/state-cloudflareworkerkv
+
+
+
+
+
 ## [0.7.6](https://github.com/Klowner/tussle/compare/v0.7.5...v0.7.6) (2024-05-29)
 
 **Note:** Version bump only for package @tussle/state-cloudflareworkerkv

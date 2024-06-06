@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.9](https://github.com/Klowner/tussle/compare/v0.7.8...v0.7.9) (2024-06-06)
+
+
+### Features
+
+* **spec:** add TussleStoragePerfEvent and optional event$ Observable to TussleStorageService ([3b80854](https://github.com/Klowner/tussle/commit/3b80854584724f39d255fd83414a902d1d07c2ac))
+
+
+
+
+
 ## [0.7.6](https://github.com/Klowner/tussle/compare/v0.7.5...v0.7.6) (2024-05-29)
 
 **Note:** Version bump only for package @tussle/spec
