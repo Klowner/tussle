@@ -3,7 +3,7 @@ import TussleStateMemory from '@tussle/state-memory';
 import { R2UploadState, TussleStorageR2 } from './storage';
 import { MemoryStorage } from "@miniflare/storage-memory";
 import { R2Bucket } from "@miniflare/r2";
-import {firstValueFrom} from 'rxjs';
+import {firstValueFrom, take, tap, toArray} from 'rxjs';
 import {mockIncomingRequest} from '@tussle/spec';
 
 storageServiceTests(
