@@ -1,4 +1,22 @@
+import {
+	EMPTY,
+	MonoTypeOperatorFunction,
+	Observable,
+	Subject,
+	catchError,
+	concat,
+	concatMap,
+	defaultIfEmpty,
+	filter,
+	from,
+	map,
+	mergeMap,
+	of,
+	pipe,
+	take,
+} from "rxjs";
 import type {TussleStateService} from '@tussle/spec/interface/state';
+import {TusProtocolExtension} from "@tussle/spec/interface/tus";
 import {
 	TussleStorageCreateFileParams,
 	TussleStorageCreateFileResponse,
@@ -11,8 +29,6 @@ import {
 	TussleStorageService,
 	TussleStorageServiceWithDeleteCapability,
 } from "@tussle/spec/interface/storage";
-import {TusProtocolExtension} from "@tussle/spec/interface/tus";
-import {EMPTY, Observable, Subject, catchError, concat, concatMap, defaultIfEmpty, filter, from, map, mergeMap, of, take, tap} from "rxjs";
 
 const unsupportedExtensions = new Set<TusProtocolExtension>([
 	// Tus concatenation extension is disabled to avoid potentially attempting to
@@ -21,12 +37,34 @@ const unsupportedExtensions = new Set<TusProtocolExtension>([
 	'concatenation',
 ]);
 
+type PrioritizeActionHint =
+	| 'create'
+	| 'patch'
+	| 'list'
+	| 'delete'
+;
+
+interface PrioritizeParams {
+	location: string;
+	action: PrioritizeActionHint;
+	poolKey?: string;
+}
+
 export interface TussleStoragePoolOptions {
 	stores: Record<string, TussleStorageService>;
 	// Cache of upload location to storage pool storage key. Does not have to be
 	// durable as the pool will attempt to rebuild state from stores when no
 	// match is found.
 	stateService: TussleStateService<string>;
+
+	// Provide an optional callback method to be called every time an operation is
+	// about to be performed. This is an opportunity to redirect the subsequent
+	// operation to a specific bucket.
+	//
+	// It is not advisable to alter `keys` for actions other than 'create'.
+	// `poolKey` should be respected (is the first element in `keys`) if defined,
+	// unless you have a clear reason for doing something else.
+	select?: (keys: string[], details: Readonly<PrioritizeParams>) => Promise<string[]>|string[];
 }
 
 interface StoragePoolHint {
@@ -161,7 +199,7 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 	createFile(
 		params: TussleStorageCreateFileParams & Partial<StoragePoolHint>,
 	): Observable<TussleStorageCreateFileResponse & Partial<StoragePoolHint>> {
-		return this.getStores(params).pipe(
+		return this.getStores(params, 'create').pipe(
 			concatMap(({ storage, storageKey }) => of(storage).pipe(
 				mergeMap(storage => storage.createFile(params)),
 				filter((creation) => creation.success === true),
@@ -190,7 +228,7 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 	): Observable<TussleStorageFileInfo & Partial<StoragePoolHint>> {
 		return of(params).pipe(
 			this.getStickyStoragePath(),
-			concatMap(params => this.getStores(params)),
+			concatMap(params => this.getStores(params, 'list')),
 			concatMap(({storage, storageKey}) => storage.getFileInfo(params).pipe(
 				filter(({ info }) => info !== null),
 				map((info) => ({...info, storageKey})),
@@ -218,7 +256,7 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 	): Observable<TussleStoragePatchFileResponse> {
 		return of(params).pipe(
 			this.ensureStickyStoragePath(),
-			concatMap((params) => this.getStores(params).pipe(
+			concatMap((params) => this.getStores(params, 'patch').pipe(
 				take(1), // Fail if unable to patch to the selected store.
 				concatMap(({ storage, storageKey }) => storage.patchFile(params).pipe(
 					map((patched) => ({...patched, storageKey})),
@@ -233,31 +271,51 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 		);
 	}
 
-	private getStores<T extends Partial<StoragePoolHint>>(
+	private getStores<T extends Partial<StoragePoolHint & {location:string} & {path:string}>>(
 		params: Readonly<T>,
+		action: Readonly<PrioritizeActionHint>,
 	): Observable<StoragePoolHint> {
+		const location = params.location || params.path || '';
 		if (params.storage) {
 			const stores = this.options.stores;
-			const storageKey = Object.keys(stores).find(key => stores[key] === params.storage);
-			if (storageKey) {
-				return this.getPrioritizedStores(storageKey);
+			const poolKey = Object.keys(stores).find(key => stores[key] === params.storage);
+			if (poolKey) {
+				return this.getPrioritizedStores({action, location, poolKey});
 			}
 		}
-		if (params.storageKey) {
-			return this.getPrioritizedStores(params.storageKey);
+		const poolKey = params.storageKey;
+		if (poolKey) {
+			return this.getPrioritizedStores({action, location, poolKey});
 		}
-		return this.getPrioritizedStores();
+		return this.getPrioritizedStores({action, location});
+	}
+
+	private callCustomSelectHookIfAvailable(
+		params: Readonly<PrioritizeParams>,
+	): MonoTypeOperatorFunction<string[]> {
+		if (!this.options.select) {
+			return pipe();
+		}
+		const callback = async (keys: string[]) => this.options.select
+			? this.options.select.call(this, keys, params) : keys;
+		return concatMap((keys) => of(keys).pipe(
+			concatMap(async (keys) => callback(keys)),
+			map((userKeys) => userKeys && userKeys.length ? userKeys : keys),
+			catchError(() => of(keys)),
+		));
 	}
 
 	private getPrioritizedStores(
-		which?: string, // defaults to first in list if not specified
+		params: PrioritizeParams,
 	): Observable<{
 		storageKey: string,
 		storage: TussleStorageService,
 	}> {
 		const keys = Object.keys(this.options.stores);
-		which = which || keys[0];
-		return from(prioritize(keys, which)).pipe(
+		params.poolKey = params.poolKey || keys[0];
+		return of(prioritize(keys, params.poolKey)).pipe(
+			this.callCustomSelectHookIfAvailable(params),
+			concatMap((keys) => from(keys)),
 			map((storageKey) => ({
 				storageKey,
 				storage: this.options.stores[storageKey],
@@ -272,7 +330,7 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 		return of(params).pipe(
 			this.ensureStickyStoragePath(),
 			catchError(() => EMPTY),
-			concatMap(params => this.getStores(params).pipe(
+			concatMap(params => this.getStores(params, 'delete').pipe(
 				concatMap(({ storage, storageKey }) => of(storage).pipe(
 					filter(hasDeleteCapability),
 					concatMap(storage => storage.deleteFile(params).pipe(

@@ -86,7 +86,10 @@ describe('@tussle/storage-pool - package specific tests', () => {
 			stores: {
 				'a': storage_a,
 				'b': storage_b,
-			}
+			},
+			select: function (keys) {
+				return keys;
+			},
 		});
 	});
 
