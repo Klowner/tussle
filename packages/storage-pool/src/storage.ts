@@ -1,3 +1,18 @@
+import type {TussleStateService} from '@tussle/spec/interface/state';
+import {
+	TussleStorageCreateFileParams,
+	TussleStorageCreateFileResponse,
+	TussleStorageDeleteFileParams,
+	TussleStorageDeleteFileResponse,
+	TussleStorageFileInfo,
+	TussleStorageFileInfoParams,
+	TussleStoragePatchFileParams,
+	TussleStoragePatchFileResponse,
+	TussleStoragePerfEvent,
+	TussleStorageService,
+	TussleStorageServiceWithDeleteCapability
+} from "@tussle/spec/interface/storage";
+import {TusProtocolExtension} from "@tussle/spec/interface/tus";
 import {
 	EMPTY,
 	MonoTypeOperatorFunction,
@@ -13,22 +28,10 @@ import {
 	mergeMap,
 	of,
 	pipe,
-	take,
+	share,
+	take
 } from "rxjs";
-import type {TussleStateService} from '@tussle/spec/interface/state';
-import {TusProtocolExtension} from "@tussle/spec/interface/tus";
-import {
-	TussleStorageCreateFileParams,
-	TussleStorageCreateFileResponse,
-	TussleStorageDeleteFileParams,
-	TussleStorageDeleteFileResponse,
-	TussleStorageFileInfo,
-	TussleStorageFileInfoParams,
-	TussleStoragePatchFileParams,
-	TussleStoragePatchFileResponse,
-	TussleStorageService,
-	TussleStorageServiceWithDeleteCapability,
-} from "@tussle/spec/interface/storage";
+
 
 const unsupportedExtensions = new Set<TusProtocolExtension>([
 	// Tus concatenation extension is disabled to avoid potentially attempting to
@@ -61,7 +64,8 @@ export interface TussleStoragePoolOptions {
 	// about to be performed. This is an opportunity to redirect the subsequent
 	// operation to a specific bucket.
 	//
-	// It is not advisable to alter `keys` for actions other than 'create'.
+	// It is not advisable to alter `keys` for actions other than 'create'!
+	//
 	// `poolKey` should be respected (is the first element in `keys`) if defined,
 	// unless you have a clear reason for doing something else.
 	select?: (keys: string[], details: Readonly<PrioritizeParams>) => Promise<string[]>|string[];
@@ -121,6 +125,21 @@ export type TussleStoragePoolState = string;
 
 export class TussleStoragePool implements TussleStorageServiceWithDeleteCapability {
 	constructor (readonly options: TussleStoragePoolOptions) {}
+
+	get event$(): Observable<TussleStoragePerfEvent & {storageKey: string}> {
+		return from(Object.entries(this.options.stores)).pipe(
+			mergeMap(([storageKey, store]) => {
+				if (exposesPerformanceEvents(store)) {
+					return store.event$.pipe(
+						map((event) => ({...event, storageKey})),
+					);
+				} else {
+					return EMPTY;
+				}
+			}),
+			share(),
+		);
+	}
 
 	readonly getStorageByKey = (key: string) => this.options.stores[key];
 
@@ -362,4 +381,15 @@ export function toTussleError(err: unknown): Error|TussleStoragePoolError {
 		return err; // TODO this is probably not what we want
 	}
 	return new TussleStoragePoolError(typeof err === 'string' ? err : 'unknown storage pool error');
+}
+
+export function exposesPerformanceEvents<
+	T extends TussleStorageService,
+	U extends TussleStoragePerfEvent,
+>(
+	storage: T,
+): storage is T & {event$: Observable<U>} {
+	return 'event$' in storage
+		&& typeof storage.event$ !== 'undefined'
+		&& typeof storage.event$.subscribe === 'function';
 }

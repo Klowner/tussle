@@ -1,10 +1,10 @@
 import {R2Bucket} from "@miniflare/r2";
 import {MemoryStorage} from "@miniflare/storage-memory";
 import {mockIncomingRequest, storageServiceTests} from '@tussle/spec';
-import {TussleStorageService} from '@tussle/spec/interface/storage';
+import {TussleStoragePerfEvent, TussleStorageService} from '@tussle/spec/interface/storage';
 import TussleStateMemory from '@tussle/state-memory';
 import {R2UploadState, TussleStorageR2} from '@tussle/storage-r2';
-import {first, firstValueFrom, of, tap} from 'rxjs';
+import {Subject, first, firstValueFrom, of, take, takeUntil, tap, toArray} from 'rxjs';
 import {commonExtensions, distinctExtensions, prioritize, toTussleError, TussleStoragePool, TussleStoragePoolError, TussleStoragePoolState} from './storage';
 
 storageServiceTests(
