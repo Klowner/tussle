@@ -97,6 +97,21 @@ export interface TussleStorageService {
 	deleteFile?(
 		params: TussleStorageDeleteFileParams,
 	): Observable<TussleStorageDeleteFileResponse>;
+
+	event$?: Observable<TussleStoragePerfEvent>;
 }
 
 export type TussleStorageServiceWithDeleteCapability = Required<TussleStorageService>;
+
+export interface TussleStoragePerfEvent {
+	storage: Readonly<TussleStorageService>;
+	action: 'create'|'patch'|'info'|'delete';
+	location: string;
+	bytes: number;
+	elapsed_time_ms: number;
+	success: boolean;
+}
+
+export interface TussleStorageServiceWithPerformanceEvents<T extends TussleStoragePerfEvent> extends TussleStorageService {
+	event$: Observable<T>;
+}
