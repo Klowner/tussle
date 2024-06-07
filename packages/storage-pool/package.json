@@ -1,6 +1,6 @@
 {
 	"name": "@tussle/storage-pool",
-	"version": "0.7.9",
+	"version": "0.7.10",
 	"description": "Tussle storage which pools multiple tussle storage services",
 	"main": "dist-cjs/index.js",
 	"types": "dist-types/index.d.ts",

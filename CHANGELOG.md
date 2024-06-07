@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.10](https://github.com/Klowner/tussle/compare/v0.7.9...v0.7.10) (2024-06-07)
+
+
+### Bug Fixes
+
+* **storage-pool:** strip leading slashes from sticky paths ([2ad2f64](https://github.com/Klowner/tussle/commit/2ad2f640e8923f7055f3a8a1240ac8ff88d215d8))
+
+
+
+
+
 ## [0.7.9](https://github.com/Klowner/tussle/compare/v0.7.8...v0.7.9) (2024-06-06)
 
 
