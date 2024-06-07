@@ -151,7 +151,7 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 
 	private setStickyStoragePath<T extends {location: string}>(storageKey: string) {
 		return concatMap(async (created: T): Promise<T & {storageKey: string}> => {
-			await this.options.stateService.setItem(created.location, storageKey);
+			await this.options.stateService.setItem(stripLeadingSlashes(created.location), storageKey);
 			return {...created, storageKey};
 		});
 	}
@@ -159,7 +159,7 @@ export class TussleStoragePool implements TussleStorageServiceWithDeleteCapabili
 	// This will override `storageKey` in params if a matching location is found.
 	private getStickyStoragePath<T extends {location: string; storageKey?: string}>() {
 		return concatMap(async (params: T): Promise<T & {storageKey?: string}> => {
-			const storageKey = await this.options.stateService.getItem(params.location) || params.storageKey;
+			const storageKey = await this.options.stateService.getItem(stripLeadingSlashes(params.location)) || params.storageKey;
 			return {...params, storageKey};
 		});
 	}
@@ -392,4 +392,7 @@ export function exposesPerformanceEvents<
 	return 'event$' in storage
 		&& typeof storage.event$ !== 'undefined'
 		&& typeof storage.event$.subscribe === 'function';
+}
+function stripLeadingSlashes(path: string) {
+	return path.replace(/^\/+/, '');
 }
