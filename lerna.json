@@ -4,7 +4,6 @@
   ],
   "version": "0.7.10",
   "license": "MIT",
-  "useWorkspaces": true,
   "npmClient": "yarn",
   "command": {
     "publish": {
