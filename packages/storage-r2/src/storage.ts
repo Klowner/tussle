@@ -22,7 +22,7 @@ import {
 	catchError, concat, concatMap, defaultIfEmpty, defer,
 	filter,
 	firstValueFrom,
-	from, map,
+	from, iif, map,
 	mergeMap,
 	of,
 	pipe,
@@ -234,11 +234,16 @@ export class TussleStorageR2 implements TussleStorageService {
 	private readonly event = new Subject<TussleStoragePerfEvent>();
 	readonly event$ = this.event.asObservable().pipe(share());
 
-	constructor(readonly options: TussleStorageR2Options) {}
+	readonly now: () => number;
+	private readonly state;
+	private readonly appendUniqueSubdir;
 
-	readonly now = this.options.now ?? (() => Date.now());
-
-	private readonly state = this.options.stateService;
+	constructor(readonly options: TussleStorageR2Options) {
+		this.now = options.now ?? (() => Date.now());
+		this.state = options.stateService;
+		this.appendUniqueSubdir = this.options.appendUniqueSubdir ??
+			((location: string) => `${location}/${lousyUUID(16)}`);
+	}
 
 	private createInitialState(
 		params: Readonly<TussleStorageCreateFileParams>,
@@ -267,8 +272,6 @@ export class TussleStorageR2 implements TussleStorageService {
 		}),
 	);
 
-	private readonly appendUniqueSubdir = this.options.appendUniqueSubdir
-		|| ((location: string) => `${location}/${lousyUUID(16)}`);
 
 	// Combines all R2 records associated with state and concatenate them to a
 	// single R2 record, and if successful, delete all R2 records associated with
@@ -383,10 +386,18 @@ export class TussleStorageR2 implements TussleStorageService {
 	protected readonly handleFinalConcatenation = pipe(
 		this.collectConcatenationStateParts,
 		this.updateConcatUploadLength,
-		!!this.options.skipMerge
-			? this.createConcatenatedR2Record
-			: switchMap(s => this.mergeAndDiscardR2Chunks(s)),
 	);
+
+	protected readonly handleUnmergedFinalConcatenation = pipe(
+		this.handleFinalConcatenation,
+		this.createConcatenatedR2Record,
+	);
+
+	protected readonly handleMergedFinalConcatenation = pipe(
+		this.handleFinalConcatenation,
+		switchMap(s => this.mergeAndDiscardR2Chunks(s))
+	);
+
 
 	protected readonly handleConcatenation = pipe(
 		mergeMap((state: InitialState): Observable<R2UploadState> => {
@@ -395,7 +406,10 @@ export class TussleStorageR2 implements TussleStorageService {
 			} else if (isPartialConcatState(state)) {
 				return of(state).pipe(map(state => this.handlePartialConcatenation(state)));
 			} else if (isFinalConcatState(state)) {
-				return of(state).pipe(this.handleFinalConcatenation);
+				return iif(() => !!this.options.skipMerge,
+					of(state).pipe(this.handleUnmergedFinalConcatenation),
+					of(state).pipe(this.handleMergedFinalConcatenation),
+				);
 			}
 			return of(state);
 		}),
