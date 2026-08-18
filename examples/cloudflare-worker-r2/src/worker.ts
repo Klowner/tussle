@@ -1,7 +1,7 @@
 import {TussleCloudflareWorker} from '@tussle/middleware-cloudflareworker';
 import {TussleStateMemory} from '@tussle/state-memory';
 import {TussleStorageR2} from '@tussle/storage-r2';
-import {R2UploadState} from "@tussle/storage-r2/lib/storage";
+import type {R2UploadState} from "@tussle/storage-r2";
 import {nanoid} from 'nanoid';
 import {firstValueFrom} from 'rxjs';
 import {staticHandler} from "./static";
