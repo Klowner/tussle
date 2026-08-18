@@ -19,13 +19,14 @@ const supportedVersions = [
 ];
 
 export class Tussle {
-	constructor(private readonly cfg: TussleConfig) {}
+	constructor(private readonly cfg: TussleConfig) {
+		this.handlers = {
+			...defaultHandlers,
+			...cfg.handlers,
+		};
+	}
 
-	readonly handlers: Partial<RequestHandler> = {
-		...defaultHandlers,
-		...this.cfg.handlers,
-	};
-
+	readonly handlers: Partial<RequestHandler>;
 	readonly extensions: Partial<Record<TusProtocolExtension, boolean>> = {};
 
 	private chooseProtocolVersion(ctx: TussleIncomingRequest<unknown, unknown>): string | null {
