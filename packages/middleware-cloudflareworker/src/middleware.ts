@@ -23,11 +23,12 @@ interface TussleCloudflareWorkerMiddlewareConfig<U> {
 }
 
 export class TussleCloudflareWorker<U = void> extends TussleBaseMiddleware<Request, U> {
+  readonly core: Tussle;
+
   constructor(readonly options: TussleCloudflareWorkerMiddlewareConfig<U>) {
     super(options.hooks);
+    this.core = new Tussle(this.options.core);
   }
-
-  readonly core: Tussle = new Tussle(this.options.core);
 
   public async handleRequest(request: Request, params: U extends never ? never : U): Promise<Response | null> {
     const req = createTussleRequest(this, request, params);
