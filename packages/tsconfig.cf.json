@@ -1,13 +1,13 @@
 {
   "extends": "./tsconfig.settings.json",
 	"compilerOptions": {
-		"lib": ["esnext"],
 		"allowJs": true,
+		"lib": ["es2022"],
 		"types": [
 			"@cloudflare/workers-types/2022-11-30",
 			"jest"
 		]
-	},
-	"exclude": [],
-	"include": ["node_modules"]
+	}
+	// "exclude": [],
+	// "include": ["node_modules"]
 }

@@ -9,9 +9,6 @@
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
-    "target": "es2015"
-  },
-  "exclude": [
-    "node_modules"
-  ]
+    "target": "ES2022"
+  }
 }

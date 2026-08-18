@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.settings.json",
   "files": [],
+  "libs": [],
   "references": [
     {"path": "./core"},
     {"path": "./spec"},
