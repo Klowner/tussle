@@ -1,11 +1,12 @@
 {
-	"extends": "../tsconfig.settings.json",
+	"extends": "../tsconfig.cf.json",
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "lib",
-		"target": "es2017",
 		"lib": [],
-		"types": ["@cloudflare/workers-types/2022-11-30"]
+		"types": [
+			"@cloudflare/workers-types/2022-11-30"
+		]
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules"],

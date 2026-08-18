@@ -1,10 +1,9 @@
 {
-  "extends": "../tsconfig.settings.json",
+  "extends": "../tsconfig.cf.json",
   "compilerOptions": {
     "resolveJsonModule": true,
     "outDir": "lib",
-    "rootDir": "src",
-    "baseUrl": "./"
+    "rootDir": "src"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

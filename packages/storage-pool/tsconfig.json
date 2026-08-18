@@ -4,9 +4,8 @@
 		"resolveJsonModule": true,
 		"outDir": "lib",
 		"rootDir": "src",
-		"baseUrl": "./",
-		"target": "es2017",
-		"lib": [],
+		"target": "es2022",
+		"lib": ["es2022"],
 		"types": [
 			"@cloudflare/workers-types/2022-11-30"
 		]

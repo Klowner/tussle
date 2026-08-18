@@ -4,7 +4,7 @@
     "resolveJsonModule": true,
     "outDir": "lib",
     "rootDir": "src",
-    "baseUrl": "./"
+		"types": ["jest", "node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

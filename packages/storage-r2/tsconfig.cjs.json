@@ -4,8 +4,6 @@
 		"outDir": "dist-cjs",
 		"importHelpers": true,
 		"module": "commonjs",
-		"noEmitHelpers": true,
-		"target": "ES2018",
-		"strict": true
+		"noEmitHelpers": true
 	}
 }
