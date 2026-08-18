@@ -16,7 +16,7 @@ function allowedMethod(method: string, overrideMethod?: string): AllowedMethod {
     case 'PATCH':
       return method;
   }
-	throw new Error(`Unknown request method: ${method}`);
+  throw new Error(`Unknown request method: ${method}`);
 }
 
 const firstOrUndefined = (v: string|string[]|undefined) => {
@@ -29,9 +29,9 @@ const firstOrUndefined = (v: string|string[]|undefined) => {
 };
 
 interface ContextWithBody extends Context {
-	request: Context['request'] & {
-		body?: Uint8Array;
-	},
+  request: Context['request'] & {
+    body?: Uint8Array;
+  },
 }
 
 const prepareRequest = async <T extends ContextWithBody, U>(
@@ -43,22 +43,22 @@ const prepareRequest = async <T extends ContextWithBody, U>(
   const ctx = originalRequest;
   const overrideMethod = firstOrUndefined(ctx.headers['x-http-method-override']);
   const method = allowedMethod(ctx.method, overrideMethod);
-	return {
-		request: {
-			getHeader: (key: string) => firstOrUndefined(ctx.headers[key]),
-			getReadable: () => ctx.request.body,
-			method,
-			path: ctx.path,
-		},
-		response: null,
-		cfg: {
-		},
-		meta: {
-		},
-		source,
-		originalRequest,
-		userParams,
-	};
+  return {
+    request: {
+      getHeader: (key: string) => firstOrUndefined(ctx.headers[key]),
+      getReadable: () => ctx.request.body,
+      method,
+      path: ctx.path,
+    },
+    response: null,
+    cfg: {
+    },
+    meta: {
+    },
+    source,
+    originalRequest,
+    userParams,
+  };
 };
 
 const handleResponse = async <T extends ContextWithBody, P>(ctx: TussleIncomingRequest<T, P>): Promise<T> => {
@@ -89,15 +89,16 @@ interface TussleKoaMiddlewareConfig<U> {
 }
 
 export default class TussleKoaMiddleware<U> extends TussleBaseMiddleware<Context, U> {
+  readonly core;
+
   constructor (readonly options: TussleKoaMiddlewareConfig<U>) {
     super(options.hooks);
+    this.core = (
+      options.core instanceof Tussle ?
+      options.core :
+      new Tussle(options.core)
+    );
   }
-
-  readonly core: Tussle = (
-    this.options.core instanceof Tussle ?
-    this.options.core :
-    new Tussle(this.options.core)
-  );
 
   public readonly middleware = (): Middleware =>
     async (ctx, next) => {
