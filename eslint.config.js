@@ -1,51 +1,47 @@
 const {
-    defineConfig,
+  defineConfig,
 } = require("eslint/config");
 
 const tsParser = require("@typescript-eslint/parser");
-const rxjs = require("eslint-plugin-rxjs");
-const deprecation = require("eslint-plugin-deprecation");
+const tsPlugin = require("@typescript-eslint/eslint-plugin");
+const rxjs = require("eslint-plugin-rxjs-x");
 const promise = require("eslint-plugin-promise");
-const js = require("@eslint/js");
 
 const {
-    FlatCompat,
-} = require("@eslint/eslintrc");
-
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
-});
-
-const {
-    join,
+  join,
 } = require("path");
 
-module.exports = defineConfig([{
+module.exports = defineConfig([
+  tsPlugin.configs["flat/recommended"],
+  promise.configs["flat/recommended"],
+  {
     languageOptions: {
-        parser: tsParser,
-        ecmaVersion: 2020,
+      parser: tsParser,
+      ecmaVersion: 2020,
 
-        parserOptions: {
-            project: join(__dirname, "./packages/tsconfig.settings.json"),
-        },
+      parserOptions: {
+        project: join(__dirname, "./packages/tsconfig.settings.json"),
+      },
     },
 
     plugins: {
-        rxjs,
-        deprecation,
-        promise,
+      rxjs: rxjs.default || rxjs,
     },
-
-    extends: compat.extends("plugin:@typescript-eslint/recommended", "plugin:promise/recommended"),
 
     rules: {
-        "semi": 1,
-        "deprecation/deprecation": "warn",
-        "rxjs/no-async-subscribe": "error",
-        "rxjs/no-ignored-observable": "error",
-        "rxjs/no-ignored-subscription": "error",
-        "rxjs/no-nested-subscribe": "error",
+      "semi": 1,
+      "@typescript-eslint/no-deprecated": "warn",
+			"@typescript-eslint/no-unused-vars": [
+				"error",
+				{
+					"argsIgnorePattern": "^_"
+				}
+			],
+      "rxjs/no-async-subscribe": "error",
+      "rxjs/no-floating-observables": "error",
+      "rxjs/no-ignored-subscription": "error",
+      "rxjs/no-nested-subscribe": "error",
     },
-}]);
+  },
+]);
+
