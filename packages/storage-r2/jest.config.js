@@ -10,7 +10,7 @@ module.exports = {
 	],
 	transform: {
 		'^.+\\.ts$': ['ts-jest', {
-			tsconfig: '<rootDir>/../tsconfig.cf.json',
+			tsconfig: '<rootDir>/tsconfig.json',
 			disableSourceMapSupport: true,
 		}],
 		'^.+\\.js$': ['babel-jest'],
