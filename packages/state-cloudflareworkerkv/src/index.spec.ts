@@ -43,6 +43,7 @@ class KVNamespaceMock implements KVNamespaceTussle {
       keys: keys.map(name => ({ name })),
       list_complete,
       cursor,
+      cacheStatus: null
     };
   }
 }
