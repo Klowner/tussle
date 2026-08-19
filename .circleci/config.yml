@@ -17,7 +17,6 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: tussle_test
-          NODE_OPTIONS: "--max-old-space-size=4096"
     resource_class: large
     environment:
       POSTGRES_CONNECT_STRING: postgres://postgres:postgres@localhost/tussle_test
@@ -50,4 +49,6 @@ jobs:
       - run:
           name: Unit tests with coverage
           command: yarn run coverage
+          environment:
+            NODE_OPTIONS: --max-old-space-size=6144
       - coveralls/upload
