@@ -42,14 +42,18 @@ export interface ReBucketOptions {
 }
 
 export class ReBucket<T extends ReBucketSupportedMethods> {
-	constructor(
-		readonly bucket: T,
-		readonly options: ReBucketOptions,
-	) {}
+	readonly retries;
+	readonly delay;
+	readonly error;
 
-	readonly retries = 1 + ((typeof this.options.retries === 'number') ? this.options.retries : DEFAULT_RETRY_COUNT);
-	readonly delay = ((typeof this.options.delay === 'number') ? this.options.delay : DEFAULT_DELAY);
-	readonly error = this.options.error;
+	constructor(
+		public readonly bucket: T,
+		public readonly options: ReBucketOptions,
+	) {
+		this.retries = 1 + ((typeof options.retries === 'number') ? options.retries : DEFAULT_RETRY_COUNT);
+		this.delay = ((typeof options.delay === 'number') ? options.delay : DEFAULT_DELAY);
+		this.error = options.error;
+	}
 
 	get(...parameters: Parameters<ReBucketSupportedMethods['get']>) {
 		return withRetry(() => this.bucket.get(...parameters), this);
