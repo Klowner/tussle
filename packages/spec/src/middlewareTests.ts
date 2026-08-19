@@ -177,7 +177,6 @@ export function middlewareTests<
 		createRequest: (request: GenericRequest) => Req,
 		handleRequest: (instance: T, request: Req) => Promise<GenericResponse|null>,
 	},
-	extensions: string[] = ['creation'],
 ): void {
 	const { createRequest, createMiddleware, createStorage, handleRequest } = options;
 

@@ -3,7 +3,6 @@ import type {TussleStateService} from '@tussle/spec/interface/state';
 import type {
 	TussleStorageCreateFileParams,
 	TussleStorageCreateFileResponse,
-	TussleStorageDeleteFileParams,
 	TussleStorageFileInfo,
 	TussleStorageFileInfoParams,
 	TussleStoragePatchFileParams,

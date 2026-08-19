@@ -24,7 +24,9 @@ export class Pool<T extends Record<string, unknown>> {
     const item = await this.acquire();
     return Object.assign(item, {
       release: (keep = false): void => {
-        keep && this.release(item);
+        if (keep) {
+          this.release(item);
+        }
       }
     });
   }
