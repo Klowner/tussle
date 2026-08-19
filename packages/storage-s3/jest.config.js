@@ -5,7 +5,7 @@ module.exports = {
 	],
 	transform: {
 		'^.+\\.ts$': ['ts-jest', {
-			tsconfig: '<rootDir>/../tsconfig.json',
+			tsconfig: '<rootDir>/../tsconfig.cf.json',
 		}],
 	},
 	collectCoverageFrom: [

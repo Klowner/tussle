@@ -1,12 +1,15 @@
 import {
-	CompletedPart,
 	CompleteMultipartUploadCommand,
-	CompleteMultipartUploadOutput,
+	CompletedPart,
 	CreateMultipartUploadCommand,
 	PutObjectCommand,
-	PutObjectCommandOutput,
 	S3Client,
 	UploadPartCommand,
+} from "@aws-sdk/client-s3";
+import type {
+	CompleteMultipartUploadOutput,
+	ObjectCannedACL,
+	PutObjectCommandOutput,
 	UploadPartCommandOutput
 } from "@aws-sdk/client-s3";
 import {TTLCache} from "@tussle/core";
@@ -40,7 +43,6 @@ import {
 	share,
 	take
 } from "rxjs/operators";
-import type {Readable} from "stream";
 import {TussleCachedState} from "./cachedstate";
 
 interface S3ClientConfig {
@@ -57,7 +59,7 @@ export interface TussleStorageS3Options {
 	s3: {
 		client: S3ClientConfig | S3Client;
 		bucket: string;
-		acl?: string;
+		acl?: ObjectCannedACL;
 	}
 }
 
@@ -99,6 +101,10 @@ function isComplete(state: S3UploadStateMultiPart) {
 	return state.currentOffset === state.uploadLength;
 }
 
+function isS3Client(client: S3Client|S3ClientConfig): client is S3Client {
+	return 'send' in client && typeof client.send === 'function';
+}
+
 function stripLeadingSlashes(path: string) {
 	return path.replace(/^\/*/, '');
 }
@@ -129,26 +135,22 @@ const asPatchResponse = map(({ state, s3response }) => ({
 }));
 
 export class TussleStorageS3 implements TussleStorageService {
+	private readonly s3;
+	private readonly state;
+
 	constructor(readonly options: TussleStorageS3Options) {
 		// It looks like the S3 client provided by aws-sdk/client-s3 supports a
 		// custom `requestHandler`. If this TussleRequestService support for this
 		// feature is needed, it can probably be implemented via that configuration
 		// option.
+		this.s3 = isS3Client(options.s3.client) ? options.s3.client : new S3Client(options.s3.client);
+		this.state = new TussleCachedState(options.stateService, new TTLCache(60 * 60 * 1000));
 	}
 
 	readonly extensionsRequired: TusProtocolExtension[] = [];
 	readonly extensionsSupported?: TusProtocolExtension[] = [
 		'creation',
 	];
-	private readonly s3 = (
-		('send' in this.options.s3.client && typeof this.options.s3.client.send === 'function') ?
-		this.options.s3.client :
-		new S3Client(this.options.s3.client)
-	);
-	private readonly state = new TussleCachedState(
-		this.options.stateService,
-		new TTLCache(60 * 60 * 1000)
-	);
 
 	destroy(): void {
 		this.s3.destroy();
@@ -207,7 +209,7 @@ export class TussleStorageS3 implements TussleStorageService {
 		};
 	}
 
-	private getDefaultACL(): ({ACL: string}|undefined) {
+	private getDefaultACL(): ({ACL:ObjectCannedACL}|undefined) {
 		const { acl } = this.options.s3;
 		return acl ? {ACL: acl} : undefined;
 	}
@@ -318,7 +320,7 @@ export class TussleStorageS3 implements TussleStorageService {
 
 	private transmitSmallFile(
 		state: Readonly<S3UploadState>,
-		body: Readable | ReadableStream<Uint8Array> | Uint8Array,
+		body: ReadableStream<Uint8Array> | Uint8Array,
 		length: number, // body length in bytes
 	): Observable<PutObjectCommandOutput> {
 		const command = new PutObjectCommand({
@@ -333,7 +335,7 @@ export class TussleStorageS3 implements TussleStorageService {
 
 	private transmitPart(
 		state: Readonly<S3UploadStateMultiPart>,
-		body: Readable | ReadableStream<Uint8Array> | Uint8Array,
+		body: ReadableStream<Uint8Array> | Uint8Array,
 		length: number // body length in bytes
 	): Observable<UploadPartCommandOutput> {
 		const command = new UploadPartCommand({
