@@ -1,14 +1,15 @@
 import type { TussleStateService } from '@tussle/spec/interface/state';
 
 export class TussleStateNamespace<T> implements TussleStateService<T> {
+	private readonly ns_prefix;
+
 	public constructor (
 		public readonly state: TussleStateService<T>,
 		public readonly namespace: string,
 		private readonly sep = '.'
 	) {
+		this.ns_prefix = new RegExp(`^${namespace}${sep}`);
 	}
-
-	private readonly ns_prefix = new RegExp(`^${this.namespace}${this.sep}`);
 
 	private addNs(key: string) {
 		return [this.namespace, key].join(this.sep);
