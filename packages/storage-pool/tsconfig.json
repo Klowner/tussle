@@ -7,11 +7,12 @@
 		"target": "es2022",
 		"lib": ["es2022"],
 		"types": [
-			"@cloudflare/workers-types/2022-11-30"
+			"@cloudflare/workers-types/2022-11-30",
+			"jest"
 		]
 	},
 	"include": ["src/**/*"],
-	"exclude": ["node_modules", "**/*.spec.*"],
+	"exclude": ["node_modules"],
 	"references": [
 		{"path": "../core"}
 	]
