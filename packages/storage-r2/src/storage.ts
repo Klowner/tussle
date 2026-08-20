@@ -67,6 +67,10 @@ export interface TussleStorageR2Options {
 	now?: () => number;
 }
 
+export interface TussleStorageR2CreateFileResponse extends TussleStorageCreateFileResponse {
+	parts?: Part[];
+}
+
 function isNonNull<T>(value: T): value is NonNullable<T> {
 	return value != null;
 }
@@ -441,7 +445,7 @@ export class TussleStorageR2 implements TussleStorageService {
 
 	createFile(
 		params: TussleStorageCreateFileParams,
-	): Observable<TussleStorageCreateFileResponse> {
+	) : Observable<TussleStorageR2CreateFileResponse> {
 		return of(params).pipe(
 			map(params => this.createInitialState(params)),
 			this.handleConcatenation,
@@ -459,7 +463,7 @@ export class TussleStorageR2 implements TussleStorageService {
 				success,
 			})),
 			catchError(err => {
-				return of<TussleStorageCreateFileResponse>({
+				return of({
 					location: params.path,
 					offset: 0,
 					success: false,
@@ -832,6 +836,7 @@ export class TussleStorageR2 implements TussleStorageService {
 			bytes: number;
 		},
 	): MonoTypeOperatorFunction<T> {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const storage = this;
 		const {event} = storage;
 		let start: number;

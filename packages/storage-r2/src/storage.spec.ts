@@ -209,7 +209,6 @@ describe('@tussle/storage-r2', () => {
 				uploadConcat: null,
 			}));
 
-			// @ts-expect-error parts is not an exposed property
 			expect(root.parts).toStrictEqual([]);
 
 			state.clear(); // ensure state can still be rebuilt from R2
@@ -326,8 +325,10 @@ describe('@tussle/storage-r2', () => {
 			}
 		});
 
-
-		test('concatenation with automerge', async () => {
+		test.each([
+			{skipMerge: true, expectParts: 9}, // skipMerge should leave multiple parts
+			{skipMerge: false, expectParts: 1},  // disabling skipMerge results in a single R2 part
+		])('multi-chunk upload with skipMerge: %b', async ({skipMerge, expectParts}) => {
 			const bucket = new R2Bucket(new MemoryStorage());
 			const storage = new TussleStorageR2({
 				stateService: state,
@@ -335,7 +336,7 @@ describe('@tussle/storage-r2', () => {
 				bucket,
 				checkpoint: 25, // force incoming stream into 25 byte chunks in R2
 				checkpointMaxBufferSize: 2,
-				skipMerge: false, // then merge those 25 byte chunks into a single file when complete
+				skipMerge, // then optionally merge those 25 byte chunks into a single file when complete
 			});
 
 			// Create first part in one chunk.
@@ -414,6 +415,8 @@ describe('@tussle/storage-r2', () => {
 
 			expect(concatenated).toHaveProperty('success', true);
 			expect(concatenated).toHaveProperty('currentOffset', 7 + 9);
+			expect(concatenated).toHaveProperty('parts');
+			expect(concatenated.parts).toHaveLength(expectParts);
 
 			const concatenatedInfo = await firstValueFrom(storage.getFileInfo({
 				location: 'fluffy-cat.png',
@@ -595,11 +598,4 @@ function asReadableStream(body: Uint8Array): ReadableStream<Uint8Array> {
 			}
 		}
 	});
-}
-
-async function listRecords(bucket: R2Bucket) {
-	const list = await bucket.list();
-	return list.objects.map(({ key, size, customMetadata }) => ({
-		key, size, customMetadata,
-	}));
 }
